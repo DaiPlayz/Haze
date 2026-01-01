@@ -39,9 +39,9 @@ end
 local Loader = {}
 function Loader:DownloadFolder(remote, localPath)
     File:EnsureFolder(localPath)
-    Notifications:SendNotification('Info', 'Installing folder: ' .. remote, CONFIG.NOTIFICATIONS)
+    Notifications:Notify('Info', 'Installing folder: ' .. remote, CONFIG.NOTIFICATIONS)
     local raw = HTTP:Get(CONFIG.API_URL .. remote)
-    if not raw then return Notifications:SendNotification('Warn', 'Failed to fetch folder: ' .. remote, CONFIG.NOTIFICATIONS) end
+    if not raw then return Notifications:Notify('Warn', 'Failed to fetch folder: ' .. remote, CONFIG.NOTIFICATIONS) end
 
     for _, item in ipairs(HttpService:JSONDecode(raw)) do
         local path = localPath .. "/" .. item.name
@@ -50,9 +50,9 @@ function Loader:DownloadFolder(remote, localPath)
                 local content = HTTP:Get(item.download_url)
                 if content then
                     File:Write(path, content)
-                    Notifications:SendNotification('Success', 'Installed file: ' ..item.name, CONFIG.NOTIFICATIONS)
+                    Notifications:Notify('Success', 'Installed file: ' ..item.name, CONFIG.NOTIFICATIONS)
                 else
-                    Notifications:SendNotification('Warn', 'Failed File: ' ..item.name, CONFIG.NOTIFICATIONS)
+                    Notifications:Notify('Warn', 'Failed File: ' ..item.name, CONFIG.NOTIFICATIONS)
                 end
             end
         elseif item.type == "dir" then
@@ -62,7 +62,7 @@ function Loader:DownloadFolder(remote, localPath)
 end
 
 function Loader:RunScript(url)
-    Notifications:SendNotification('Info', 'Running script: ' .. url:match("[^/]+$"), CONFIG.NOTIFICATIONS)
+    Notifications:Notify('Info', 'Running script: ' .. url:match("[^/]+$"), CONFIG.NOTIFICATIONS)
     local src = HTTP:Get(url)
     if src then
         local fn, err = loadstring(src)
@@ -70,10 +70,10 @@ function Loader:RunScript(url)
             pcall(fn)
             return true
         else
-            Notifications:SendNotification('Warn', 'Loadstring error: ' .. err, CONFIG.NOTIFICATIONS)
+            Notifications:Notify('Warn', 'Loadstring error: ' .. err, CONFIG.NOTIFICATIONS)
         end
     else
-        Notifications:SendNotification('Warn', 'Failed to fetch script: ' .. url, CONFIG.NOTIFICATIONS)
+        Notifications:Notify('Warn', 'Failed to fetch script: ' .. url, CONFIG.NOTIFICATIONS)
     end
 end
 
@@ -89,9 +89,9 @@ if not File:IsFile(loaderPath) then
     local loaderContent = HTTP:Get(CONFIG.BASE_URL .. "loader.lua")
     if loaderContent then
         File:Write(loaderPath, loaderContent)
-        Notifications:SendNotification('Success', 'Loader has been installed', CONFIG.NOTIFICATIONS)
+        Notifications:Notify('Success', 'Loader has been installed', CONFIG.NOTIFICATIONS)
     else
-        Notifications:SendNotification('Warn', 'Failed to install loader.lua', CONFIG.NOTIFICATIONS)
+        Notifications:Notify('Warn', 'Failed to install loader.lua', CONFIG.NOTIFICATIONS)
     end
 end
 
