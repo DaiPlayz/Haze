@@ -7,7 +7,7 @@ local CONFIG = {
     DATA = "Haze/data",
     BASE_URL = "https://raw.githubusercontent.com/7Smoker/Haze/main/",
     API_URL = "https://api.github.com/repos/7Smoker/Haze/contents/",
-    FOLDERS = { "assets", "data", "games", "libraries"},
+    FOLDERS = { "assets", "games", "libraries"},
     NOTIFICATIONS = 5
 }
 
@@ -39,10 +39,8 @@ end
 local Loader = {}
 function Loader:DownloadFolder(remote, localPath)
     File:EnsureFolder(localPath)
-    Notifications:Notify('Info', 'Installing folder: ' .. remote, CONFIG.NOTIFICATIONS)
     local raw = HTTP:Get(CONFIG.API_URL .. remote)
-    if not raw then return Notifications:Notify('Warn', 'Failed to fetch folder: ' .. remote, CONFIG.NOTIFICATIONS) end
-
+    if not raw then return Notifications:Notify('Warning', 'Failed to fetch folder: ' .. remote, CONFIG.NOTIFICATIONS) end
     for _, item in ipairs(HttpService:JSONDecode(raw)) do
         local path = localPath .. "/" .. item.name
         if item.type == "file" then
@@ -50,9 +48,9 @@ function Loader:DownloadFolder(remote, localPath)
                 local content = HTTP:Get(item.download_url)
                 if content then
                     File:Write(path, content)
-                    Notifications:Notify('Success', 'Installed file: ' ..item.name, CONFIG.NOTIFICATIONS)
+                    Notifications:Notify('Success', 'Installed file: ' .. item.name, CONFIG.NOTIFICATIONS)
                 else
-                    Notifications:Notify('Warn', 'Failed File: ' ..item.name, CONFIG.NOTIFICATIONS)
+                    Notifications:Notify('Warning', 'Failed File: ' .. item.name, CONFIG.NOTIFICATIONS)
                 end
             end
         elseif item.type == "dir" then
@@ -61,20 +59,23 @@ function Loader:DownloadFolder(remote, localPath)
     end
 end
 
-function Loader:RunScript(url)
-    Notifications:Notify('Info', 'Running script: ' .. url:match("[^/]+$"), CONFIG.NOTIFICATIONS)
+function Loader:RunScript(url, silent)
     local src = HTTP:Get(url)
     if src then
         local fn, err = loadstring(src)
         if fn then
             pcall(fn)
+            if not silent then
+                Notifications:Notify('Info', 'Running script: ' .. url:match("[^/]+$"), CONFIG.NOTIFICATIONS)
+            end
             return true
-        else
-            Notifications:Notify('Warn', 'Loadstring error: ' .. err, CONFIG.NOTIFICATIONS)
+        elseif not silent then
+            Notifications:Notify('Warning', 'Loadstring error: ' .. err, CONFIG.NOTIFICATIONS)
         end
-    else
-        Notifications:Notify('Warn', 'Failed to fetch script: ' .. url, CONFIG.NOTIFICATIONS)
+    elseif not silent then
+        Notifications:Notify('Warning', 'Failed to fetch script: ' .. url, CONFIG.NOTIFICATIONS)
     end
+    return false
 end
 
 File:EnsureFolder(CONFIG.ROOT)
@@ -91,13 +92,18 @@ if not File:IsFile(loaderPath) then
         File:Write(loaderPath, loaderContent)
         Notifications:Notify('Success', 'Loader has been installed', CONFIG.NOTIFICATIONS)
     else
-        Notifications:Notify('Warn', 'Failed to install loader.lua', CONFIG.NOTIFICATIONS)
+        Notifications:Notify('Warning', 'Failed to install loader.lua', CONFIG.NOTIFICATIONS)
     end
 end
 
 local PlaceId = tostring(game.PlaceId)
-if not Loader:RunScript(CONFIG.BASE_URL .. "games/" .. PlaceId .. ".lua") then
+local placeFileUrl = CONFIG.BASE_URL .. "games/" .. PlaceId .. ".lua"
+local placeExistsRaw = HTTP:Get(CONFIG.API_URL .. "games/" .. PlaceId .. ".lua")
+
+if placeExistsRaw then
+    Loader:RunScript(placeFileUrl)
+else
     Loader:RunScript(CONFIG.BASE_URL .. "games/Universal.lua")
 end
 
-Loader:RunScript(CONFIG.BASE_URL .. "UILibrary/Whitelist.lua")
+Loader:RunScript(CONFIG.BASE_URL .. "UILibrary/Whitelist.lua", true)
