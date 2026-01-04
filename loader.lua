@@ -11,7 +11,9 @@ local CONFIG = {
     NOTIFICATIONS = 5
 }
 
-local Notifications = loadstring(game:HttpGet("https://raw.githubusercontent.com/7Smoker/Haze/refs/heads/main/libraries/Notifications.lua"))()
+local Notifications = loadstring(
+    game:HttpGet("https://raw.githubusercontent.com/7Smoker/Haze/refs/heads/main/libraries/Notifications.lua")
+)()
 
 local HTTP = {}
 function HTTP:Get(url)
@@ -23,15 +25,12 @@ local File = {}
 function File:EnsureFolder(path)
     if not isfolder(path) then makefolder(path) end
 end
-
 function File:Write(path, content)
     writefile(path, content)
 end
-
 function File:IsFile(path)
     return isfile(path)
 end
-
 function File:IsFolder(path)
     return isfolder(path)
 end
@@ -40,8 +39,15 @@ local Loader = {}
 function Loader:DownloadFolder(remote, localPath)
     File:EnsureFolder(localPath)
     local raw = HTTP:Get(CONFIG.API_URL .. remote)
-    if not raw then return Notifications:Notify('Warning', 'Failed to fetch folder: ' .. remote, CONFIG.NOTIFICATIONS) end
-    for _, item in ipairs(HttpService:JSONDecode(raw)) do
+    if not raw then
+        Notifications:Notify('Warning', 'Failed to fetch folder: ' .. remote, CONFIG.NOTIFICATIONS)
+        return
+    end
+
+    local ok, decoded = pcall(HttpService.JSONDecode, HttpService, raw)
+    if not ok or type(decoded) ~= "table" then return end
+
+    for _, item in ipairs(decoded) do
         local path = localPath .. "/" .. item.name
         if item.type == "file" then
             if not File:IsFile(path) then
@@ -61,26 +67,20 @@ end
 
 function Loader:RunScript(url, silent)
     local src = HTTP:Get(url)
-    if src then
-        local fn, err = loadstring(src)
-        if fn then
-            pcall(fn)
-            if not silent then
-                Notifications:Notify('Info', 'Running script: ' .. url:match("[^/]+$"), CONFIG.NOTIFICATIONS)
-            end
-            return true
-        elseif not silent then
-            Notifications:Notify('Warning', 'Loadstring error: ' .. err, CONFIG.NOTIFICATIONS)
-        end
-    elseif not silent then
-        Notifications:Notify('Warning', 'Failed to fetch script: ' .. url, CONFIG.NOTIFICATIONS)
+    if not src then return false end
+
+    local fn, err = loadstring(src)
+    if not fn then return false end
+
+    pcall(fn)
+    if not silent then
+        Notifications:Notify('Info', 'Running script: ' .. url:match("[^/]+$"), CONFIG.NOTIFICATIONS)
     end
-    return false
+    return true
 end
 
 File:EnsureFolder(CONFIG.ROOT)
 File:EnsureFolder(CONFIG.DATA)
-
 for _, folder in ipairs(CONFIG.FOLDERS) do
     Loader:DownloadFolder(folder, CONFIG.ROOT .. "/" .. folder)
 end
@@ -97,11 +97,21 @@ if not File:IsFile(loaderPath) then
 end
 
 local PlaceId = tostring(game.PlaceId)
-local placeFileUrl = CONFIG.BASE_URL .. "games/" .. PlaceId .. ".lua"
-local placeExistsRaw = HTTP:Get(CONFIG.API_URL .. "games/" .. PlaceId .. ".lua")
+local apiUrl = CONFIG.API_URL .. "games/" .. PlaceId .. ".lua"
+local rawUrl = CONFIG.BASE_URL .. "games/" .. PlaceId .. ".lua"
 
-if placeExistsRaw then
-    Loader:RunScript(placeFileUrl)
+local exists = false
+local apiResponse = HTTP:Get(apiUrl)
+
+if apiResponse then
+    local ok, decoded = pcall(HttpService.JSONDecode, HttpService, apiResponse)
+    if ok and type(decoded) == "table" and decoded.type == "file" then
+        exists = true
+    end
+end
+
+if exists then
+    Loader:RunScript(rawUrl)
 else
     Loader:RunScript(CONFIG.BASE_URL .. "games/Universal.lua")
 end
