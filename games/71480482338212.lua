@@ -1,0 +1,1 @@
+print('bedfight detect check')
