@@ -15,6 +15,31 @@ local Notifications = loadstring(
     game:HttpGet("https://raw.githubusercontent.com/7Smoker/Haze/refs/heads/main/libraries/Notifications.lua")
 )()
 
+do
+    local exec = identifyexecutor and identifyexecutor()
+    if exec then
+        local name = string.lower(exec)
+        if name:find('xeno') or name:find('solara') then
+                Notifications:Notify('Warning', exec .. " is a shitty unsupported executor", 15)
+                Notifications:Notify('Warning', "Get a good quality executor. Free Executors good quality: Velocity, Bunni.lol", 15)
+            return
+        end
+    end
+
+    local ok = false
+    if getrawmetatable then
+        ok = pcall(function()
+            getrawmetatable(game)
+        end)
+    end
+
+    if not ok then
+            Notifications:Notify('Warning', 'Your executor is shit, does not support getrawmetatable', 15)
+            Notifications:Notify('Warning', 'getrawmetatable is necessary to spoof most of speed detections', 15)
+        return
+    end
+end
+
 local HTTP = {}
 function HTTP:Get(url)
     local ok, res = pcall(game.HttpGet, game, url)
