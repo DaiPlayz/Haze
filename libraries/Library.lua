@@ -979,16 +979,19 @@ local Library do
         local TextGradient = Instances:Create("UIGradient", {
             Parent = Items["Text"].Instance,
             Rotation = 0,
-            Color = RGBSequence{
-                RGBSequenceKeypoint(0, FromRGB(66, 135, 245)),
-                RGBSequenceKeypoint(1, FromRGB(255, 0, 225))
-            }
+            Color = ColorSequence.new({
+                ColorSequenceKeypoint.new(0, FromRGB(66, 135, 245)),
+                ColorSequenceKeypoint.new(0.5, FromRGB(255, 255, 255)),
+                ColorSequenceKeypoint.new(1, FromRGB(255, 0, 225))
+            })
         })
 
         task.spawn(function()
+            local rotation = 0
             while Items["Text"].Instance.Parent do
-                TextGradient.Instance.Rotation = (TextGradient.Instance.Rotation + 5) % 360
-                task.wait(0.1)
+                rotation = (rotation + 0.7) % 360
+                TextGradient.Instance.Rotation = rotation
+                task.wait(0.02)
             end
         end)
 
