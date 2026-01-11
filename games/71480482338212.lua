@@ -153,7 +153,7 @@ KaSection:Toggle({
     ["Name"] = "Highlight",
     ["Default"] = false,
     ["Flag"] = "HighlightKA",
-    ["Tooltip"] = "Highlight target"
+    ["Tooltip"] = "Highlight target",
     ["Callback"] = function(state)
         HighVar = state
         if not state and CHighlight then
