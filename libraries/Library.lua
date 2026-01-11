@@ -961,40 +961,6 @@ local Library do
             ApplyStrokeMode = Enum.ApplyStrokeMode.Border
         }):AddToTheme({ Color = "Border" })
 
-        Items["Glow"] = Instances:Create("TextLabel", {
-            Parent = Items["Watermark"].Instance,
-            FontFace = Library.Font,
-            Text = Text,
-            TextSize = 12,
-            TextColor3 = FromRGB(255, 0, 225),
-            BackgroundTransparency = 1,
-            BorderSizePixel = 0,
-            AutomaticSize = Enum.AutomaticSize.X,
-            Size = UDim2New(0, 0, 1, 0),
-            TextTransparency = 0.45,
-            ZIndex = 1
-        })
-
-        Instances:Create("UIGradient", {
-            Parent = Items["Glow"].Instance,
-            Rotation = 0,
-            Color = RGBSequence{
-                RGBSequenceKeypoint(0, FromRGB(66, 135, 245)),
-                RGBSequenceKeypoint(1, FromRGB(255, 0, 225))
-            }
-        })
-
-        for _, offset in ipairs({
-            Vector2.new(1, 0),
-            Vector2.new(-1, 0),
-            Vector2.new(0, 1),
-            Vector2.new(0, -1)
-        }) do
-            local clone = Items["Glow"].Instance:Clone()
-            clone.Position = UDim2.fromOffset(offset.X, offset.Y)
-            clone.Parent = Items["Watermark"].Instance
-        end
-
         Items["Text"] = Instances:Create("TextLabel", {
             Parent = Items["Watermark"].Instance,
             FontFace = Library.Font,
@@ -1067,7 +1033,6 @@ local Library do
             })
 
             Items["Text"].Instance.Position = UDim2New(0, 20, 0, 0)
-            Items["Glow"].Instance.Position = UDim2New(0, 20, 0, 0)
         end
 
         function Watermark:SetVisibility(Bool)
