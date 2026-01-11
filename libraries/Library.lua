@@ -1022,13 +1022,23 @@ local Library do
         })
 
         if Icon and type(Icon) == "table" then
+            local imageSource
+            if tonumber(Icon[1]) then
+                imageSource = "rbxassetid://" .. Icon[1]
+            elseif type(Icon[1]) == "string" then
+                imageSource = getcustomasset(Icon[1])
+            else
+                Library:Notification("Invalid icon please try to execute again or report this to the devs", 5, FromRGB(255, 0, 0))
+                imageSource = ""
+            end
+
             Items["Icon"] = Instances:Create("ImageLabel", {
                 Parent = Items["Watermark"].Instance,
                 ImageColor3 = Icon[2] or FromRGB(255, 255, 255),
                 ScaleType = Enum.ScaleType.Fit,
                 BorderColor3 = FromRGB(0, 0, 0),
                 Name = "\0",
-                Image = "rbxassetid://" .. Icon[1],
+                Image = imageSource,
                 BackgroundTransparency = 1,
                 Position = UDim2New(0, -3, 0, 4),
                 Size = UDim2New(0, 18, 0, 18),
