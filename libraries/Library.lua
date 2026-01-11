@@ -71,9 +71,9 @@ local Library do
 
         Folders = {
             Directory = "Haze",
-            Configs = "Haze/Configs",
-            Assets = "Haze/Assets",
-            Themes = "Haze/Themes"
+            Configs = "Haze/configs",
+            Assets = "Haze/assets",
+            Themes = "Haze/themes"
         },
 
         Images = {
