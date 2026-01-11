@@ -204,19 +204,6 @@ local Library do
 
     local Themes = {
         ["Default"] = {
-            ["Window Background"] = FromRGB(43, 43, 43),
-            ["Inline"] = FromRGB(12, 12, 12),
-            ["Text"] = FromRGB(180, 180, 180),
-            ["Section Background"] = FromRGB(19, 19, 19),
-            ["Element"] = FromRGB(63, 63, 63),
-            ["Border"] = FromRGB(68, 68, 68),
-            ["Outline"] = FromRGB(0, 0, 0),
-            ["Dark Liner"] = FromRGB(56, 56, 56),
-            ["Risky"] = FromRGB(255, 50, 50),
-            ["Accent"] = FromRGB(31, 226, 130)
-        },
-
-        ["Bitchbot"] = {
             ["Window Background"] = FromRGB(33, 33, 33),
             ["Inline"] = FromRGB(14, 14, 14),
             ["Text"] = FromRGB(255, 255, 255),
@@ -227,6 +214,19 @@ local Library do
             ["Dark Liner"] = FromRGB(21, 21, 21),
             ["Risky"] = FromRGB(255, 50, 50),
             ["Accent"] = FromRGB(158, 79, 249)
+        },
+
+        ["Bitchbot"] = {
+            ["Window Background"] = FromRGB(43, 43, 43),
+            ["Inline"] = FromRGB(12, 12, 12),
+            ["Text"] = FromRGB(180, 180, 180),
+            ["Section Background"] = FromRGB(19, 19, 19),
+            ["Element"] = FromRGB(63, 63, 63),
+            ["Border"] = FromRGB(68, 68, 68),
+            ["Outline"] = FromRGB(0, 0, 0),
+            ["Dark Liner"] = FromRGB(56, 56, 56),
+            ["Risky"] = FromRGB(255, 50, 50),
+            ["Accent"] = FromRGB(31, 226, 130)
         },
 
         ["Onetap"] = {
@@ -256,7 +256,7 @@ local Library do
         }
     }
 
-    Library.Theme = TableClone(Themes["Bitchbot"])
+    Library.Theme = TableClone(Themes["Default"])
     Library.Themes = Themes
 
     local Tween = { } do
