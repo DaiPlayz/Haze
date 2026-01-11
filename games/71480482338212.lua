@@ -534,14 +534,32 @@ local ChestStealSec = UtilityTab:Section({
     ["Side"] = 1
 })
 
+local TeamColors = {"Red", "Orange", "Yellow", "Green", "Blue", "Purple", "Pink", "Brown"}
+
+local CSVar = false
+
 local CSTog = ChestStealSec:Toggle({
     ["Name"] = "Chest Stealer",
     ["Default"] = false,
     ["Flag"] = "Chest_Stealer",
     ["Tooltip"] = "Steal loot from every chest",
-    ["Risky"] = true,
-    ["Callback"] = function()
-       Library:Notification("Comming soon...", 5, Color3.fromRGB(255, 0, 68))
+    ["Risky"] = false,
+    ["Callback"] = function(state)
+        CSVar = state
+        if state then
+            spawn(function()
+                while CSVar do
+                    for _, color in ipairs(TeamColors) do
+                        for num = 1, 20 do
+                            if not CSVar then break end
+                            ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("TakeItemFromChest"):FireServer(color, num, "1")
+                            task.wait(.1)
+                        end
+                        if not CSVar then break end
+                    end
+                end
+            end)
+        end
     end
 })
 
