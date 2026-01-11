@@ -964,7 +964,7 @@ local Library do
             Items["Text"] = Instances:Create("TextLabel", {
                 Parent = Items["Watermark"].Instance,
                 FontFace = Library.Font,
-                TextColor3 = FromRGB(180, 180, 180),
+                TextColor3 = FromRGB(255, 255, 255),
                 BorderColor3 = FromRGB(0, 0, 0),
                 Text = Text,
                 Name = "\0",
@@ -974,7 +974,16 @@ local Library do
                 AutomaticSize = Enum.AutomaticSize.X,
                 TextSize = 12,
                 BackgroundColor3 = FromRGB(255, 255, 255)
-            })  Items["Text"]:AddToTheme({TextColor3 = "Text"})
+            }) Items["Text"]:AddToTheme({TextColor3 = "Text"})
+            --gradient
+            Instances:Create("UIGradient", {
+                Parent = Items["Text"].Instance,
+                Rotation = 0,
+                Color = RGBSequence{
+                    RGBSequenceKeypoint(0, FromRGB(66, 135, 245)),
+                    RGBSequenceKeypoint(1, FromRGB(255, 0, 225))
+                }
+            })
 
             Instances:Create("UIPadding", {
                 Parent = Items["Watermark"].Instance,

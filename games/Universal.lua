@@ -7,11 +7,12 @@ local Window = Library:Window({
         Start = Color3.fromRGB(66, 135, 245),
         Middle = Color3.fromRGB(255, 0, 225),
         End = Color3.fromRGB(66, 135, 245),
-        Speed = 2
+        Speed = 1.5
     }
 })
 
 local Watermark = Library:Watermark("H A Z E", {"77974153657891", Color3.fromRGB(66, 135, 245)})
+
 local KeybindList = Library:KeybindList()
 
 local CombatTab = Window:Page({Name = "Combat", Columns = 2})
