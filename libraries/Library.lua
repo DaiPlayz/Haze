@@ -937,95 +937,137 @@ local Library do
     end
 
     Library.Watermark = function(self, Text, Icon)
-        local Watermark = { }
+        local Watermark = {}
+        local Items = {}
 
-        local Items = { } do
-            Items["Watermark"] = Instances:Create("Frame", {
-                Parent = Library.Holder.Instance,
-                BorderColor3 = FromRGB(0, 0, 0),
-                AnchorPoint = Vector2New(0.5, 0),
-                Name = "\0",
-                Position = UDim2New(0.5, 0, 0, 20),
-                Size = UDim2New(0, 0, 0, 25),
-                BorderSizePixel = 2,
-                AutomaticSize = Enum.AutomaticSize.X,
-                BackgroundColor3 = FromRGB(12, 12, 12)
-            })  Items["Watermark"]:AddToTheme({BackgroundColor3 = "Inline", BorderColor3 = "Outline"})
+        Items["Watermark"] = Instances:Create("Frame", {
+            Parent = Library.Holder.Instance,
+            BorderColor3 = FromRGB(0, 0, 0),
+            AnchorPoint = Vector2New(0.5, 0),
+            Name = "\0",
+            Position = UDim2New(0.5, 0, 0, 20),
+            Size = UDim2New(0, 0, 0, 25),
+            BorderSizePixel = 2,
+            AutomaticSize = Enum.AutomaticSize.X,
+            BackgroundColor3 = FromRGB(12, 12, 12)
+        })
+        Items["Watermark"]:AddToTheme({ BackgroundColor3 = "Inline", BorderColor3 = "Outline" })
+        Items["Watermark"]:MakeDraggable()
 
-            Items["Watermark"]:MakeDraggable()
+        Instances:Create("UIStroke", {
+            Parent = Items["Watermark"].Instance,
+            Color = FromRGB(68, 68, 68),
+            LineJoinMode = Enum.LineJoinMode.Miter,
+            ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+        }):AddToTheme({ Color = "Border" })
 
-            Instances:Create("UIStroke", {
+        Items["Glow"] = Instances:Create("TextLabel", {
+            Parent = Items["Watermark"].Instance,
+            FontFace = Library.Font,
+            Text = Text,
+            TextSize = 12,
+            TextColor3 = FromRGB(255, 0, 225),
+            BackgroundTransparency = 1,
+            BorderSizePixel = 0,
+            AutomaticSize = Enum.AutomaticSize.X,
+            Size = UDim2New(0, 0, 1, 0),
+            TextTransparency = 0.45,
+            ZIndex = 1
+        })
+
+        Instances:Create("UIGradient", {
+            Parent = Items["Glow"].Instance,
+            Rotation = 0,
+            Color = RGBSequence{
+                RGBSequenceKeypoint(0, FromRGB(66, 135, 245)),
+                RGBSequenceKeypoint(1, FromRGB(255, 0, 225))
+            }
+        })
+
+        for _, offset in ipairs({
+            Vector2.new(1, 0),
+            Vector2.new(-1, 0),
+            Vector2.new(0, 1),
+            Vector2.new(0, -1)
+        }) do
+            local clone = Items["Glow"].Instance:Clone()
+            clone.Position = UDim2.fromOffset(offset.X, offset.Y)
+            clone.Parent = Items["Watermark"].Instance
+        end
+
+        Items["Text"] = Instances:Create("TextLabel", {
+            Parent = Items["Watermark"].Instance,
+            FontFace = Library.Font,
+            TextColor3 = FromRGB(255, 255, 255),
+            BorderColor3 = FromRGB(0, 0, 0),
+            Text = Text,
+            Name = "\0",
+            BackgroundTransparency = 1,
+            Size = UDim2New(0, 0, 1, 0),
+            BorderSizePixel = 0,
+            AutomaticSize = Enum.AutomaticSize.X,
+            TextSize = 12,
+            ZIndex = 2
+        })
+
+        local TextGradient = Instances:Create("UIGradient", {
+            Parent = Items["Text"].Instance,
+            Rotation = 0,
+            Color = RGBSequence{
+                RGBSequenceKeypoint(0, FromRGB(66, 135, 245)),
+                RGBSequenceKeypoint(1, FromRGB(255, 0, 225))
+            }
+        })
+
+        task.spawn(function()
+            while Items["Text"].Instance.Parent do
+                TextGradient.Instance.Rotation = (TextGradient.Instance.Rotation + 1) % 360
+                task.wait(0.03)
+            end
+        end)
+
+        Instances:Create("UIPadding", {
+            Parent = Items["Watermark"].Instance,
+            PaddingRight = UDimNew(0, 8),
+            PaddingLeft = UDimNew(0, 8)
+        })
+
+        Items["Liner"] = Instances:Create("Frame", {
+            Parent = Items["Watermark"].Instance,
+            Name = "\0",
+            Position = UDim2New(0, -8, 0, 0),
+            BorderColor3 = FromRGB(0, 0, 0),
+            Size = UDim2New(1, 16, 0, 2),
+            BorderSizePixel = 0,
+            BackgroundColor3 = FromRGB(31, 226, 130)
+        })
+        Items["Liner"]:AddToTheme({ BackgroundColor3 = "Accent" })
+
+        Instances:Create("UIGradient", {
+            Parent = Items["Liner"].Instance,
+            Rotation = 90,
+            Color = RGBSequence{
+                RGBSequenceKeypoint(0, FromRGB(255, 255, 255)),
+                RGBSequenceKeypoint(1, FromRGB(94, 94, 94))
+            }
+        })
+
+        if Icon and type(Icon) == "table" then
+            Items["Icon"] = Instances:Create("ImageLabel", {
                 Parent = Items["Watermark"].Instance,
-                Color = FromRGB(68, 68, 68),
-                LineJoinMode = Enum.LineJoinMode.Miter,
-                ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-            }):AddToTheme({Color = "Border"})
-
-            Items["Text"] = Instances:Create("TextLabel", {
-                Parent = Items["Watermark"].Instance,
-                FontFace = Library.Font,
-                TextColor3 = FromRGB(255, 255, 255),
+                ImageColor3 = Icon[2] or FromRGB(255, 255, 255),
+                ScaleType = Enum.ScaleType.Fit,
                 BorderColor3 = FromRGB(0, 0, 0),
-                Text = Text,
                 Name = "\0",
+                Image = "rbxassetid://" .. Icon[1],
                 BackgroundTransparency = 1,
-                Size = UDim2New(0, 0, 1, 0),
-                BorderSizePixel = 0,
-                AutomaticSize = Enum.AutomaticSize.X,
-                TextSize = 12,
-                BackgroundColor3 = FromRGB(255, 255, 255)
-            }) Items["Text"]:AddToTheme({TextColor3 = "Text"})
-            --gradient
-            Instances:Create("UIGradient", {
-                Parent = Items["Text"].Instance,
-                Rotation = 0,
-                Color = RGBSequence{
-                    RGBSequenceKeypoint(0, FromRGB(66, 135, 245)),
-                    RGBSequenceKeypoint(1, FromRGB(255, 0, 225))
-                }
+                Position = UDim2New(0, -3, 0, 4),
+                Size = UDim2New(0, 18, 0, 18),
+                BorderSizePixel = 0
             })
 
-            Instances:Create("UIPadding", {
-                Parent = Items["Watermark"].Instance,
-                PaddingRight = UDimNew(0, 8),
-                PaddingLeft = UDimNew(0, 8)
-            }) 
-
-            Items["Liner"] = Instances:Create("Frame", {
-                Parent = Items["Watermark"].Instance,
-                Name = "\0",
-                Position = UDim2New(0, -8, 0, 0),
-                BorderColor3 = FromRGB(0, 0, 0),
-                Size = UDim2New(1, 16, 0, 2),
-                BorderSizePixel = 0,
-                BackgroundColor3 = FromRGB(31, 226, 130)
-            })  Items["Liner"]:AddToTheme({BackgroundColor3 = "Accent"})
-
-            Instances:Create("UIGradient", {
-                Parent = Items["Liner"].Instance,
-                Rotation = 90,
-                Color = RGBSequence{RGBSequenceKeypoint(0, FromRGB(255, 255, 255)), RGBSequenceKeypoint(1, FromRGB(94, 94, 94))}
-            }) 
-
-            if Icon then 
-                if type(Icon) == "table" then
-                    Items["Icon"] = Instances:Create("ImageLabel", {
-                        Parent = Items["Watermark"].Instance,
-                        ImageColor3 = Icon[2] or FromRGB(255, 255, 255),
-                        ScaleType = Enum.ScaleType.Fit,
-                        BorderColor3 = FromRGB(0, 0, 0),
-                        Name = "\0",
-                        Image = "rbxassetid://" .. Icon[1],
-                        BackgroundTransparency = 1,
-                        Position = UDim2New(0, -3, 0, 4),
-                        Size = UDim2New(0, 18, 0, 18),
-                        BorderSizePixel = 0,
-                        BackgroundColor3 = FromRGB(255, 255, 255)
-                    }) 
-
-                    Items["Text"].Instance.Position = UDim2New(0, 20, 0, 0)
-                end
-            end
+            Items["Text"].Instance.Position = UDim2New(0, 20, 0, 0)
+            Items["Glow"].Instance.Position = UDim2New(0, 20, 0, 0)
         end
 
         function Watermark:SetVisibility(Bool)
