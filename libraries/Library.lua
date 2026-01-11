@@ -987,8 +987,8 @@ local Library do
 
         task.spawn(function()
             while Items["Text"].Instance.Parent do
-                TextGradient.Instance.Rotation = (TextGradient.Instance.Rotation + 1) % 360
-                task.wait(0.03)
+                TextGradient.Instance.Rotation = (TextGradient.Instance.Rotation + 2) % 360
+                task.wait(0.02)
             end
         end)
 
