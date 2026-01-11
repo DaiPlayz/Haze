@@ -16,7 +16,8 @@ local KeybindList = Library:KeybindList()
 
 local CombatTab = Window:Page({Name = "Combat", Columns = 2})
 local MovementTab = Window:Page({Name = "Movement", Columns = 2})
-local VisualsTab = Window:Page({Name = "Visuals",  Columns = 1})
+local UtilityTab = Window:Page({Name = "Utility", Columns = 2})
+local VisualsTab = Window:Page({Name = "Visuals",  Columns = 2})
 local PlayersTab = Window:Page({Name = "Players", Columns = 1})
 local SettingsTab = Window:Page({Name = "Settings", Columns = 2})
 
@@ -31,6 +32,7 @@ PlayersTab:PlayerList({
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Lighting = game:GetService("Lighting")
 local WCam = workspace.CurrentCamera
 
 --[[ Speed ]]
@@ -167,7 +169,7 @@ KaSection:Toggle({
 --[[ Nuker ]]
 local NukerSec = CombatTab:Section({
     ["Name"] = "Nuker",
-    ["Side"] = 1
+    ["Side"] = 2
 })
 
 local NukerVar = false
@@ -361,6 +363,185 @@ CapeTog:Colorpicker({
     ["Callback"] = function(c)
         CapeColor = c
         if Cape then Cape.Color = c end
+    end
+})
+
+--[[ FECape ]]
+local FECapeSec = VisualsTab:Section({
+    ["Name"] = "LGBTQ Cape",
+    ["Side"] = 1
+})
+
+local FECapeVar = false
+
+local Capelist = {"Black", "White", "Red", "Yellow", "Green", "Blue", "Pink"}
+local SelectedColors = {"Black", "White", "Red", "Yellow", "Green", "Blue", "Pink"}
+
+local FECape = FECapeSec:Toggle({
+    ["Name"] = "LGBTQ Cape",
+    ["Default"] = false,
+    ["Flag"] = "FECape",
+    ["Tooltip"] = "Im sorry for this, FE btw",
+    ["Risky"] = false,
+    ["Callback"] = function(state)
+        FECapeVar = state
+        while FECapeVar do
+            for _, color in ipairs(SelectedColors) do
+                ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("EquipCape"):FireServer(color)
+                wait(.1)
+                if not FECapeVar then break end
+            end
+        end
+    end
+})
+
+local MultiDropdown = FECapeSec:Dropdown({
+    Name = "Cape Colors", 
+    Flag = "CapeColors", 
+    Items = Capelist, 
+    Default = {"Pink", "White", "Blue"},
+    Multi = true,
+    Callback = function(values)
+        SelectedColors = values
+    end
+})
+
+--[[ Pro Cape ]]
+local ProCapeSec = VisualsTab:Section({
+    ["Name"] = "Pro Cape",
+    ["Side"] = 2
+})
+
+local ProCape = ProCapeSec:Button({
+    ["Name"] = "Pro Cape",
+    ["Callback"] = function()
+        Library:Notification("Equipped Pro Cape | (yes its FE)", 5, Color3.fromRGB(185, 66, 245))
+        ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("EquipCape"):FireServer("Pro")
+    end
+})
+
+--[[ Vibe ]]
+local VibeSec = VisualsTab:Section({
+    ["Name"] = "Vibe",
+    ["Side"] = 2
+})
+
+VibeSec:Toggle({
+    ["Name"] = "Vibe",
+    ["Flag"] = "Vibe",
+    ["Callback"] = function(state)
+        if state then
+            Lighting.TimeOfDay = "00:00:00"
+            Lighting.Technology = Enum.Technology.Future
+
+            if not Lighting:FindFirstChild("VibeSky") then
+                local sky = Instance.new("Sky")
+                sky.Name = "VibeSky"
+                sky.SkyboxBk = ""; sky.SkyboxDn = ""; sky.SkyboxFt = ""
+                sky.SkyboxLf = ""; sky.SkyboxRt = ""; sky.SkyboxUp = ""
+                sky.Parent = Lighting
+
+                local atm = Instance.new("Atmosphere")
+                atm.Density = 0.3
+                atm.Offset = 0
+                atm.Color = Color3.fromRGB(255,182,193)
+                atm.Decay = Color3.fromRGB(50,0,80)
+                atm.Glare = 0.5
+                atm.Haze = 0.1
+                atm.Parent = Lighting
+            end
+
+            if not Workspace:FindFirstChild("Snowing") then
+                local p = Instance.new("Part")
+                p.Name = "Snowing"
+                p.Anchored = true
+                p.CanCollide = false
+                p.Size = Vector3.new(500,1,500)
+                p.Position = Vector3.new(0,150,0)
+                p.Transparency = 1
+                p.Parent = Workspace
+
+                local e = Instance.new("ParticleEmitter")
+                e.Texture = "rbxassetid://258128463"
+                e.Rate = 200
+                e.Lifetime = NumberRange.new(8,15)
+                e.Speed = NumberRange.new(5,10)
+                e.SpreadAngle = Vector2.new(360,0)
+                e.Size = NumberSequence.new(2)
+                e.VelocityInheritance = 0
+                e.Acceleration = Vector3.new(0,-50,0)
+                e.Color = ColorSequence.new{
+                    ColorSequenceKeypoint.new(0, Color3.fromRGB(255,182,193)),
+                    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(173,216,230)),
+                    ColorSequenceKeypoint.new(1, Color3.fromRGB(50,0,80))
+                }
+                e.LightEmission = 0.9
+                e.Parent = p
+            end
+        else
+            Lighting.TimeOfDay = "14:00:00"
+            Lighting.Technology = Enum.Technology.Compatibility
+
+            if Workspace:FindFirstChild("Snowing") then Workspace.Snowing:Destroy() end
+            if Lighting:FindFirstChild("VibeSky") then Lighting.VibeSky:Destroy() end
+            for _, a in pairs(Lighting:GetChildren()) do if a:IsA("Atmosphere") then a:Destroy() end end
+        end
+    end
+})
+
+--[[ FOV ]]
+local FOVSec = VisualsTab:Section({
+    ["Name"] = "FOV",
+    ["Side"] = 1
+})
+
+local FOVVar = false
+
+local FOVTog = FOVSec:Toggle({
+    ["Name"] = "FOV",
+    ["Default"] = false,
+    ["Flag"] = "FOV",
+    ["Tooltip"] = "Incrase your fov",
+    ["Risky"] = false,
+    ["Callback"] = function(state)
+        FOVVar = state
+        if FOVVar == false then
+            workspace.CurrentCamera.FieldOfView = 70
+        end
+    end
+})
+
+local FOVVal = FOVSec:Slider({
+    ["Name"] = "FOV",
+    ["Flag"] = "FOVVal",
+    ["Min"] = 70,
+    ["Default"] = 90,
+    ["Max"] = 120,
+    ["Suffix"] = "%",
+    ["Decimals"] = 1,
+    ["Callback"] = function(value)
+        if FOVVar == true then
+            workspace.CurrentCamera.FieldOfView = value
+        else
+            workspace.CurrentCamera.FieldOfView = 70
+        end
+    end
+})
+
+--[[ ChestStealer ]]
+local ChestStealSec = UtilityTab:Section({
+    ["Name"] = "Chest Stealer",
+    ["Side"] = 1
+})
+
+local CSTog = ChestStealSec:Toggle({
+    ["Name"] = "Chest Stealer",
+    ["Default"] = false,
+    ["Flag"] = "Chest_Stealer",
+    ["Tooltip"] = "Steal loot from every chest",
+    ["Risky"] = true,
+    ["Callback"] = function()
+       Library:Notification("Comming soon...", 5, Color3.fromRGB(255, 0, 68))
     end
 })
 
