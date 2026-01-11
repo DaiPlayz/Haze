@@ -199,7 +199,16 @@ local function breakbed(pick, bed)
     ItemsRemotes.MineBlock:FireServer(pick.Name, bed, pivot, minePos, pivot - minePos)
 end
 
-NukerSec:Toggle({Name="Nuker", Default=false, Callback=function(state) NukerVar = state end})
+NukerSec:Toggle({
+    ["Name"] = "Nuker",
+    ["Default"] = false,
+    ["Flag"] = "Nuker",
+    ["Tooltip"] = "Breaks beds around you",
+    ["Risky"] = true
+    ["Callback"] = function(state)
+        NukerVar = state
+    end
+})
 
 local Lastswitch, Switchdelay = 0, 0.08
 local Usesword = true
