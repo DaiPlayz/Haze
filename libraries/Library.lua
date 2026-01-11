@@ -1032,42 +1032,18 @@ local Library do
                 imageSource = ""
             end
 
-            Items["IconHolder"] = Instances:Create("Frame", {
-                Parent = Items["Watermark"].Instance,
-                Size = UDim2New(0, 18, 0, 18),
-                Position = UDim2New(0, -3, 0, 4),
-                BackgroundTransparency = 1
-            })
-
             Items["Icon"] = Instances:Create("ImageLabel", {
-                Parent = Items["IconHolder"].Instance,
+                Parent = Items["Watermark"].Instance,
+                ImageColor3 = Icon[2] or FromRGB(255, 255, 255),
+                ScaleType = Enum.ScaleType.Fit,
+                BorderColor3 = FromRGB(0, 0, 0),
+                Name = "\0",
                 Image = imageSource,
                 BackgroundTransparency = 1,
-                Size = UDim2New(1, 0, 1, 0),
-                BorderSizePixel = 0,
-                ImageColor3 = Color3.fromRGB(255, 255, 255),
-                ScaleType = Enum.ScaleType.Fit
+                Position = UDim2New(0, -3, 0, 4),
+                Size = UDim2New(0, 18, 0, 18),
+                BorderSizePixel = 0
             })
-
-            Instances:Create("UIGradient", {
-                Parent = Items["IconHolder"].Instance,
-                Rotation = 0,
-                Color = ColorSequence.new({
-                    ColorSequenceKeypoint.new(0, Color3.fromRGB(66, 135, 245)),
-                    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255, 255, 255)),
-                    ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 0, 225))
-                })
-            })
-
-            local IconGradient = Items["IconHolder"].Instance:FindFirstChildOfClass("UIGradient")
-            task.spawn(function()
-                local rotation = 0
-                while Items["IconHolder"].Instance.Parent do
-                    rotation = (rotation + 1) % 360
-                    IconGradient.Rotation = rotation
-                    task.wait(0.02)
-                end
-            end)
 
             Items["Text"].Instance.Position = UDim2New(0, 20, 0, 0)
         end

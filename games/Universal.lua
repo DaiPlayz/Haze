@@ -11,7 +11,7 @@ local Window = Library:Window({
     }
 })
 
-local Watermark = Library:Watermark("H A Z E", {"77974153657891", Color3.fromRGB(66, 135, 245)})
+local Watermark = Library:Watermark("H A Z E", {"Haze/assets/lib/logo.png", Color3.fromRGB(66, 135, 245)})
 
 local KeybindList = Library:KeybindList()
 
