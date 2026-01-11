@@ -77,10 +77,10 @@ local Library do
         },
 
         Images = {
-            ["Saturation"] = {"Saturation.png", "https://raw.githubusercontent.com/7Smoker/Haze/refs/heads/main/assets/lib/saturation.png" },
-            ["Value"] = { "Value.png", "https://raw.githubusercontent.com/7Smoker/Haze/refs/heads/main/assets/lib/value.png" },
-            ["Hue"] = { "Hue.png", "https://raw.githubusercontent.com/7Smoker/Haze/refs/heads/main/assets/lib/horizontalhue.png" },
-            ["Checkers"] = { "Checkers.png", "https://raw.githubusercontent.com/7Smoker/Haze/refs/heads/main/assets/lib/checkers.png" },
+            ["Saturation"] = {"Saturation.png", "https://raw.githubusercontent.com/7Smoker/Haze/refs/heads/main/assets/lib/saturation.png"},
+            ["Value"] = {"Value.png", "https://raw.githubusercontent.com/7Smoker/Haze/refs/heads/main/assets/lib/value.png"},
+            ["Hue"] = {"Hue.png", "https://raw.githubusercontent.com/7Smoker/Haze/refs/heads/main/assets/lib/horizontalhue.png"},
+            ["Checkers"] = {"Checkers.png", "https://raw.githubusercontent.com/7Smoker/Haze/refs/heads/main/assets/lib/checkers.png"},
         },
 
         Pages = { },
