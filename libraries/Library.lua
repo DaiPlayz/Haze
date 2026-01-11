@@ -256,7 +256,7 @@ local Library do
         }
     }
 
-    Library.Theme = TableClone(Themes["Default"])
+    Library.Theme = TableClone(Themes["Bitchbot"])
     Library.Themes = Themes
 
     local Tween = { } do
