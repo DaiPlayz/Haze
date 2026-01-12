@@ -73,13 +73,13 @@ local universaldetect = GAMES .. "/Universal.lua"
 local gamename = getgamename()
 
 if isfile(gamedetect) then
-    Notifications:Notify("Info", "Loading script for " .. gamename, 5)
+    Notifications:Notify("Info", "Loading script for: " .. gamename, 5)
     safeload(gamedetect)
 elseif isfile(universaldetect) then
-    Notifications:Notify("Info", "Loading universal script for " .. gamename, 5)
+    Notifications:Notify("Info", "Loading universal: " .. gamename, 5)
     safeload(universaldetect)
 else
-    Notifications:Notify("Error", "No compatible game script found for " .. gamename, 10)
+    Notifications:Notify("Error", "No compatible game script found for: " .. gamename, 10)
     return
 end
 
