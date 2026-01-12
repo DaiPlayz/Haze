@@ -28,19 +28,19 @@ local function UpdateSprint(active, humanoid)
     
     local baseFOV = GetBaseFOV()
     local targetFOV = active and (baseFOV + 15) or baseFOV
-    local defaultSpeed = humanoid:GetAttribute("DefaultSpeed") or StarterPlayer.CharacterWalkSpeed
+    local DefSpeed = humanoid:GetAttribute("DefaultSpeed") or StarterPlayer.CharacterWalkSpeed
     
     TweenService:Create(Camera, TWEEN_INFO, {FieldOfView = targetFOV}):Play()
 
     if active then
         SprintObj:Set(true)
         if not humanoid:GetAttribute("SpeedLock") then
-            humanoid.WalkSpeed = defaultSpeed + 4
+            humanoid.WalkSpeed = DefSpeed + 4
         end
     else
         SprintObj:Set(false)
         if not humanoid:GetAttribute("SpeedLock") then
-            humanoid.WalkSpeed = defaultSpeed
+            humanoid.WalkSpeed = DefSpeed
         end
     end
 end
