@@ -204,7 +204,7 @@ NukerSec:Toggle({
     ["Default"] = false,
     ["Flag"] = "Nuker",
     ["Tooltip"] = "Breaks beds around you",
-    ["Risky"] = true
+    ["Risky"] = true,
     ["Callback"] = function(state)
         NukerVar = state
     end
