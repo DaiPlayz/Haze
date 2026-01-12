@@ -34,6 +34,32 @@ local LocalPlayer = Players.LocalPlayer
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Lighting = game:GetService("Lighting")
 local WCam = workspace.CurrentCamera
+local RunService = game:GetService("RunService")
+
+--[[ Libraries ]]
+local ROOT = "Haze"
+local GAMES = ROOT .. "/games"
+local Notifications = loadfile(ROOT .. "/libraries/Notifications.lua")()
+
+local LibraryPath = "Haze/libraries/"
+local ControllerList = {
+    "bedfight/SprintController",
+    "Whitelist"
+}
+
+local Controllers = {}
+
+for _, name in ipairs(ControllerList) do
+    local success, result = pcall(function()
+        return loadfile(LibraryPath .. name .. ".lua")()
+    end)
+    
+    if success then
+        Controllers[name] = result
+    else
+        Notifications:Notify("Error", "Failed to load " .. name .. ": " .. result, 15)
+    end
+end
 
 --[[ Speed ]]
 local gmt = getrawmetatable(game)
@@ -41,55 +67,55 @@ setreadonly(gmt, false)
 local oldindex = gmt.__index
 
 gmt.__index = newcclosure(function(self, b)
-    if b == "JumpPower" then
-        return 50
-    end
-    if b == "WalkSpeed" then
-        return 16
-    end
+    if b == "JumpPower" then return 50 end
+    if b == "WalkSpeed" then return 16 end
     return oldindex(self, b)
 end)
-
 setreadonly(gmt, true)
 
 local SpeedVar = false
+local SpeedValue = 16
+
+RunService.Heartbeat:Connect(function()
+    if SpeedVar then
+        local Character = LocalPlayer.Character
+        local Humanoid = Character and Character:FindFirstChildOfClass("Humanoid")
+        if Humanoid then
+            Humanoid.WalkSpeed = SpeedValue
+        end
+    end
+end)
 
 local SpeedSection = MovementTab:Section({
     ["Name"] = "Speed",
     ["Side"] = 1
 })
 
-local SpeedTog = SpeedSection:Toggle({
+SpeedSection:Toggle({
     ["Name"] = "Speed", 
     ["Default"] = false, 
     ["Flag"] = "SpeedTog",
     ["Tooltip"] = "Makes you walk faster",
     ["Risky"] = false,
     ["Callback"] = function(State)
-        SpeedVar = State
-        if State == true then
-            --ok
-        else
-            LocalPlayer.Character.Humanoid.WalkSpeed = 16
+        SpeedVar = State        if not State then
+            local Character = LocalPlayer.Character
+            local Humanoid = Character and Character:FindFirstChildOfClass("Humanoid")
+            if Humanoid then Humanoid.WalkSpeed = 16 end
         end
     end
 })
 
-local SpeedSlide = SpeedSection:Slider({
+SpeedSection:Slider({
     ["Name"] = "Speed",
     ["Flag"] = "SpeedVal",
     ["Min"] = 16,
     ["Default"] = 16,
     ["Max"] = 32,
-    ["Suffix"] = "%",
+    ["Suffix"] = "studs",
     ["Decimals"] = 1,
     ["Callback"] = function(Value)
-        task.spawn(function()
-            while SpeedVar do
-                LocalPlayer.Character.Humanoid.WalkSpeed = Value
-                task.wait(0.1)
-            end
-        end)
+        SpeedValue = Value
     end
 })
 
@@ -499,41 +525,51 @@ VibeSec:Toggle({
 })
 
 --[[ FOV ]]
+local FOVVar = false
+local FOVValue = 90
+local FOVConnection
+
+workspace:GetPropertyChangedSignal("CurrentCamera"):Connect(function()
+    WCam = workspace.CurrentCamera
+end)
+
 local FOVSec = VisualsTab:Section({
     ["Name"] = "FOV",
     ["Side"] = 1
 })
 
-local FOVVar = false
+local function ManageFOV()
+    if FOVConnection then FOVConnection:Disconnect() end
+    
+    if FOVVar then
+        FOVConnection = RunService.RenderStepped:Connect(function()
+            WCam.FieldOfView = FOVValue
+        end)
+    else
+        WCam.FieldOfView = 70
+    end
+end
 
-local FOVTog = FOVSec:Toggle({
+FOVSec:Toggle({
     ["Name"] = "FOV",
     ["Default"] = false,
-    ["Flag"] = "FOV",
-    ["Tooltip"] = "Incrase your fov",
-    ["Risky"] = false,
+    ["Flag"] = "FOV_Toggle",
+    ["Tooltip"] = "Incrase your foc",
     ["Callback"] = function(state)
         FOVVar = state
-        if FOVVar == false then
-            workspace.CurrentCamera.FieldOfView = 70
-        end
+        ManageFOV()
     end
 })
 
-local FOVVal = FOVSec:Slider({
+FOVSec:Slider({
     ["Name"] = "FOV",
-    ["Flag"] = "FOVVal",
     ["Min"] = 70,
-    ["Default"] = 90,
     ["Max"] = 120,
-    ["Suffix"] = "%",
+    ["Default"] = 90,
     ["Decimals"] = 1,
-    ["Callback"] = function(value)
-        if FOVVar == true then
-            workspace.CurrentCamera.FieldOfView = value
-        else
-            workspace.CurrentCamera.FieldOfView = 70
-        end
+    ["Flag"] = "FOV_Value",
+    ["Callback"] = function(val)
+        FOVValue = val
     end
 })
 
@@ -569,6 +605,51 @@ local CSTog = ChestStealSec:Toggle({
                 end
             end)
         end
+    end
+})
+
+--[[ Velocity ]]
+local VelocityUtils = require(ReplicatedStorage:WaitForChild("Modules"):WaitForChild("VelocityUtils"))
+
+local VelocityVar = false
+local originalCreate
+
+local VelocitySec = UtilityTab:Section({
+    ["Name"] = "Velocity",
+    ["Side"] = 2
+})
+
+VelocitySec:Toggle({
+    ["Name"] = "Velocity",
+    ["Default"] = false,
+    ["Flag"] = "Velocity",
+    ["Tooltip"] = "Bypasses the knockback in our ways",
+    ["Callback"] = function(state)
+        VelocityVar = state
+        originalCreate = hookfunction(VelocityUtils.Create, function(...)
+            if VelocityVar then
+                return nil
+            end
+            return originalCreate(...)
+        end)
+    end
+})
+
+--[[ AutoSprint ]]
+local SprintController = loadfile("Haze/libraries/bedfight/SprintController.lua")()
+
+local SprintSec = UtilityTab:Section({
+    ["Name"] = "AutoSprint",
+    ["Side"] = 1
+})
+
+SprintSec:Toggle({
+    ["Name"] = "AutoSprint",
+    ["Default"] = false,
+    ["Flag"] = "AutoSprint",
+    ["Tooltip"] = "Sprints for you",
+    ["Callback"] = function(state)
+        SprintController:SetState(state)
     end
 })
 
