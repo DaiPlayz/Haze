@@ -936,7 +936,7 @@ local Library do
         end
     end
 
-    Library.Watermark = function(self, Text, Icon)
+    Library.Watermark = function(self, Text, Icon, HideLogo)
         local Watermark = {}
         local Items = {}
 
@@ -1028,7 +1028,7 @@ local Library do
             elseif type(Icon[1]) == "string" then
                 imageSource = getcustomasset(Icon[1])
             else
-                Library:Notification("Invalid icon please try to execute again or report this to the devs", 5, FromRGB(255, 0, 0))
+                Library:Notification("Invalid icon, please try again or report to devs", 5, FromRGB(255, 0, 0))
                 imageSource = ""
             end
 
@@ -1050,6 +1050,21 @@ local Library do
 
         function Watermark:SetVisibility(Bool)
             Items["Watermark"].Instance.Visible = Bool
+        end
+
+        function Watermark:HideLogo(hide)
+            if Items["Icon"] then
+                Items["Icon"].Instance.Visible = not hide
+                if hide then
+                    Items["Text"].Instance.Position = UDim2.new(0, 0, 0, 0)
+                else
+                    Items["Text"].Instance.Position = UDim2.new(0, 20, 0, 0)
+                end
+            end
+        end
+
+        if HideLogo then
+            Watermark:HideLogo(true)
         end
 
         return Watermark
