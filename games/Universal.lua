@@ -1,13 +1,13 @@
-local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/7Smoker/Haze/refs/heads/main/libraries/Library.lua"))()
+local Library = loadfile("Haze/libraries/Library.lua")()
 
 local Window = Library:Window({
-    Name = "H A Z E",
-    GradientTitle = {
-        Enabled = true,
-        Start = Color3.fromRGB(66, 135, 245),
-        Middle = Color3.fromRGB(255, 0, 225),
-        End = Color3.fromRGB(66, 135, 245),
-        Speed = 1.5
+    ["Name"] = "H A Z E",
+    ["GradientTitle"] = {
+        ["Enabled"] = true,
+        ["Start"] = Color3.fromRGB(66, 135, 245),
+        ["Middle"] = Color3.fromRGB(255, 0, 225),
+        ["End"] = Color3.fromRGB(66, 135, 245),
+        ["Speed"] = 2
     }
 })
 
@@ -17,7 +17,7 @@ local KeybindList = Library:KeybindList()
 
 local CombatTab = Window:Page({Name = "Combat", Columns = 2})
 local MovementTab = Window:Page({Name = "Movement", Columns = 2})
-local VisualsTab = Window:Page({Name = "Visuals",  Columns = 1})
+local VisualsTab = Window:Page({Name = "Visuals",  Columns = 2})
 local PlayersTab = Window:Page({Name = "Players", Columns = 1})
 local SettingsTab = Window:Page({Name = "Settings", Columns = 2})
 
@@ -34,6 +34,13 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Lighting = game:GetService('Lighting')
 local LocalPlayer = Players.LocalPlayer
 local WCam = workspace.CurrentCamera
+local RunService = game:GetService("RunService")
+
+--[[ Libraries ]]
+local modules = {
+    Whitelist = loadfile("Haze/libraries/Whitelist.lua")(),
+    ESPController = loadfile("Haze/libraries/modules/EspController.lua")()
+}
 
 --[[ Speed ]]
 local gmt = getrawmetatable(game)
@@ -59,10 +66,7 @@ local SpeedSection = MovementTab:Section({
     ["Side"] = 1
 })
 
-local SpeedLab = SpeedSection:Label(
-    "Bypasses most of the anticheats",
-    "Left"
-)
+local SpeedLab = SpeedSection:Label("Bypasses most of the anticheats","Left")
 
 local SpeedTog = SpeedSection:Toggle({
     ["Name"] = "Speed", 
@@ -207,39 +211,177 @@ CapeTog:Colorpicker({
 })
 
 --[[ Vibe ]]
-local VibeColor = Color3.fromRGB(169, 3, 252)
-local VibeChecker = false
-
-local VibeSection = VisualsTab:Section({
+local VibeSec = VisualsTab:Section({
     ["Name"] = "Vibe",
-    ["Side"] = 1
+    ["Side"] = 2
 })
 
-local Vibe = VibeSection:Toggle({
+VibeSec:Toggle({
     ["Name"] = "Vibe",
     ["Flag"] = "Vibe",
     ["Callback"] = function(state)
-        if not VibeChecker then
-            VibeChecker = true
-            return
-        end
+        if state then
+            Lighting.TimeOfDay = "00:00:00"
+            Lighting.Technology = Enum.Technology.Future
 
-        Lighting.TimeOfDay = state and "00:00:00" or "14:00:00"
-        Lighting.Ambient = state and VibeColor or Color3.fromRGB(127,127,127)
-        Lighting.OutdoorAmbient = state and Color3.new(0,0,0) or Color3.fromRGB(127,127,127)
-        Lighting.Technology = state and Enum.Technology.Future or Enum.Technology.Compatibility
+            if not Lighting:FindFirstChild("VibeSky") then
+                local sky = Instance.new("Sky")
+                sky.Name = "VibeSky"
+                sky.SkyboxBk = ""; sky.SkyboxDn = ""; sky.SkyboxFt = ""
+                sky.SkyboxLf = ""; sky.SkyboxRt = ""; sky.SkyboxUp = ""
+                sky.Parent = Lighting
+
+                local atm = Instance.new("Atmosphere")
+                atm.Density = 0.3
+                atm.Offset = 0
+                atm.Color = Color3.fromRGB(255,182,193)
+                atm.Decay = Color3.fromRGB(50,0,80)
+                atm.Glare = 0.5
+                atm.Haze = 0.1
+                atm.Parent = Lighting
+            end
+
+            if not Workspace:FindFirstChild("Snowing") then
+                local p = Instance.new("Part")
+                p.Name = "Snowing"
+                p.Anchored = true
+                p.CanCollide = false
+                p.Size = Vector3.new(500,1,500)
+                p.Position = Vector3.new(0,150,0)
+                p.Transparency = 1
+                p.Parent = Workspace
+
+                local e = Instance.new("ParticleEmitter")
+                e.Texture = "rbxassetid://258128463"
+                e.Rate = 200
+                e.Lifetime = NumberRange.new(8,15)
+                e.Speed = NumberRange.new(5,10)
+                e.SpreadAngle = Vector2.new(360,0)
+                e.Size = NumberSequence.new(2)
+                e.VelocityInheritance = 0
+                e.Acceleration = Vector3.new(0,-50,0)
+                e.Color = ColorSequence.new{
+                    ColorSequenceKeypoint.new(0, Color3.fromRGB(255,182,193)),
+                    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(173,216,230)),
+                    ColorSequenceKeypoint.new(1, Color3.fromRGB(50,0,80))
+                }
+                e.LightEmission = 0.9
+                e.Parent = p
+            end
+        else
+            Lighting.TimeOfDay = "14:00:00"
+            Lighting.Technology = Enum.Technology.Compatibility
+
+            if Workspace:FindFirstChild("Snowing") then Workspace.Snowing:Destroy() end
+            if Lighting:FindFirstChild("VibeSky") then Lighting.VibeSky:Destroy() end
+            for _, a in pairs(Lighting:GetChildren()) do if a:IsA("Atmosphere") then a:Destroy() end end
+        end
     end
 })
 
-Vibe:Colorpicker({
-    ["Name"] = "Vibe Color",
-    ["Default"] = VibeColor,
-    ["Flag"] = "VibeColor",
-    ["Callback"] = function(vibestate)
-        VibeColor = vibestate
-        if VibeChecker then
-            Lighting.Ambient = vibestate
+--[[ FOV ]]
+local FOVVar = false
+local FOVValue = 90
+local FOVConnection
+
+workspace:GetPropertyChangedSignal("CurrentCamera"):Connect(function()
+    WCam = workspace.CurrentCamera
+end)
+
+local FOVSec = VisualsTab:Section({
+    ["Name"] = "FOV",
+    ["Side"] = 1
+})
+
+local function ManageFOV()
+    if FOVConnection then FOVConnection:Disconnect() end
+    
+    if FOVVar then
+        FOVConnection = RunService.RenderStepped:Connect(function()
+            WCam.FieldOfView = FOVValue
+        end)
+    else
+        WCam.FieldOfView = 70
+    end
+end
+
+FOVSec:Toggle({
+    ["Name"] = "FOV",
+    ["Default"] = false,
+    ["Flag"] = "FOV_Toggle",
+    ["Tooltip"] = "Incrase your fov",
+    ["Callback"] = function(state)
+        FOVVar = state
+        ManageFOV()
+    end
+})
+
+FOVSec:Slider({
+    ["Name"] = "FOV",
+    ["Min"] = 70,
+    ["Max"] = 120,
+    ["Default"] = 90,
+    ["Decimals"] = 1,
+    ["Flag"] = "FOV_Value",
+    ["Callback"] = function(val)
+        FOVValue = val
+    end
+})
+
+--[[ ESP ]]
+local ESPSec = VisualsTab:Section({
+    ["Name"] = "ESP",
+    ["Side"] = 1
+})
+
+ESPSec:Toggle({
+    ["Name"] = "ESP",
+    ["Default"] = false,
+    ["Flag"] = "ESP",
+    ["Callback"] = function(state)
+        modules.ESPController.Enabled = state
+    end
+})
+
+ESPSec:Toggle({
+    ["Name"] = "Vibe ESP",
+    ["Default"] = true,
+    ["Flag"] = "ESP_Vibe",
+    ["Tooltip"] = "Give a good vibe to the esp boxes",
+    ["Callback"] = function(state)
+        modules.ESPController.UseGradient = state
+    end
+})
+
+ESPSec:Dropdown({
+    ["Name"] = "Theme",
+    ["Flag"] = "ESP_Theme",
+    ["Items"] = {"Haze", "Aqua", "Nova"},
+    ["Default"] = "Haze",
+    ["Callback"] = function(val)
+        if val and val ~= "" then
+            modules.ESPController.Theme = val
+        else
+            modules.ESPController.Theme = "Haze"
         end
+    end
+})
+
+ESPSec:Toggle({
+    ["Name"] = "Team Check",
+    ["Default"] = false,
+    ["Flag"] = "ESP_TeamCheck",
+    ["Callback"] = function(state)
+        modules.ESPController.TeamCheck = state
+    end
+})
+
+ESPSec:Toggle({
+    ["Name"] = "Ignore Team",
+    ["Default"] = false,
+    ["Flag"] = "ESP_NoTeam",
+    ["Callback"] = function(state)
+        modules.ESPController.NoTeam = state
     end
 })
 
