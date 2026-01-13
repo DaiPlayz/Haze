@@ -1,13 +1,13 @@
-local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/7Smoker/Haze/refs/heads/main/libraries/Library.lua"))()
+local Library = loadfile("Haze/libraries/Library.lua")()
 
 local Window = Library:Window({
-    Name = "H A Z E",
-    GradientTitle = {
-        Enabled = true,
-        Start = Color3.fromRGB(66, 135, 245),
-        Middle = Color3.fromRGB(255, 0, 225),
-        End = Color3.fromRGB(66, 135, 245),
-        Speed = 2
+    ["Name"] = "H A Z E",
+    ["GradientTitle"] = {
+        ["Enabled"] = true,
+        ["Start"] = Color3.fromRGB(66, 135, 245),
+        ["Middle"] = Color3.fromRGB(255, 0, 225),
+        ["End"] = Color3.fromRGB(66, 135, 245),
+        ["Speed"] = 2
     }
 })
 
@@ -37,29 +37,11 @@ local WCam = workspace.CurrentCamera
 local RunService = game:GetService("RunService")
 
 --[[ Libraries ]]
-local ROOT = "Haze"
-local GAMES = ROOT .. "/games"
-local Notifications = loadfile(ROOT .. "/libraries/Notifications.lua")()
-
-local LibraryPath = "Haze/libraries/"
-local ControllerList = {
-    "bedfight/SprintController",
-    "Whitelist"
+local modules = {
+    Whitelist = loadfile("Haze/libraries/Whitelist.lua")(),
+    SprintController = loadfile("Haze/libraries/bedfight/SprintController.lua")(),
+    ESPController = loadfile("Haze/libraries/modules/EspController.lua")()
 }
-
-local Controllers = {}
-
-for _, name in ipairs(ControllerList) do
-    local success, result = pcall(function()
-        return loadfile(LibraryPath .. name .. ".lua")()
-    end)
-    
-    if success then
-        Controllers[name] = result
-    else
-        Notifications:Notify("Error", "Failed to load " .. name .. ": " .. result, 15)
-    end
-end
 
 --[[ Speed ]]
 local gmt = getrawmetatable(game)
@@ -636,8 +618,6 @@ VelocitySec:Toggle({
 })
 
 --[[ AutoSprint ]]
-local SprintController = loadfile("Haze/libraries/bedfight/SprintController.lua")()
-
 local SprintSec = UtilityTab:Section({
     ["Name"] = "AutoSprint",
     ["Side"] = 1
@@ -649,7 +629,64 @@ SprintSec:Toggle({
     ["Flag"] = "AutoSprint",
     ["Tooltip"] = "Sprints for you",
     ["Callback"] = function(state)
-        SprintController:SetState(state)
+        modules.SprintController:SetState(state)
+    end
+})
+
+--[[ ESP ]]
+local ESPSec = VisualsTab:Section({
+    ["Name"] = "ESP",
+    ["Side"] = 1
+})
+
+ESPSec:Toggle({
+    ["Name"] = "ESP",
+    ["Default"] = false,
+    ["Flag"] = "ESP",
+    ["Callback"] = function(state)
+        modules.ESPController.Enabled = state
+    end
+})
+
+ESPSec:Toggle({
+    ["Name"] = "Vibe ESP",
+    ["Default"] = true,
+    ["Flag"] = "ESP_Vibe",
+    ["Tooltip"] = "Give a good vibe to the esp boxes",
+    ["Callback"] = function(state)
+        modules.ESPController.UseGradient = state
+    end
+})
+
+ESPSec:Dropdown({
+    ["Name"] = "Theme",
+    ["Flag"] = "ESP_Theme",
+    ["Items"] = {"Haze", "Aqua", "Nova"},
+    ["Default"] = "Haze",
+    ["Callback"] = function(val)
+        if val and val ~= "" then
+            modules.ESPController.Theme = val
+        else
+            modules.ESPController.Theme = "Haze"
+        end
+    end
+})
+
+ESPSec:Toggle({
+    ["Name"] = "Team Check",
+    ["Default"] = false,
+    ["Flag"] = "ESP_TeamCheck",
+    ["Callback"] = function(state)
+        modules.ESPController.TeamCheck = state
+    end
+})
+
+ESPSec:Toggle({
+    ["Name"] = "Ignore Team",
+    ["Default"] = false,
+    ["Flag"] = "ESP_NoTeam",
+    ["Callback"] = function(state)
+        modules.ESPController.NoTeam = state
     end
 })
 
