@@ -41,7 +41,8 @@ local RunService = game:GetService("RunService")
 local modules = {
     Whitelist = loadfile("Haze/libraries/Whitelist.lua")(),
     SprintController = loadfile("Haze/libraries/bedfight/SprintController.lua")(),
-    ESPController = loadfile("Haze/libraries/modules/EspController.lua")()
+    ESPController = loadfile("Haze/libraries/modules/EspController.lua")(),
+    ScaffoldController = loadfile("Haze/libraries/bedfight/ScaffoldController.lua")()
 }
 
 --[[ Speed ]]
@@ -688,6 +689,22 @@ ESPSec:Toggle({
     ["Flag"] = "ESP_NoTeam",
     ["Callback"] = function(state)
         modules.ESPController.NoTeam = state
+    end
+})
+
+--[[ Scaffold ]]
+local ScaffoldSec = UtilityTab:Section({
+    ["Name"] = "Scaffold",
+    ["Side"] = 2
+})
+
+local ScaffoldKey = ScaffoldSec:Label("Scaffold", "Left"):Keybind({
+    ["Name"] = "Scaffold",
+    ["Flag"] = "Scaffold",
+    ["Default"] = Enum.KeyCode.V,
+    ["Mode"] = "Toggle",
+    ["Callback"] = function(state)
+        modules.ScaffoldController:SetState(state)
     end
 })
 
