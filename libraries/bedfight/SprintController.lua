@@ -1,12 +1,11 @@
 local SprintController = {}
 
 local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
 local RunService = game:GetService("RunService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
 local StarterPlayer = game:GetService("StarterPlayer")
-
-local Player = Players.LocalPlayer
 local Camera = workspace.CurrentCamera
 local Modules = ReplicatedStorage:WaitForChild("Modules")
 local ButtonProperties = require(Modules:WaitForChild("ButtonProperties"))
@@ -17,16 +16,19 @@ local SprintObj = ButtonProperties.new("Sprint")
 local IsEnabled = false
 local RenderSteppedConn = nil
 
-local function GetBaseFOV()
-    local settings = Player:FindFirstChild("Settings")
+local char = LocalPlayer.Character
+local hum = char and char:FindFirstChildOfClass("Humanoid")
+
+local function BaseFOV()
+    local settings = LocalPlayer:FindFirstChild("Settings")
     local fovVal = settings and settings:FindFirstChild("FOV")
     return fovVal and fovVal.Value or 70
 end
 
-local function UpdateSprint(active, humanoid)
+local function UpdSprint(active, humanoid)
     if not humanoid then return end
     
-    local baseFOV = GetBaseFOV()
+    local baseFOV = BaseFOV()
     local targetFOV = active and (baseFOV + 15) or baseFOV
     local DefSpeed = humanoid:GetAttribute("DefaultSpeed") or StarterPlayer.CharacterWalkSpeed
     
@@ -50,24 +52,19 @@ function SprintController:SetState(state)
     
     if not state then
         if RenderSteppedConn then RenderSteppedConn:Disconnect() RenderSteppedConn = nil end
-        local char = Player.Character
-        local hum = char and char:FindFirstChildOfClass("Humanoid")
-        UpdateSprint(false, hum)
+            UpdSprint(false, hum)
         return
     end
 
     if RenderSteppedConn then return end
 
     RenderSteppedConn = RunService.RenderStepped:Connect(function()
-        local char = Player.Character
-        local hum = char and char:FindFirstChildOfClass("Humanoid")
-        
         if hum then
             local isMoving = hum.MoveDirection.Magnitude > 0
             if isMoving and SprintObj.Active.Value == false then
-                UpdateSprint(true, hum)
+                UpdSprint(true, hum)
             elseif not isMoving and SprintObj.Active.Value == true then
-                UpdateSprint(false, hum)
+                UpdSprint(false, hum)
             end
             
             if IsEnabled and isMoving and hum:GetAttribute("SpeedLock") then
