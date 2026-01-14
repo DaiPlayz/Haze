@@ -365,7 +365,7 @@ local CapeTog = CapeSection:Toggle({
 
 CapeSection:Dropdown({
     ["Name"] = "Capes",
-    ["Items"] = {"Cat","Waifu","Troll"},
+    ["Items"] = {"Cat","Waifu","Troll", "Wave"},
     ["Flag"] = "CapeTexture",
     ["Callback"] = function(v)
         local path = "Haze/Assets/capes/"..v..".png"
