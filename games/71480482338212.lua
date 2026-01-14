@@ -38,11 +38,13 @@ local WCam = workspace.CurrentCamera
 local RunService = game:GetService("RunService")
 
 --[[ Libraries ]]
+local LocalLibrary = "Haze/libraries"
 local modules = {
-    Whitelist = loadfile("Haze/libraries/Whitelist.lua")(),
-    SprintController = loadfile("Haze/libraries/bedfight/SprintController.lua")(),
-    ESPController = loadfile("Haze/libraries/modules/EspController.lua")(),
-    ScaffoldController = loadfile("Haze/libraries/bedfight/ScaffoldController.lua")()
+    Whitelist = loadfile(LocalLibrary .. "/Whitelist.lua")(),
+    SprintController = loadfile(LocalLibrary .. "/bedfight/SprintController.lua")(),
+    ESPController = loadfile(LocalLibrary .. "/modules/EspController.lua")(),
+    ScaffoldController = loadfile(LocalLibrary .. "/bedfight/ScaffoldController.lua")(),
+    FlyController = loadfile(LocalLibrary .. "/bedfight/FlyController.lua")()
 }
 
 --[[ Speed ]]
@@ -705,6 +707,31 @@ local ScaffoldKey = ScaffoldSec:Label("Scaffold", "Left"):Keybind({
     ["Mode"] = "Toggle",
     ["Callback"] = function(state)
         modules.ScaffoldController:SetState(state)
+    end
+})
+
+--[[ Fly ]]
+local FlySec = MovementTab:Section({
+    ["Name"] = "Fly",
+    ["Side"] = 2
+})
+
+local FlyKey = FlySec:Label("Fly", "Left"):Keybind({
+    ["Name"] = "Fly",
+    ["Flag"] = "Fly",
+    ["Default"] = Enum.KeyCode.R,
+    ["Mode"] = "Toggle",
+    ["Callback"] = function(state)
+        modules.FlyController:Toggle(state)
+    end
+})
+
+FlySec:Toggle({
+    ["Name"] = "Vertical",
+    ["Flag"] = "Vertical",
+    ["Default"] = false,
+    ["Callback"] = function(state)
+        modules.FlyController:SetVertical(state)
     end
 })
 
