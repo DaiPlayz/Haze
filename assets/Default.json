@@ -1,23 +1,19 @@
-[
-  "loader.lua",
-  "libraries/Library.lua",
-  "libraries/Notifications.lua",
-  "libraries/Whitelist.lua",
-  "libraries/bedfight/FlyController.lua",
-  "libraries/bedfight/PartyController.lua",
-  "libraries/bedfight/ScaffoldController.lua",
-  "libraries/bedfight/SprintController.lua",
-  "libraries/modules/EspController.lua",
-  "assets/Data/Versions.json",
-  "assets/capes/Cat.png",
-  "assets/capes/Troll.png",
-  "assets/capes/Waifu.png",
-  "assets/capes/Wave.png",
-  "assets/lib/checkers.png",
-  "assets/lib/horizontalhue.png",
-  "assets/lib/logo.png",
-  "assets/lib/saturation.png",
-  "assets/lib/value.png",
-  "games/71480482338212.lua",
-  "games/Universal.lua"
-]
+{
+  "files": ["loader.lua", "loadstring.txt"],
+
+  "libraries": ["Library.lua", "Notifications.lua", "Whitelist.lua"],
+
+  "libraries/bedfight": ["FlyController.lua", "SprintController.lua", "ScaffoldController.lua", "PartyController.lua"],
+
+  "libraries/modules": ["EspController.lua"],
+
+  "assets": ["Default.json"],
+
+  "assets/Data": ["Versions.json"],
+
+  "assets/capes": ["Cat.png", "Troll.png", "Waifu.png", "Wave.png"],
+
+  "assets/lib": ["checkers.png", "horizontalhue.png", "logo.png", "saturation.png", "value.png"],
+
+  "games": ["71480482338212.lua", "Universal.png"]
+}
