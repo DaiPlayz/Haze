@@ -1,5 +1,5 @@
 {
-  "": ["loader.lua", "loadstring.txt"],
+  "root": ["loader.lua", "loadstring.txt"],
 
   "libraries": ["Library.lua", "Notifications.lua", "Whitelist.lua"],
 
