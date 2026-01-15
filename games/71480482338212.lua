@@ -44,7 +44,8 @@ local modules = {
     SprintController = loadfile(LocalLibrary .. "/bedfight/SprintController.lua")(),
     ESPController = loadfile(LocalLibrary .. "/modules/EspController.lua")(),
     ScaffoldController = loadfile(LocalLibrary .. "/bedfight/ScaffoldController.lua")(),
-    FlyController = loadfile(LocalLibrary .. "/bedfight/FlyController.lua")()
+    FlyController = loadfile(LocalLibrary .. "/bedfight/FlyController.lua")(),
+    PartyController = loadfile(LocalLibrary .. "/bedfight/PartyController.lua")()
 }
 
 --[[ Speed ]]
@@ -732,6 +733,42 @@ FlySec:Toggle({
     ["Default"] = false,
     ["Callback"] = function(state)
         modules.FlyController:SetVertical(state)
+    end
+})
+
+--[[ Spam Invites ]]
+local PartySec = UtilityTab:Section({
+    ["Name"] = "Party Utilities",
+    ["Side"] = 1
+})
+
+PartySec:Toggle({
+    ["Name"] = "Spam Invites",
+    ["Flag"] = "InviteSpam",
+    ["Tooltip"] = "Invites everyone in your party",
+    ["Default"] = false,
+    ["Callback"] = function(state)
+        spawn(function()
+            while state do
+                modules.PartyController:InviteAll()
+                wait(0.1)
+            end
+        end)
+    end
+})
+
+PartySec:Toggle({
+    ["Name"] = "Spam Kicks",
+    ["Flag"] = "KickSpam",
+    ["Tooltip"] = "Kicks everyone from your party"
+    ["Default"] = false,
+    ["Callback"] = function(state)
+        spawn(function()
+            while state do
+                modules.PartyController:KickAll()
+                wait(0.1)
+            end
+        end)
     end
 })
 
