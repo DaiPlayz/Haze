@@ -760,7 +760,7 @@ PartySec:Toggle({
 PartySec:Toggle({
     ["Name"] = "Spam Kicks",
     ["Flag"] = "KickSpam",
-    ["Tooltip"] = "Kicks everyone from your party"
+    ["Tooltip"] = "Kicks everyone from your party",
     ["Default"] = false,
     ["Callback"] = function(state)
         spawn(function()
