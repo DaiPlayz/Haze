@@ -1,0 +1,23 @@
+[
+  "loader.lua",
+  "libraries/Library.lua",
+  "libraries/Notifications.lua",
+  "libraries/Whitelist.lua",
+  "libraries/bedfight/FlyController.lua",
+  "libraries/bedfight/PartyController.lua",
+  "libraries/bedfight/ScaffoldController.lua",
+  "libraries/bedfight/SprintController.lua",
+  "libraries/modules/EspController.lua",
+  "assets/Data/Versions.json",
+  "assets/capes/Cat.png",
+  "assets/capes/Troll.png",
+  "assets/capes/Waifu.png",
+  "assets/capes/Wave.png",
+  "assets/lib/checkers.png",
+  "assets/lib/horizontalhue.png",
+  "assets/lib/logo.png",
+  "assets/lib/saturation.png",
+  "assets/lib/value.png",
+  "games/71480482338212.lua",
+  "games/Universal.lua"
+]
