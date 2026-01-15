@@ -2,23 +2,9 @@ local HttpService = game:GetService("HttpService")
 
 local CONFIG = {
     ROOT = "Haze",
-    BASE_URL = "https://raw.githubusercontent.com/7Smoker/Haze/main/",
-    API_URL  = "https://api.github.com/repos/7Smoker/Haze/contents/",
-
-    INSTALL_FOLDERS = {
-        "assets",
-        "games",
-        "libraries"
-    },
-
-    INSTALL_FILES = {
-        "loader.lua"
-    }
+    REPO_URL = "https://raw.githubusercontent.com/7Smoker/Haze/main/",
+    FILES = "https://raw.githubusercontent.com/7Smoker/Haze/main/assets/Default.json"
 }
-
-local Notifications = loadstring(
-    game:HttpGet("https://raw.githubusercontent.com/7Smoker/Haze/main/libraries/Notifications.lua")
-)()
 
 local function httpGet(url)
     local ok, res = pcall(game.HttpGet, game, url)
@@ -39,59 +25,119 @@ local function write(path, content)
     writefile(path, content)
 end
 
-local function syncFile(localPath, content)
-    local existing = read(localPath)
+local Notifications = loadstring(
+    game:HttpGet("https://raw.githubusercontent.com/7Smoker/Haze/main/libraries/Notifications.lua")
+)()
 
-    if not existing then
-        write(localPath, content)
-        Notifications:Notify("Success", "Installed: " .. localPath, 4)
+local function flattenFiles(tbl, prefix)
+    local files = {}
+    prefix = prefix or ""
+
+    for k, v in pairs(tbl) do
+        if type(v) == "table" then
+            if k == "root" then
+                local subFiles = flattenFiles(v, "")
+                for _, f in ipairs(subFiles) do
+                    table.insert(files, f)
+                end
+            else
+                local subPrefix = (prefix ~= "" and prefix .. "/" or "") .. k
+                local subFiles = flattenFiles(v, subPrefix)
+                for _, f in ipairs(subFiles) do
+                    table.insert(files, f)
+                end
+            end
+        elseif type(v) == "string" then
+            local fullPath = (prefix ~= "" and prefix .. "/" or "") .. v
+            table.insert(files, fullPath)
+        end
+    end
+
+    return files
+end
+
+local function InstallFiles()
+    local url = CONFIG.FILES
+    if not url:match("^https?://") then
+        url = CONFIG.REPO_URL .. url
+    end
+
+    local json = httpGet(url)
+    if not json then
+            Notifications:Notify("Warning", "Failed to download files list. Report this to the devs", 4)
+        return {}
+    end
+
+    local success, data = pcall(function()
+        return HttpService:JSONDecode(json)
+    end)
+
+    if not success or type(data) ~= "table" then
+            Notifications:Notify("Warning", "Invalid files in the JSON. Report this to the devs", 4)
+        return {}
+    end
+
+    return flattenFiles(data)
+end
+
+local function syncFile(FilePath)
+    local url = CONFIG.REPO_URL .. FilePath
+    local content = httpGet(url)
+
+    if not content then
+            Notifications:Notify("Warning", "Failed to download: " .. FilePath, 4)
         return
     end
 
-    if existing ~= content then
-        write(localPath, content)
-        Notifications:Notify("Success", "Updated: " .. localPath, 4)
+    local LocalPath = CONFIG.ROOT .. "/" .. FilePath
+    local folder = LocalPath:match("(.+)/[^/]+$")
+
+    if folder then
+        ensureFolder(folder)
     end
-end
 
-local function syncFolder(remotePath, localPath)
-    ensureFolder(localPath)
-
-    local raw = httpGet(CONFIG.API_URL .. remotePath)
-    if not raw then return end
-
-    local decoded = HttpService:JSONDecode(raw)
-    for _, item in ipairs(decoded) do
-        local localItemPath = localPath .. "/" .. item.name
-
-        if item.type == "file" then
-            local content = httpGet(item.download_url)
-            if content then
-                syncFile(localItemPath, content)
-            end
-        elseif item.type == "dir" then
-            syncFolder(remotePath .. "/" .. item.name, localItemPath)
+    local existing = read(LocalPath)
+    if not existing then
+        write(LocalPath, content)
+        if Notifications then
+            Notifications:Notify("Success", "Installed: " .. FilePath, 4)
+        else
+            print("[Haze] Installed:", FilePath)
+        end
+    elseif existing ~= content then
+        write(LocalPath, content)
+        if Notifications then
+            Notifications:Notify("Success", "Updated: " .. FilePath, 4)
+        else
+            print("[Haze] Updated:", FilePath)
         end
     end
 end
 
 ensureFolder(CONFIG.ROOT)
 
-for _, folder in ipairs(CONFIG.INSTALL_FOLDERS) do
-    syncFolder(folder, CONFIG.ROOT .. "/" .. folder)
+local installFiles = InstallFiles()
+
+for _, file in ipairs(installFiles) do
+    syncFile(file)
 end
 
-for _, file in ipairs(CONFIG.INSTALL_FILES) do
-    local content = httpGet(CONFIG.BASE_URL .. file)
-    if content then
-        syncFile(CONFIG.ROOT .. "/" .. file, content)
+local LoaderPath = CONFIG.ROOT .. "/loader.lua"
+if isfile(LoaderPath) then
+    local fn = loadfile(LoaderPath)
+    if fn then
+        pcall(fn)
+    else
+        if Notifications then
+            Notifications:Notify("Warning", "Failed to run loader.lua", 5)
+        else
+            warn("[Haze] Failed to run loader.lua")
+        end
     end
-end
-
-local loaderPath = CONFIG.ROOT .. "/loader.lua"
-local loaderFn = loadfile(loaderPath)
-if loaderFn then
-    pcall(loaderFn)
 else
-    Notifications:Notify("Warning", "Failed to load loader.lua", 5)
+    if Notifications then
+        Notifications:Notify("Warning", "loader.lua missing", 5)
+    else
+        warn("[Haze] loader.lua missing")
+    end
 end
