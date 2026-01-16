@@ -5,6 +5,7 @@ local RunService = game:GetService("RunService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local PlaceRemote = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("ItemsRemotes"):WaitForChild("PlaceBlock")
+local BlocksFolder = ReplicatedStorage:WaitForChild("Blocks")
 
 local IsEnabled = false
 local Connection = nil
@@ -20,6 +21,13 @@ local TeamColors = {
     "Brown"
 }
 
+local function roundPos(pos: Vector3)
+    local x = math.floor(pos.X / 3) * 3
+    local y = math.floor(pos.Y / 3) * 3
+    local z = math.floor(pos.Z / 3) * 3
+    return Vector3.new(x, y, z)
+end
+
 local function DetectBlock()
     local blocks = {}
     for _, color in ipairs(TeamColors) do
@@ -31,33 +39,45 @@ end
 
 local function ScaffoldPos()
     local char = Players.LocalPlayer.Character
-    local hrp = char and char:FindFirstChild("HumanoidRootPart")
-    local hum = char and char:FindFirstChild("Humanoid")
+    if not char then return nil end
 
-    if hrp and hum and hum.MoveDirection.Magnitude > 0 then
-        local targetPos = hrp.Position + (hum.MoveDirection * 7)
+    local hrp = char:FindFirstChild("HumanoidRootPart")
+    local hum = char:FindFirstChild("Humanoid")
+    if not hrp or not hum then return nil end
 
-        return Vector3.new(
-            math.floor(targetPos.X),
-            math.floor(hrp.Position.Y - 3.5),
-            math.floor(targetPos.Z)
-        )
-    end
-    return nil
+    local moveDir = hum.MoveDirection
+    if moveDir.Magnitude <= 0 then return nil end
+
+    local targetPos = hrp.Position - Vector3.new(0, 3.5, 0) + moveDir
+    return roundPos(targetPos)
 end
 
-function ScaffoldController:SetState(state)
+local function PlaceBlock(blockName, pos)
+    if not blockName or not pos then return end
+
+    PlaceRemote:FireServer(blockName, 1, pos)
+
+    local cloneTemplate = BlocksFolder:FindFirstChild(blockName)
+    if cloneTemplate then
+        local clone = cloneTemplate:Clone()
+        clone.Parent = workspace
+        clone.Position = pos
+
+        task.delay(0.5, function()
+            clone:Destroy()
+        end)
+    end
+end
+
+function ScaffoldController:SetState(state: boolean)
     IsEnabled = state
 
-    if not state then
-        if Connection then
-            Connection:Disconnect()
-            Connection = nil
-        end
-        return
+    if Connection then
+        Connection:Disconnect()
+        Connection = nil
     end
 
-    if Connection then return end
+    if not state then return end
 
     Connection = RunService.PostSimulation:Connect(function()
         if not IsEnabled then return end
@@ -66,11 +86,7 @@ function ScaffoldController:SetState(state)
         if not pos then return end
 
         local blockName = DetectBlock()
-        PlaceRemote:FireServer(
-            blockName,
-            1,
-            vector.create(pos.X, pos.Y, pos.Z)
-        )
+        PlaceBlock(blockName, pos)
     end)
 end
 
