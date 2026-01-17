@@ -272,7 +272,7 @@ KASec:Dropdown({
 --[[ Nuker ]]
 local NukerSec = CombatTab:Section({
     ["Name"] = "Nuker",
-    ["Side"] = 1
+    ["Side"] = 2
 })
 
 local MineBlockRemote = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("ItemsRemotes"):WaitForChild("MineBlock")
