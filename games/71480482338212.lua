@@ -349,6 +349,52 @@ NukerSec:Toggle({
     end
 })
 
+--[[ Killaura and Nuker Holder ]]
+local EquipRemote = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("ItemsRemotes"):WaitForChild("EquipTool")
+local Swords = {"Emerald Sword", "Diamond Sword", "Iron Sword", "Stone Sword", "Wooden Sword"}
+
+local function getbestsword()
+    local container = {LocalPlayer.Backpack, LocalPlayer.Character}
+    for _, parent in ipairs(container) do
+        if parent then
+            for _, swordName in ipairs(Swords) do
+                local tool = parent:FindFirstChild(swordName)
+                if tool then return tool.Name end
+            end
+        end
+    end
+end
+
+
+local currentTool = nil
+
+RunService.Heartbeat:Connect(function()
+    local pickaxe = getpickaxe()
+    local sword = getbestsword()
+    local targetTool = nil
+
+    local nearBed = getnearbed(30)
+
+    if NukerVar and not KAVar then
+        if pickaxe and nearBed then
+            targetTool = pickaxe.Name
+        end
+    elseif KAVar and not NukerVar then
+        targetTool = sword
+    elseif NukerVar and KAVar then
+        if currentTool ~= sword and sword then
+            targetTool = sword
+        elseif pickaxe and nearBed and currentTool ~= pickaxe then
+            targetTool = pickaxe.Name
+        end
+    end
+
+    if targetTool and targetTool ~= currentTool then
+        EquipRemote:FireServer(targetTool)
+        currentTool = targetTool
+    end
+end)
+
 --[[ Cape ]]
 local Capevar = false
 
