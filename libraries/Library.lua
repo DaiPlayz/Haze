@@ -342,7 +342,15 @@ local Library do
         end
 
         Instances.ChangeItemTheme = function(self, Properties)
-            if not self.Instance then 
+            if not self then
+                return
+            end
+
+            if not self.Instance then
+                return
+            end
+
+            if not Library or not Library.ChangeItemTheme then
                 return
             end
 
