@@ -107,178 +107,242 @@ SpeedSection:Slider({
 })
 
 --[[ KillAura ]]
-local ItemsRemotes = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("ItemsRemotes")
-local KaSection = CombatTab:Section({
-    ["Name"] = "Killaura",
-    ["Side"] = 1
-})
+local SwordHitRemote = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("ItemsRemotes"):WaitForChild("SwordHit")
+
+local Swords = {"Emerald Sword", "Diamond Sword", "Iron Sword", "Stone Sword", "Wooden Sword"}
 
 local KAVar = false
 local HighVar = false
-local CHighlight
+local AnimsVar = false
+local AnimMode = "Respect Delay"
+local currentHighlight = nil
+local LastAnimTime = 0
 
-local function getequippedtool()
-    if not LocalPlayer.Character then return end
-    for _, v in ipairs(LocalPlayer.Character:GetChildren()) do
-        if v:IsA("Tool") then return v end
-    end
+local SwingSound = Instance.new("Sound")
+SwingSound.SoundId = "rbxassetid://104766549106531"
+SwingSound.Volume = 1
+SwingSound.Parent = workspace
+
+local SwingAnimation = Instance.new("Animation")
+SwingAnimation.AnimationId = "rbxassetid://123800159244236"
+
+local function isAlive(char)
+    local hum = char and char:FindFirstChildOfClass("Humanoid")
+    return hum and hum.Health > 0
 end
 
-local function toolequip(name)
-    local eq = getequippedtool()
-    if eq and eq.Name == name then return end
-    if LocalPlayer.Backpack:FindFirstChild(name) then
-        ItemsRemotes.EquipTool:FireServer(name)
-    end
-end
+local function getnearplayer()
+    local closest, closestDist = nil, math.huge
+    local myChar = LocalPlayer.Character
+    local myRoot = myChar and myChar:FindFirstChild("HumanoidRootPart")
+    if not myRoot or not isAlive(myChar) then return nil end
 
-local function getsword()
-    for _, s in ipairs({"Emerald Sword","Diamond Sword","Iron Sword","Stone Sword","Wooden Sword"}) do
-        if LocalPlayer.Backpack:FindFirstChild(s) or (LocalPlayer.Character and LocalPlayer.Character:FindFirstChild(s)) then
-            return s
-        end
-    end
-end
-
-local function getnearplayer(range)
-    if not LocalPlayer.Character or not LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then return end
-    local root = LocalPlayer.Character.HumanoidRootPart
-    local closest, dist = nil, math.huge
     for _, p in ipairs(Players:GetPlayers()) do
-        if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
-            local hum = p.Character:FindFirstChildOfClass("Humanoid")
-            if hum and hum.Health > 0 then
-                local d = (p.Character.HumanoidRootPart.Position - root.Position).Magnitude
-                if d < range and d < dist then closest, dist = p, d end
+        if p ~= LocalPlayer and p.Character and isAlive(p.Character) then
+            local root = p.Character:FindFirstChild("HumanoidRootPart")
+            if root then
+                local sameTeam = LocalPlayer.Team and p.Team == LocalPlayer.Team
+                if sameTeam and p.Team and p.Team.Name ~= "Spectators" then continue end
+
+                local dist = (root.Position - myRoot.Position).Magnitude
+                if dist <= 20 and dist < closestDist then
+                    closestDist = dist
+                    closest = p
+                end
             end
         end
     end
     return closest
 end
 
-KaSection:Toggle({
+local function updhighlight(target)
+    if currentHighlight then
+        currentHighlight:Destroy()
+        currentHighlight = nil
+    end
+    if HighVar and target and target.Character then
+        local highlight = Instance.new("Highlight")
+        highlight.Adornee = target.Character
+        highlight.FillColor = Color3.fromRGB(0, 255, 0)
+        highlight.OutlineColor = Color3.fromRGB(0, 255, 0)
+        highlight.FillTransparency = 0.5
+        highlight.OutlineTransparency = 0
+        highlight.Parent = workspace
+        currentHighlight = highlight
+    end
+end
+
+local function playanims()
+    local char = LocalPlayer.Character
+    if not char then return end
+    local humanoid = char:FindFirstChildOfClass("Humanoid")
+    if not humanoid then return end
+    local animator = humanoid:FindFirstChildWhichIsA("Animator")
+    if not animator then
+        animator = Instance.new("Animator")
+        animator.Parent = humanoid
+    end
+    local track = animator:LoadAnimation(SwingAnimation)
+    track:Play()
+end
+
+local function runKA()
+    task.spawn(function()
+        while KAVar do
+            local target = getnearplayer()
+            updhighlight(target)
+
+            if target then
+                for _, sword in ipairs(Swords) do
+                    SwordHitRemote:FireServer(target.Character, sword)
+                end
+
+                if AnimsVar then
+                    if AnimMode == "No Delay" then
+                        playanims()
+                        SwingSound:Play()
+                    elseif AnimMode == "Respect Delay" then
+                        local now = tick()
+                        if now - LastAnimTime > 0.5 then
+                            playanims()
+                            SwingSound:Play()
+                            LastAnimTime = now
+                        end
+                    end
+                end
+            end
+            task.wait(0.01)
+        end
+        updhighlight(nil)
+    end)
+end
+
+local KASec = CombatTab:Section({
+    ["Name"] = "Killaura",
+    ["Side"] = 1
+})
+
+KASec:Toggle({
     ["Name"] = "Killaura",
     ["Default"] = false,
     ["Flag"] = "Killaura",
+    ["Tooltip"] = "Attacks players around you",
     ["Callback"] = function(state)
         KAVar = state
+        if state then
+            runKA()
+        end
     end
 })
 
-KaSection:Toggle({
+KASec:Toggle({
     ["Name"] = "Highlight",
     ["Default"] = false,
-    ["Flag"] = "HighlightKA",
-    ["Tooltip"] = "Highlight target",
+    ["Flag"] = "KA_Highlight",
+    ["Tooltip"] = "Highlight the target",
     ["Callback"] = function(state)
         HighVar = state
-        if not state and CHighlight then
-            CHighlight:Destroy()
-            CHighlight = nil
+        if not state and currentHighlight then
+            currentHighlight:Destroy()
+            currentHighlight = nil
         end
+    end
+})
+
+KASec:Toggle({
+    ["Name"] = "Anims",
+    ["Default"] = false,
+    ["Flag"] = "KA_Anims",
+    ["Callback"] = function(state)
+        AnimsVar = state
+    end
+})
+
+KASec:Dropdown({
+    ["Name"] = "Delay",
+    ["Flag"] = "KA_Delay",
+    ["Items"] = {"No Delay", "Respect Delay"},
+    ["Multi"] = false,
+    ["Default"] = "Respect Delay",
+    ["Callback"] = function(value)
+        AnimMode = value
     end
 })
 
 --[[ Nuker ]]
 local NukerSec = CombatTab:Section({
     ["Name"] = "Nuker",
-    ["Side"] = 2
+    ["Side"] = 1
 })
+
+local MineBlockRemote = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("ItemsRemotes"):WaitForChild("MineBlock")
 
 local NukerVar = false
 
-local function getpickaxe()
-    for _, n in ipairs({"Diamond Pickaxe","Iron Pickaxe","Stone Pickaxe","Wooden Pickaxe"}) do
-        if LocalPlayer.Backpack:FindFirstChild(n) then return LocalPlayer.Backpack[n] end
-        if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild(n) then return LocalPlayer.Character[n] end
-    end
-end
-
 local function getnearbed(range)
-    local beds = workspace:FindFirstChild("BedsContainer")
-    if not beds or not LocalPlayer.Character then return end
-    local closest, dist
-    for _, b in ipairs(beds:GetChildren()) do
-        local pivot = b:GetPivot().Position
-        local d = (pivot - LocalPlayer.Character:GetPivot().Position).Magnitude
-        if d <= range and (not dist or d < dist) then closest, dist = b, d end
+    local bedsContainer = workspace:FindFirstChild("BedsContainer")
+    if not bedsContainer or not LocalPlayer.Character or not LocalPlayer.Character.PrimaryPart then return nil end
+
+    local closestBed, closestDist
+    for _, bed in ipairs(bedsContainer:GetChildren()) do
+        local hitbox = bed:FindFirstChild("BedHitbox")
+        if hitbox then
+            local distance = (LocalPlayer.Character.PrimaryPart.Position - hitbox.Position).Magnitude
+            if distance <= range and (not closestDist or distance < closestDist) then
+                closestBed, closestDist = hitbox, distance
+            end
+        end
     end
-    return closest
+    return closestBed
 end
 
-local function breakbed(pick, bed)
-    local pivot = bed:GetPivot().Position
-    local minePos = pivot + Vector3.new(0, bed:GetExtentsSize().Y + 0.05, 0)
-    ItemsRemotes.MineBlock:FireServer(pick.Name, bed, pivot, minePos, pivot - minePos)
+local function getpickaxe()
+    if LocalPlayer.Backpack then
+        for _, item in ipairs(LocalPlayer.Backpack:GetChildren()) do
+            if item.Name:lower():find("pickaxe") then return item end
+        end
+    end
+    if LocalPlayer.Character then
+        for _, item in ipairs(LocalPlayer.Character:GetChildren()) do
+            if item.Name:lower():find("pickaxe") then return item end
+        end
+    end
+end
+
+local function breakbed(pick, hitbox)
+    if not pick or not hitbox then return end
+    local model = hitbox.Parent
+    local pos = hitbox.Position
+    local origin = pos + Vector3.new(0, 3, 0)
+    local direction = (pos - origin).Unit
+    MineBlockRemote:FireServer(
+        pick.Name,
+        model,
+        vector.create(pos.X, pos.Y, pos.Z),
+        vector.create(origin.X, origin.Y, origin.Z),
+        vector.create(direction.X, direction.Y, direction.Z)
+    )
 end
 
 NukerSec:Toggle({
     ["Name"] = "Nuker",
-    ["Default"] = false,
     ["Flag"] = "Nuker",
-    ["Tooltip"] = "Breaks beds around you",
-    ["Risky"] = true,
+    ["Default"] = false,
     ["Callback"] = function(state)
         NukerVar = state
+        if state then
+            task.wait(function()
+                task.wait(0.1)
+                if not LocalPlayer.Character or not LocalPlayer.Character.PrimaryPart then continue end
+                local bedHitbox = getnearbed(30)
+                local pickaxe = getpickaxe()
+                if bedHitbox and pickaxe then
+                    breakbed(pickaxe, bedHitbox)
+                end
+            end)
+        end
     end
 })
-
-local Lastswitch, Switchdelay = 0, 0.08
-local Usesword = true
-local Lastmine, Minedelay = 0, 0.15
-
-task.spawn(function()
-    while task.wait(0.03) do
-        if not LocalPlayer.Character then continue end
-
-        local target = KAVar and getnearplayer(18)
-        local bed = NukerVar and getnearbed(30)
-        local now = tick()
-
-        if target and bed then
-            if now - Lastswitch >= Switchdelay then
-                Lastswitch = now
-                Usesword = not Usesword
-            end
-        elseif target then Usesword = true
-        elseif bed then Usesword = false
-        else Usesword = true end
-
-        if KAVar and target then
-            local sword = getsword()
-            if sword then
-                toolequip(sword)
-                ItemsRemotes.SwordHit:FireServer(target.Character, sword)
-            end
-        end
-
-        if NukerVar and bed and now - Lastmine >= Minedelay then
-            Lastmine = now
-            local pick = getpickaxe()
-            if pick then
-                toolequip(pick.Name)
-                task.wait(0.02)
-                breakbed(pick, bed)
-                if KAVar and target then
-                    local sword = getsword()
-                    if sword then task.wait(0.01) toolequip(sword) end
-                end
-            end
-        end
-
-        if HighVar and target and target.Character then
-            if not CHighlight then
-                CHighlight = Instance.new("Highlight")
-                CHighlight.FillColor = Color3.fromRGB(66,135,245)
-            end
-            CHighlight.Adornee = target.Character
-            CHighlight.Parent = target.Character
-        elseif CHighlight then
-            CHighlight:Destroy()
-            CHighlight=nil
-        end
-    end
-end)
 
 --[[ Cape ]]
 local Capevar = false
