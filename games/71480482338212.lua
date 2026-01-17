@@ -331,13 +331,18 @@ NukerSec:Toggle({
     ["Callback"] = function(state)
         NukerVar = state
         if state then
-            task.wait(function()
-                task.wait(0.1)
-                if not LocalPlayer.Character or not LocalPlayer.Character.PrimaryPart then continue end
-                local bedHitbox = getnearbed(30)
-                local pickaxe = getpickaxe()
-                if bedHitbox and pickaxe then
-                    breakbed(pickaxe, bedHitbox)
+            task.spawn(function()
+                while NukerVar do
+                    task.wait(0.1)
+                    if not LocalPlayer.Character or not LocalPlayer.Character.PrimaryPart then
+                        continue
+                    end
+
+                    local bedHitbox = getnearbed(30)
+                    local pickaxe = getpickaxe()
+                    if bedHitbox and pickaxe then
+                        breakbed(pickaxe, bedHitbox)
+                    end
                 end
             end)
         end
