@@ -1,7 +1,7 @@
 # Haze 🌫️
 
 ![Status](https://img.shields.io/badge/status-beta-yellow)  
-![Version](https://img.shields.io/badge/version-1.0-blue)  
+![Version](https://img.shields.io/github/commit-activity/t/7Smoker/Haze?label=version&prefix=v&color=blue)  
 ![License](https://img.shields.io/badge/license-proprietary-red)
 
 **Powered by ScriptIsFocus**
