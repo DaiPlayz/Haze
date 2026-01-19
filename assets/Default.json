@@ -1,7 +1,7 @@
 {
   "root": ["loader.lua", "loadstring.txt"],
 
-  "libraries": ["Library.lua", "Notifications.lua", "Whitelist.lua"],
+  "libraries": ["Library.lua", "Notifications.lua", "Whitelist.lua", "Discord.lua"],
 
   "libraries/bedfight": ["FlyController.lua", "SprintController.lua", "ScaffoldController.lua", "PartyController.lua"],
 
@@ -15,5 +15,5 @@
 
   "assets/lib": ["checkers.png", "horizontalhue.png", "logo.png", "saturation.png", "value.png", "signlogo.png"],
 
-  "games": ["71480482338212.lua", "Universal.png"]
+  "games": ["71480482338212.lua", "Universal.lua"]
 }
