@@ -38,6 +38,7 @@ local RunService = game:GetService("RunService")
 
 --[[ Libraries ]]
 local modules = {
+    Discord = loadfile(LocalLibrary .. "/Discord.lua")(),
     Whitelist = loadfile("Haze/libraries/Whitelist.lua")(),
     ESPController = loadfile("Haze/libraries/modules/EspController.lua")()
 }
@@ -634,6 +635,13 @@ do
         ["Flag"] = "Tweening Time",
         ["Callback"] = function(Value)
         Library.Tween.Time = Value
+    end})
+
+    ConfigsSection:Button({
+        ["Name"] = "Discord",
+        ["Callback"] = function()
+        modules.Discord:Join("https://discord.gg/W92SXVmB5X")
+        modules.Discord:Copy("https://discord.gg/W92SXVmB5X")
     end})
 
     ConfigsSection:Button({
