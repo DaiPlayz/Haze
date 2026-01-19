@@ -40,6 +40,7 @@ local RunService = game:GetService("RunService")
 --[[ Libraries ]]
 local LocalLibrary = "Haze/libraries"
 local modules = {
+    Discord = loadfile(LocalLibrary .. "/Discord.lua")(),
     Whitelist = loadfile(LocalLibrary .. "/Whitelist.lua")(),
     SprintController = loadfile(LocalLibrary .. "/bedfight/SprintController.lua")(),
     ESPController = loadfile(LocalLibrary .. "/modules/EspController.lua")(),
@@ -1139,8 +1140,38 @@ do
     end})
 
     ConfigsSection:Button({
-        ["Name"] = "Uninject",
+        ["Name"] = "Discord",
         ["Callback"] = function()
-        Library:Unload()
+        modules.Discord:Join("https://discord.gg/W92SXVmB5X")
+        modules.Discord:Copy("https://discord.gg/W92SXVmB5X")
     end})
+
+    ConfigsSection:Button({
+    ["Name"] = "Uninject",
+    ["Callback"] = function()
+            SpeedVar = false
+            KAVar = false
+            HighVar = false
+            AnimsVar = false
+            NukerVar = false
+            Capevar = false
+            FECapeVar = false
+            FOVVar = false
+            CSVar = false
+            VelocityVar = false
+
+            Lighting.TimeOfDay = "14:00:00"
+            Lighting.Technology = Enum.Technology.Compatibility
+
+            if Workspace:FindFirstChild("Snowing") then Workspace.Snowing:Destroy() end
+            if Lighting:FindFirstChild("VibeSky") then Lighting.VibeSky:Destroy() end
+            for _, a in pairs(Lighting:GetChildren()) do if a:IsA("Atmosphere") then a:Destroy() end end
+
+            modules.SprintController:SetState(false)
+            modules.ScaffoldController:SetState(false)
+            modules.FlyController:Toggle(false)
+
+            Library:Unload()
+        end
+    })
 end
