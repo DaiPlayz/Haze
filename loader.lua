@@ -2,6 +2,7 @@ local ROOT = "Haze"
 local GAMES = ROOT .. "/games"
 
 local Notifications = loadfile(ROOT .. "/libraries/Notifications.lua")()
+local Discord = loadfile(ROOT .. "/libraries/Discord.lua")()
 
 local function safeload(path)
     if not isfile(path) then
@@ -52,6 +53,8 @@ do
         return
     end
 end
+
+Discord:Join("https://discord.gg/W92SXVmB5X", true)
 
 local MarketplaceService = game:GetService("MarketplaceService")
 
