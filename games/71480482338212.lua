@@ -36,6 +36,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Lighting = game:GetService("Lighting")
 local WCam = workspace.CurrentCamera
 local RunService = game:GetService("RunService")
+local SoundService = game:GetService("SoundService")
 
 --[[ Libraries ]]
 local LocalLibrary = "Haze/libraries"
@@ -881,6 +882,26 @@ PartySec:Toggle({
                 wait(0.1)
             end
         end)
+    end
+})
+
+--[[ Reverbs ]]
+local RevertReverbs = SoundService.AmbientReverb
+local ReverbsSec = VisualsTab:Section({
+    ["Name"] = "Reverbs",
+    ["Side"] = 2
+})
+
+ReverbsSec:Toggle({
+    ["Name"] = "Reverbs",
+    ["Flag"] = "Reverbs",
+    ["Default"] = false,
+    ["Callback"] = function(state)
+        if state then
+            SoundService.AmbientReverb = Enum.ReverbType.SewerPipe
+        else
+            SoundService.AmbientReverb = RevertReverbs
+        end
     end
 })
 
