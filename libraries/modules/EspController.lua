@@ -13,7 +13,7 @@ local EspController = {
 }
 
 local Themes = {
-    Haze  = {Color1 = Color3.fromRGB(130, 0, 255), Color2 = Color3.fromRGB(0, 0, 0)},
+    Haze  = {Color1 = Color3.fromRGB(31, 226, 130), Color2 = Color3.fromRGB(245, 66, 200)},
     Aqua  = {Color1 = Color3.fromRGB(0, 255, 255), Color2 = Color3.fromRGB(0, 100, 255)},
     Nova  = {Color1 = Color3.fromRGB(255, 100, 0), Color2 = Color3.fromRGB(200, 0, 255)}
 }
