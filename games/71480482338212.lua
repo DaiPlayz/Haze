@@ -49,6 +49,14 @@ local modules = {
     PartyController = loadfile(LocalLibrary .. "/bedfight/PartyController.lua")()
 }
 
+local remotes = {
+    SwordHitRemote = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("ItemsRemotes"):WaitForChild("SwordHit"),
+    MineBlockRemote = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("ItemsRemotes"):WaitForChild("MineBlock"),
+    EquipRemote = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("ItemsRemotes"):WaitForChild("EquipTool"),
+    EquipCape = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("EquipCape"),
+    TakeItemFromChest = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("TakeItemFromChest")
+}
+
 --[[ Speed ]]
 local gmt = getrawmetatable(game)
 setreadonly(gmt, false)
@@ -108,8 +116,6 @@ SpeedSection:Slider({
 })
 
 --[[ KillAura ]]
-local SwordHitRemote = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("ItemsRemotes"):WaitForChild("SwordHit")
-
 local Swords = {"Emerald Sword", "Diamond Sword", "Iron Sword", "Stone Sword", "Wooden Sword"}
 
 local KAVar = false
@@ -195,7 +201,7 @@ local function runKA()
 
             if target then
                 for _, sword in ipairs(Swords) do
-                    SwordHitRemote:FireServer(target.Character, sword)
+                    remotes.SwordHitRemote:FireServer(target.Character, sword)
                 end
 
                 if AnimsVar then
@@ -276,8 +282,6 @@ local NukerSec = CombatTab:Section({
     ["Side"] = 2
 })
 
-local MineBlockRemote = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("ItemsRemotes"):WaitForChild("MineBlock")
-
 local NukerVar = false
 
 local function getnearbed(range)
@@ -316,7 +320,7 @@ local function breakbed(pick, hitbox)
     local pos = hitbox.Position
     local origin = pos + Vector3.new(0, 3, 0)
     local direction = (pos - origin).Unit
-    MineBlockRemote:FireServer(
+    remotes.MineBlockRemote:FireServer(
         pick.Name,
         model,
         vector.create(pos.X, pos.Y, pos.Z),
@@ -351,7 +355,6 @@ NukerSec:Toggle({
 })
 
 --[[ Killaura and Nuker Holder ]]
-local EquipRemote = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("ItemsRemotes"):WaitForChild("EquipTool")
 local Swords = {"Emerald Sword", "Diamond Sword", "Iron Sword", "Stone Sword", "Wooden Sword"}
 
 local function getbestsword()
@@ -391,7 +394,7 @@ RunService.Heartbeat:Connect(function()
     end
 
     if targetTool and targetTool ~= currentTool then
-        EquipRemote:FireServer(targetTool)
+        remotes.EquipRemote:FireServer(targetTool)
         currentTool = targetTool
     end
 end)
@@ -525,7 +528,7 @@ local FECape = FECapeSec:Toggle({
         FECapeVar = state
         while FECapeVar do
             for _, color in ipairs(SelectedColors) do
-                ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("EquipCape"):FireServer(color)
+               remotes.EquipCape:FireServer(color)
                 wait(.1)
                 if not FECapeVar then break end
             end
@@ -554,7 +557,7 @@ local ProCape = ProCapeSec:Button({
     ["Name"] = "Pro Cape",
     ["Callback"] = function()
         Library:Notification("Equipped Pro Cape | (yes its FE)", 5, Color3.fromRGB(185, 66, 245))
-        ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("EquipCape"):FireServer("Pro")
+        remotes.EquipCape:FireServer("Pro")
     end
 })
 
@@ -700,7 +703,7 @@ local CSTog = ChestStealSec:Toggle({
                     for _, color in ipairs(TeamColors) do
                         for num = 1, 20 do
                             if not CSVar then break end
-                            ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("TakeItemFromChest"):FireServer(color, num, "1")
+                            remotes.TakeItemFromChest:FireServer(color, num, "1")
                             task.wait(.1)
                         end
                         if not CSVar then break end
