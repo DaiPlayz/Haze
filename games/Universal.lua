@@ -35,6 +35,7 @@ local Lighting = game:GetService('Lighting')
 local LocalPlayer = Players.LocalPlayer
 local WCam = workspace.CurrentCamera
 local RunService = game:GetService("RunService")
+local SoundService = game:GetService("SoundService")
 
 --[[ Libraries ]]
 local modules = {
@@ -383,6 +384,26 @@ ESPSec:Toggle({
     ["Flag"] = "ESP_NoTeam",
     ["Callback"] = function(state)
         modules.ESPController.NoTeam = state
+    end
+})
+
+--[[ Reverbs ]]
+local RevertReverbs = SoundService.AmbientReverb
+local ReverbsSec = VisualsTab:Section({
+    ["Name"] = "Reverbs",
+    ["Side"] = 2
+})
+
+ReverbsSec:Toggle({
+    ["Name"] = "Reverbs",
+    ["Flag"] = "Reverbs",
+    ["Default"] = false,
+    ["Callback"] = function(state)
+        if state then
+            SoundService.AmbientReverb = Enum.ReverbType.SewerPipe
+        else
+            SoundService.AmbientReverb = RevertReverbs
+        end
     end
 })
 
