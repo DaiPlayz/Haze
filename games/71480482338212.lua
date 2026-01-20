@@ -7,7 +7,7 @@ local Window = Library:Window({
         ["Start"] = Color3.fromRGB(66, 245, 138),
         ["Middle"] = Color3.fromRGB(66, 191, 245),
         ["End"] = Color3.fromRGB(245, 66, 200),
-        ["Speed"] = 2
+        ["Speed"] = 1
     }
 })
 
