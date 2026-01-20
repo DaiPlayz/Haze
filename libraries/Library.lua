@@ -204,19 +204,6 @@ local Library do
 
     local Themes = {
         ["Default"] = {
-            ["Window Background"] = FromRGB(33, 33, 33),
-            ["Inline"] = FromRGB(14, 14, 14),
-            ["Text"] = FromRGB(255, 255, 255),
-            ["Section Background"] = FromRGB(18, 18, 18),
-            ["Element"] = FromRGB(14, 14, 14),
-            ["Border"] = FromRGB(0, 0, 0),
-            ["Outline"] = FromRGB(19, 19, 19),
-            ["Dark Liner"] = FromRGB(21, 21, 21),
-            ["Risky"] = FromRGB(255, 50, 50),
-            ["Accent"] = FromRGB(158, 79, 249)
-        },
-
-        ["Bitchbot"] = {
             ["Window Background"] = FromRGB(43, 43, 43),
             ["Inline"] = FromRGB(12, 12, 12),
             ["Text"] = FromRGB(180, 180, 180),
@@ -227,6 +214,19 @@ local Library do
             ["Dark Liner"] = FromRGB(56, 56, 56),
             ["Risky"] = FromRGB(255, 50, 50),
             ["Accent"] = FromRGB(31, 226, 130)
+        },
+
+        ["Bitchbot"] = {
+            ["Window Background"] = FromRGB(33, 33, 33),
+            ["Inline"] = FromRGB(14, 14, 14),
+            ["Text"] = FromRGB(255, 255, 255),
+            ["Section Background"] = FromRGB(18, 18, 18),
+            ["Element"] = FromRGB(14, 14, 14),
+            ["Border"] = FromRGB(0, 0, 0),
+            ["Outline"] = FromRGB(19, 19, 19),
+            ["Dark Liner"] = FromRGB(21, 21, 21),
+            ["Risky"] = FromRGB(255, 50, 50),
+            ["Accent"] = FromRGB(158, 79, 249)
         },
 
         ["Onetap"] = {
@@ -988,9 +988,9 @@ local Library do
             Parent = Items["Text"].Instance,
             Rotation = 0,
             Color = ColorSequence.new({
-                ColorSequenceKeypoint.new(0, FromRGB(66, 135, 245)),
-                ColorSequenceKeypoint.new(0.5, FromRGB(255, 255, 255)),
-                ColorSequenceKeypoint.new(1, FromRGB(255, 0, 225))
+                ColorSequenceKeypoint.new(0, FromRGB(66, 245, 138)),
+                ColorSequenceKeypoint.new(0.5, FromRGB(66, 191, 245)),
+                ColorSequenceKeypoint.new(1, FromRGB(245, 66, 200))
             })
         })
 
