@@ -5,7 +5,7 @@
 
   "libraries/bedfight": ["FlyController.lua", "SprintController.lua", "ScaffoldController.lua", "PartyController.lua"],
 
-  "libraries/modules": ["EspController.lua"],
+  "libraries/modules": ["EspController.lua", "Entity.lua"],
 
   "assets": ["Default.json"],
 
