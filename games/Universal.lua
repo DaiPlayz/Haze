@@ -38,7 +38,7 @@ local RunService = game:GetService("RunService")
 
 --[[ Libraries ]]
 local modules = {
-    Discord = loadfile(LocalLibrary .. "/Discord.lua")(),
+    Discord = loadfile("Haze/libraries/Discord.lua")(),
     Whitelist = loadfile("Haze/libraries/Whitelist.lua")(),
     ESPController = loadfile("Haze/libraries/modules/EspController.lua")()
 }
