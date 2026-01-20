@@ -4,14 +4,14 @@ local Window = Library:Window({
     ["Name"] = "H A Z E",
     ["GradientTitle"] = {
         ["Enabled"] = true,
-        ["Start"] = Color3.fromRGB(66, 135, 245),
-        ["Middle"] = Color3.fromRGB(255, 0, 225),
-        ["End"] = Color3.fromRGB(66, 135, 245),
+        ["Start"] = Color3.fromRGB(66, 245, 138),
+        ["Middle"] = Color3.fromRGB(66, 191, 245),
+        ["End"] = Color3.fromRGB(245, 66, 200),
         ["Speed"] = 2
     }
 })
 
-local Watermark = Library:Watermark("H A Z E", {"Haze/assets/lib/logo.png", Color3.fromRGB(66, 135, 245)}, false)
+local Watermark = Library:Watermark("H A Z E", {"Haze/assets/lib/logo.png", Color3.fromRGB(66, 245, 138)}, false)
 
 local KeybindList = Library:KeybindList()
 
@@ -971,7 +971,7 @@ do
 
                 Library:RefreshThemeList(ThemesListbox)
             else
-                Library:Notification("Theme '" .. ThemeName .. ".json' already exists", 3, Color3.fromRGB(66, 135, 245))
+                Library:Notification("Theme '" .. ThemeName .. ".json' already exists", 3, Color3.fromRGB(66, 245, 138))
                 return
             end
         end
@@ -1061,7 +1061,7 @@ do
 
                 Library:RefreshConfigsList(ConfigsListbox)
             else
-                Library:Notification("Config '" .. ConfigName .. ".json' already exists", 3, Color3.fromRGB(66, 135, 245))
+                Library:Notification("Config '" .. ConfigName .. ".json' already exists", 3, Color3.fromRGB(66, 245, 138))
                 return
             end
         end
