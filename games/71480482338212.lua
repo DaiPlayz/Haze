@@ -40,6 +40,7 @@ local RunService = game:GetService("RunService")
 --[[ Libraries ]]
 local LocalLibrary = "Haze/libraries"
 local modules = {
+    Entity = loadfile(LocalLibrary .. "/modules/Entity.lua")(),
     Discord = loadfile(LocalLibrary .. "/Discord.lua")(),
     Whitelist = loadfile(LocalLibrary .. "/Whitelist.lua")(),
     SprintController = loadfile(LocalLibrary .. "/bedfight/SprintController.lua")(),
@@ -133,24 +134,16 @@ SwingSound.Parent = workspace
 local SwingAnimation = Instance.new("Animation")
 SwingAnimation.AnimationId = "rbxassetid://123800159244236"
 
-local function isAlive(char)
-    local hum = char and char:FindFirstChildOfClass("Humanoid")
-    return hum and hum.Health > 0
-end
-
 local function getnearplayer()
     local closest, closestDist = nil, math.huge
     local myChar = LocalPlayer.Character
     local myRoot = myChar and myChar:FindFirstChild("HumanoidRootPart")
-    if not myRoot or not isAlive(myChar) then return nil end
+    if not myRoot or not modules.Entity.isAlive(myChar) then return nil end
 
     for _, p in ipairs(Players:GetPlayers()) do
-        if p ~= LocalPlayer and p.Character and isAlive(p.Character) then
+        if p ~= LocalPlayer and p.Character and modules.Entity.isAlive(p.Character) then
             local root = p.Character:FindFirstChild("HumanoidRootPart")
             if root then
-                local sameTeam = LocalPlayer.Team and p.Team == LocalPlayer.Team
-                if sameTeam and p.Team and p.Team.Name ~= "Spectators" then continue end
-
                 local dist = (root.Position - myRoot.Position).Magnitude
                 if dist <= 20 and dist < closestDist then
                     closestDist = dist
