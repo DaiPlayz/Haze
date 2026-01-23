@@ -498,6 +498,7 @@ CapeSection:Dropdown({
 
 CapeTog:Colorpicker({
     ["Name"] = "Cape Color",
+    ["Flag"] = "CapeColor",
     ["Default"] = CapeColor,
     ["Callback"] = function(c)
         CapeColor = c
@@ -535,12 +536,12 @@ local FECape = FECapeSec:Toggle({
 })
 
 local MultiDropdown = FECapeSec:Dropdown({
-    Name = "Cape Colors", 
-    Flag = "CapeColors", 
-    Items = Capelist, 
-    Default = {"Pink", "White", "Blue"},
-    Multi = true,
-    Callback = function(values)
+    ["Name"] = "Cape Colors", 
+    ["Flag"] = "CapeColors", 
+    ["Items"] = Capelist, 
+    ["Default"] = {"Pink", "White", "Blue"},
+    ["Multi"] = true,
+    ["Callback"] = function(values)
         SelectedColors = values
     end
 })
