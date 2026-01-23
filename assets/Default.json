@@ -9,11 +9,13 @@
 
   "assets": ["Default.json"],
 
-  "assets/Data": ["Versions.json"],
+  "assets/data": ["License.json"],
 
   "assets/capes": ["Cat.png", "Troll.png", "Waifu.png", "Wave.png"],
 
   "assets/lib": ["checkers.png", "horizontalhue.png", "logo.png", "saturation.png", "value.png", "signlogo.png"],
+
+  "assets/audios": ["tutorial.txt"],
 
   "games": ["71480482338212.lua", "Universal.lua"]
 }
