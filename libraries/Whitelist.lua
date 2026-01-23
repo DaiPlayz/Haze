@@ -43,15 +43,14 @@ local function verifyPlayer()
     if not whitelistData then return nil end
 
     local uid = tostring(LocalPlayer.UserId)
+    local data = whitelistData[uid]
+    if not data then return nil end
 
     local hash = hashData(uid, 10)
     local saltHash = hashData(uid .. SALT, 14)
 
-    if whitelistData.userid ~= uid then return nil end
-    if whitelistData.hash ~= hash then return nil end
-    if whitelistData.saltHash ~= saltHash then return nil end
-
-    return whitelistData
+    if data.hash ~= hash or data.saltHash ~= saltHash then return nil end
+    return data
 end
 
 local function updLicense(rank)
@@ -61,7 +60,6 @@ local function updLicense(rank)
     else
         data.Default = true
     end
-
     writefile(LicensePath, HttpService:JSONEncode(data))
 end
 
@@ -86,7 +84,6 @@ end
 local function tagHandler(player, license, colors)
     local char = player.Character
     if not char then return end
-
     local head = char:FindFirstChild("Head")
     if not head or head:FindFirstChild("HAZE_TAG") then return end
 
@@ -120,6 +117,10 @@ local function tagHandler(player, license, colors)
     local gradient = Instance.new("UIGradient")
     local seq = {}
 
+    if type(colors) ~= "table" or #colors < 2 then
+        colors = {{255,255,255},{255,255,255}}
+    end
+
     for i, rgb in ipairs(colors) do
         seq[#seq + 1] = ColorSequenceKeypoint.new(
             (i - 1) / (#colors - 1),
@@ -140,30 +141,46 @@ local function tagHandler(player, license, colors)
     end)
 end
 
-whitelistLoad()
-
-local verified = verifyPlayer()
-
-if verified then
-    LocalPlayer:SetAttribute("HazeLicense", verified.license)
-    updLicense(verified.license)
-
-    if verified.godmode then
-        runGodmode(LocalPlayer)
+local function safeTag(player, data)
+    player.CharacterAdded:Connect(function(char)
+        task.wait(0.1)
+        tagHandler(player, data.license, data.colors)
+    end)
+    if player.Character then
+        task.wait(0.1)
+        tagHandler(player, data.license, data.colors)
     end
 end
 
-local function onCharacter(player)
-    if not verified then return end
-    if player ~= LocalPlayer then return end
-    task.wait(0.4)
-    tagHandler(player, verified.license, verified.colors)
+local function whitelistedTags()
+    for _, player in ipairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer then
+            local data = whitelistData[tostring(player.UserId)]
+            if data then
+                safeTag(player, data)
+            end
+        end
+    end
 end
 
-LocalPlayer.CharacterAdded:Connect(function()
-    onCharacter(LocalPlayer)
+Players.PlayerAdded:Connect(function(player)
+    local data = whitelistData[tostring(player.UserId)]
+    if data then
+        safeTag(player, data)
+    end
 end)
 
-if LocalPlayer.Character then
-    onCharacter(LocalPlayer)
+whitelistLoad()
+
+local verified = verifyPlayer()
+if verified then
+    LocalPlayer:SetAttribute("HazeLicense", verified.license)
+    updLicense(verified.license)
+    if verified.godmode then
+        runGodmode(LocalPlayer)
+    end
+    task.wait(0.4)
+    tagHandler(LocalPlayer, verified.license, verified.colors)
 end
+
+whitelistedTags()
