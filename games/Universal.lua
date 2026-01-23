@@ -31,7 +31,7 @@ PlayersTab:PlayerList({
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local Lighting = game:GetService('Lighting')
+local Lighting = game:GetService("Lighting")
 local LocalPlayer = Players.LocalPlayer
 local WCam = workspace.CurrentCamera
 local RunService = game:GetService("RunService")
@@ -243,7 +243,7 @@ VibeSec:Toggle({
                 atm.Parent = Lighting
             end
 
-            if not Workspace:FindFirstChild("Snowing") then
+            if not workspace:FindFirstChild("Snowing") then
                 local p = Instance.new("Part")
                 p.Name = "Snowing"
                 p.Anchored = true
@@ -251,7 +251,7 @@ VibeSec:Toggle({
                 p.Size = Vector3.new(500,1,500)
                 p.Position = Vector3.new(0,150,0)
                 p.Transparency = 1
-                p.Parent = Workspace
+                p.Parent = workspace
 
                 local e = Instance.new("ParticleEmitter")
                 e.Texture = "rbxassetid://258128463"
@@ -274,7 +274,7 @@ VibeSec:Toggle({
             Lighting.TimeOfDay = "14:00:00"
             Lighting.Technology = Enum.Technology.Compatibility
 
-            if Workspace:FindFirstChild("Snowing") then Workspace.Snowing:Destroy() end
+            if workspace:FindFirstChild("Snowing") then workspace.Snowing:Destroy() end
             if Lighting:FindFirstChild("VibeSky") then Lighting.VibeSky:Destroy() end
             for _, a in pairs(Lighting:GetChildren()) do if a:IsA("Atmosphere") then a:Destroy() end end
         end
@@ -407,6 +407,193 @@ ReverbsSec:Toggle({
     end
 })
 
+--[[ Viber ]]
+local oldFOV = WCam.FieldOfView
+local ReverbBackup = SoundService.AmbientReverb
+local oldRevert = {
+    ClockTime = Lighting.ClockTime,
+    Brightness = Lighting.Brightness,
+    FogEnd = Lighting.FogEnd,
+    Ambient = Lighting.Ambient,
+    OutdoorAmbient = Lighting.OutdoorAmbient
+}
+
+local ViberSec = VisualsTab:Section({
+    ["Name"] = "Viber",
+    ["Side"] = 2
+})
+
+local volumeVal = 1
+
+local MusicSound = Instance.new("Sound")
+MusicSound.Parent = SoundService
+MusicSound.Looped = true
+MusicSound.Volume = volumeVal
+
+local viberVar = false
+local reverbsvibervar = false
+local fovConnection
+local snowConnection
+local glowingsnow = {}
+
+local function getAudioAsset(name)
+    if not name or name == "" then return end
+
+    local path = "Haze/assets/audios/" .. name .. ".mp3"
+    local success, asset = pcall(function()
+        return getcustomasset(path)
+    end)
+
+    if success and asset then
+        MusicSound.SoundId = asset
+        if viberVar then
+            MusicSound:Play()
+        end
+    end
+end
+
+ViberSec:Toggle({
+    ["Name"] = "Viber",
+    ["Flag"] = "ViberToggle",
+    ["Default"] = false,
+    ["Callback"] = function(state)
+        viberVar = state
+
+        if state then
+            if MusicSound.SoundId ~= "" then
+                MusicSound:Play()
+            end
+
+            if reverbsvibervar then
+                SoundService.AmbientReverb = Enum.ReverbType.Cave
+            end
+
+            Lighting.ClockTime = 23
+            Lighting.Brightness = 2
+            Lighting.FogEnd = 1000
+            Lighting.Ambient = Color3.fromRGB(120,120,140)
+            Lighting.OutdoorAmbient = Color3.fromRGB(80,80,100)
+
+            fovConnection = RunService.RenderStepped:Connect(function()
+                if MusicSound.IsPlaying then
+                    local bass = MusicSound.PlaybackLoudness / 150
+                    WCam.FieldOfView = oldFOV + bass * 15
+                else
+                    WCam.FieldOfView = oldFOV
+                end
+            end)
+
+            snowConnection = RunService.RenderStepped:Connect(function(dt)
+                local loudness = MusicSound.IsPlaying and MusicSound.PlaybackLoudness or 0
+                local bassScale = math.clamp(loudness / 100, 0.5, 6)
+                local rainbow = loudness >= 280
+
+                for _ = 1, math.floor(6 * bassScale) do
+                    local s = Instance.new("Part")
+                    s.Anchored = true
+                    s.CanCollide = false
+                    s.Size = Vector3.new(0.5,0.5,0.5)
+                    s.Material = Enum.Material.Neon
+                    s.Color = rainbow
+                        and Color3.fromHSV(math.random(),1,1)
+                        or Color3.fromRGB(180,220,255)
+
+                    s.Position = Vector3.new(
+                        math.random(-500 , 500),
+                        80,
+                        math.random(-500 , 500)
+                    )
+                    s.Parent = workspace
+                    table.insert(glowingsnow,s)
+                end
+
+                for i = #glowingsnow, 1, -1 do
+                    local s = glowingsnow[i]
+                    if not s or not s.Parent then
+                        table.remove(glowingsnow, i)
+                        continue
+                    end
+
+                    local fall = dt * 14 * bassScale
+                    s.Position -= Vector3.new(0, fall, 0)
+
+                    local params = RaycastParams.new()
+                    params.FilterDescendantsInstances = { s }
+                    params.FilterType = Enum.RaycastFilterType.Blacklist
+
+                    local hit = workspace:Raycast(
+                        s.Position,
+                        Vector3.new(0, -fall, 0),
+                        params
+                    )
+
+                    if hit or s.Position.Y <= 0 then
+                        s:Destroy()
+                        table.remove(glowingsnow, i)
+                    end
+                end
+            end)
+
+        else
+            MusicSound:Stop()
+            WCam.FieldOfView = oldFOV
+            SoundService.AmbientReverb = ReverbBackup
+
+            for k,v in pairs(oldRevert) do
+                Lighting[k] = v
+            end
+
+            if fovConnection then fovConnection:Disconnect() end
+            if snowConnection then snowConnection:Disconnect() end
+
+            for _,s in ipairs(glowingsnow) do
+                if s and s.Parent then s:Destroy() end
+            end
+            glowingsnow = {}
+        end
+    end
+})
+
+ViberSec:Toggle({
+    ["Name"] = "Reverbs",
+    ["Flag"] = "ViberReverb",
+    ["Default"] = false,
+    ["Callback"] = function(state)
+        reverbsvibervar = state
+        if viberVar then
+            SoundService.AmbientReverb = state and Enum.ReverbType.Cave or ReverbBackup
+        end
+    end
+})
+
+ViberSec:Textbox({
+    ["Name"] = "Asset Name",
+    ["Flag"] = "MusicInput",
+    ["Default"] = "",
+    ["Placeholder"] = "song name (must be in Haze/assets/audios)",
+    ["Callback"] = getAudioAsset
+})
+
+ViberSec:Slider({
+    ["Name"] = "Volume",
+    ["Min"] = 0.5,
+    ["Max"] = 10,
+    ["Default"] = 1,
+    ["Decimals"] = 0.1,
+    ["Flag"] = "ViberVolume",
+    ["Callback"] = function(value)
+        volumeVal = value
+        MusicSound.Volume = value
+    end
+})
+
+ViberSec:Button({
+    ["Name"] = "Tutorial",
+    ["Callback"] = function()
+        Library:Notification("Place a song (.mp3) in the folder Haze/assets/audios then put the name of the file in the textbox (SONG FILE MUST BE UNDER 20mb and 7 Mins long)", 15, Color3.fromRGB(66, 245, 138))
+    end
+})
+
 --[[ Themes + Config ]]
 local ThemesSection = SettingsTab:Section({
     ["Name"] = "Settings",
@@ -490,7 +677,7 @@ do
 
                 Library:RefreshThemeList(ThemesListbox)
             else
-                Library:Notification("Theme '" .. ThemeName .. ".json' already exists", 3, Color3.fromRGB(66, 245, 138))
+                Library:Notification("Theme " .. ThemeName .. ".json already exists", 3, Color3.fromRGB(66, 245, 138))
                 return
             end
         end
@@ -580,7 +767,7 @@ do
 
                 Library:RefreshConfigsList(ConfigsListbox)
             else
-                Library:Notification("Config '" .. ConfigName .. ".json' already exists", 3, Color3.fromRGB(66, 245, 138))
+                Library:Notification("Config " .. ConfigName .. ".json already exists", 3, Color3.fromRGB(66, 245, 138))
                 return
             end
         end
