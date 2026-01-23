@@ -139,16 +139,20 @@ local function getnearplayer()
     local closest, closestDist = nil, math.huge
     local myChar = LocalPlayer.Character
     local myRoot = myChar and myChar:FindFirstChild("HumanoidRootPart")
+    local myTeam = LocalPlayer.Team
     if not myRoot or not modules.Entity.isAlive(myChar) then return nil end
 
     for _, p in ipairs(Players:GetPlayers()) do
         if p ~= LocalPlayer and p.Character and modules.Entity.isAlive(p.Character) then
             local root = p.Character:FindFirstChild("HumanoidRootPart")
             if root then
-                local dist = (root.Position - myRoot.Position).Magnitude
-                if dist <= 20 and dist < closestDist then
-                    closestDist = dist
-                    closest = p
+                local isSpectator = p:FindFirstChild("Spectator") or (p.Team == nil)
+                if p.Team ~= myTeam or isSpectator then
+                    local dist = (root.Position - myRoot.Position).Magnitude
+                    if dist <= 20 and dist < closestDist then
+                        closestDist = dist
+                        closest = p
+                    end
                 end
             end
         end
