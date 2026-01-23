@@ -85,7 +85,11 @@ local function tagHandler(player, license, colors)
     local char = player.Character
     if not char then return end
     local head = char:FindFirstChild("Head")
-    if not head or head:FindFirstChild("HAZE_TAG") then return end
+    if not head then return end
+
+    if head:FindFirstChild("HAZE_TAG") then
+        head.HAZE_TAG:Destroy()
+    end
 
     local billboard = Instance.new("BillboardGui")
     billboard.Name = "HAZE_TAG"
@@ -141,7 +145,7 @@ local function tagHandler(player, license, colors)
     end)
 end
 
-local function safeTag(player, data)
+local function persistentTag(player, data)
     player.CharacterAdded:Connect(function(char)
         task.wait(0.1)
         tagHandler(player, data.license, data.colors)
@@ -152,13 +156,11 @@ local function safeTag(player, data)
     end
 end
 
-local function whitelistedTags()
+local function applyTags()
     for _, player in ipairs(Players:GetPlayers()) do
-        if player ~= LocalPlayer then
-            local data = whitelistData[tostring(player.UserId)]
-            if data then
-                safeTag(player, data)
-            end
+        local data = whitelistData[tostring(player.UserId)]
+        if data then
+            persistentTag(player, data)
         end
     end
 end
@@ -166,7 +168,7 @@ end
 Players.PlayerAdded:Connect(function(player)
     local data = whitelistData[tostring(player.UserId)]
     if data then
-        safeTag(player, data)
+        persistentTag(player, data)
     end
 end)
 
@@ -180,7 +182,7 @@ if verified then
         runGodmode(LocalPlayer)
     end
     task.wait(0.4)
-    tagHandler(LocalPlayer, verified.license, verified.colors)
+    persistentTag(LocalPlayer, verified)
 end
 
-whitelistedTags()
+applyTags()
