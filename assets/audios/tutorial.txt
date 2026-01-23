@@ -1,0 +1,9 @@
+1- Find a song you like
+2- Download it as (name.mp3)
+3- Place the file in the audios folder
+4- Make sure that the file is under 20Mb and under 7 mins long
+5- Once done, execute the script and in the textbox just put the name of the song you placed into the folder
+
+Example: Music.mp3 in audios folder = i type Music in the textbox
+
+Enjoy <3 -scriptisfocus
