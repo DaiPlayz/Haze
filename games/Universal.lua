@@ -205,6 +205,7 @@ CapeSection:Dropdown({
 
 CapeTog:Colorpicker({
     ["Name"] = "Cape Color",
+    ["Flag"] = "CapeColor",
     ["Default"] = CapeColor,
     ["Callback"] = function(c)
         CapeColor = c
