@@ -17,7 +17,7 @@ local Watermark = Library:Watermark("H A Z E", {"Haze/assets/lib/logo.png", Colo
 local KeybindList = Library:KeybindList()
 
 local UtilityTab = Window:Page({Name = "Utility", Columns = 1})
-local MovementTab = Window:Page({Name = "Movement", Columns = 1})
+local MovementTab = Window:Page({Name = "Movement", Columns = 2})
 local VisualsTab = Window:Page({Name = "Visuals",  Columns = 2})
 local PlayersTab = Window:Page({Name = "Players", Columns = 1})
 local SettingsTab = Window:Page({Name = "Settings", Columns = 2})
