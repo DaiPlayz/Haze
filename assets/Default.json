@@ -7,6 +7,8 @@
 
   "libraries/modules": ["EspController.lua", "Entity.lua"],
 
+  "libraries/skybridge": ["PartyController.lua", "SwordController.lua", "FlyController.lua"],
+
   "assets": ["Default.json"],
 
   "assets/data": ["License.json"],
@@ -17,5 +19,5 @@
 
   "assets/audios": ["tutorial.txt"],
 
-  "games": ["71480482338212.lua", "Universal.lua"]
+  "games": ["71480482338212.lua", "97422150253985.lua", "123941384302059.lua", "Universal.lua"]
 }
