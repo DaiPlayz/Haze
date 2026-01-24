@@ -888,9 +888,9 @@ PartySec:Toggle({
 })
 
 PartySec:Toggle({
-    ["Name"] = "Spam Kicks",
+    ["Name"] = "KickExploit",
     ["Flag"] = "KickSpam",
-    ["Tooltip"] = "Kicks everyone from your party",
+    ["Tooltip"] = "Spam Kick everyone for party, everyone in server will get spam kicked even if not in party",
     ["Default"] = false,
     ["Callback"] = function(state)
         spawn(function()
