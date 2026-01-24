@@ -7,7 +7,7 @@
 
   "libraries/modules": ["EspController.lua", "Entity.lua"],
 
-  "libraries/skybridge": ["PartyController.lua", "SwordController.lua", "FlyController.lua"],
+  "libraries/skybridge": ["PartyController.lua", "SwordController.lua", "FlyController.lua", "BowController.lua"],
 
   "assets": ["Default.json"],
 
