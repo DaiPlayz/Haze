@@ -37,6 +37,7 @@ local LocalPlayer = Players.LocalPlayer
 local WCam = workspace.CurrentCamera
 local RunService = game:GetService("RunService")
 local SoundService = game:GetService("SoundService")
+local HazeLicense = LocalPlayer:GetAttribute("HazeLicense")
 
 --[[ Libraries ]]
 local modules = {
@@ -44,7 +45,8 @@ local modules = {
     Whitelist = loadfile("Haze/libraries/Whitelist.lua")(),
     ESPController = loadfile("Haze/libraries/modules/EspController.lua")(),
     SwordController = loadfile("Haze/libraries/skybridge/SwordController.lua")(),
-    FlyController = loadfile("Haze/libraries/skybridge/FlyController.lua")()
+    FlyController = loadfile("Haze/libraries/skybridge/FlyController.lua")(),
+    BowController = loadfile("Haze/libraries/skybridge/BowController.lua")()
 }
 
 --[[ Speed ]]
@@ -615,7 +617,10 @@ AutoWinSec:Toggle({
     ["Callback"] = function(state)
         AutoWinVar = state
         if state then
-            workspace.Blocks:Destroy()
+            if workspace:FindFirstChild("Blocks") then
+                workspace.Blocks:Destroy()
+            end
+
             local tpIndex = 1
             spawn(function()
                 while AutoWinVar do
@@ -683,6 +688,54 @@ KASec:Toggle({
         end
     end
 })
+
+if HazeLicense == "Private" or HazeLicense == "Developer" then
+    local CrasherVar = false
+    local CrashConnection = nil
+
+    local function runCrasher()
+        if CrashConnection then CrashConnection:Disconnect() end
+
+        CrashConnection = RunService.Heartbeat:Connect(function()
+            if not CrasherVar then
+                if CrashConnection then
+                    CrashConnection:Disconnect()
+                    CrashConnection = nil
+                end
+                return
+            end
+
+            local target = modules.BowController.GetNearestPlayer()
+            if target then
+                modules.BowController.Shoot(target)
+            end
+        end)
+    end
+
+    local CrasherSec = CombatTab:Section({
+        ["Name"] = "BowCrasher",
+        ["Side"] = 2
+    })
+
+    CrasherSec:Toggle({
+        ["Name"] = "BowCrasher",
+        ["Default"] = false,
+        ["Flag"] = "BowCrasher",
+        ["Tooltip"] = "Uses Bow to crash players",
+        ["Callback"] = function(state)
+            CrasherVar = state
+            if state then
+                runCrasher()
+            else
+                if CrashConnection then
+                    CrashConnection:Disconnect()
+                    CrashConnection = nil
+                end
+            end
+        end
+    })
+
+end
 
 --[[ Fly ]]
 local FlySec = MovementTab:Section({
