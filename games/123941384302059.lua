@@ -43,7 +43,8 @@ local modules = {
     Discord = loadfile("Haze/libraries/Discord.lua")(),
     Whitelist = loadfile("Haze/libraries/Whitelist.lua")(),
     ESPController = loadfile("Haze/libraries/modules/EspController.lua")(),
-    PartyController = loadfile("Haze/libraries/skybridge/PartyController.lua")()
+    PartyController = loadfile("Haze/libraries/skybridge/PartyController.lua")(),
+    FlyController = loadfile("Haze/libraries/skybridge/FlyController.lua")()
 }
 
 --[[ Speed ]]
@@ -630,6 +631,43 @@ PartySec:Toggle({
                 wait(0.01)
             end
         end)
+    end
+})
+
+--[[ Fly ]]
+local FlySec = MovementTab:Section({
+    ["Name"] = "Fly",
+    ["Side"] = 2
+})
+
+local FlyKey = FlySec:Label("Fly", "Left"):Keybind({
+    ["Name"] = "Fly",
+    ["Flag"] = "Fly",
+    ["Default"] = Enum.KeyCode.R,
+    ["Mode"] = "Toggle",
+    ["Callback"] = function(state)
+        modules.FlyController:Toggle(state)
+    end
+})
+
+FlySec:Toggle({
+    ["Name"] = "Vertical",
+    ["Flag"] = "Vertical",
+    ["Default"] = false,
+    ["Callback"] = function(state)
+        modules.FlyController:SetVertical(state)
+    end
+})
+
+FlySec:Slider({
+    ["Name"] = "Speed",
+    ["Min"] = 10,
+    ["Max"] = 200,
+    ["Default"] = 50,
+    ["Decimals"] = 1,
+    ["Flag"] = "FlySpeed",
+    ["Callback"] = function(value)
+        modules.FlyController:SetSpeed(value)
     end
 })
 
