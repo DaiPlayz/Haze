@@ -18,6 +18,7 @@ local KeybindList = Library:KeybindList()
 
 local CombatTab = Window:Page({Name = "Combat", Columns = 2})
 local MovementTab = Window:Page({Name = "Movement", Columns = 2})
+local UtilityTab = Window:Page({Name = "Utility", Columns = 2})
 local VisualsTab = Window:Page({Name = "Visuals",  Columns = 2})
 local PlayersTab = Window:Page({Name = "Players", Columns = 1})
 local SettingsTab = Window:Page({Name = "Settings", Columns = 2})
@@ -37,6 +38,7 @@ local LocalPlayer = Players.LocalPlayer
 local WCam = workspace.CurrentCamera
 local RunService = game:GetService("RunService")
 local SoundService = game:GetService("SoundService")
+local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 local HazeLicense = LocalPlayer:GetAttribute("HazeLicense")
 
 --[[ Libraries ]]
@@ -689,53 +691,51 @@ KASec:Toggle({
     end
 })
 
-if HazeLicense == "Private" or HazeLicense == "Developer" then
-    local CrasherVar = false
-    local CrashConnection = nil
+--[[ Crasher ]]
+local CrasherVar = false
+local CrashConnection = nil
 
-    local function runCrasher()
-        if CrashConnection then CrashConnection:Disconnect() end
+local function runCrasher()
+    if CrashConnection then CrashConnection:Disconnect() end
 
-        CrashConnection = RunService.Heartbeat:Connect(function()
-            if not CrasherVar then
-                if CrashConnection then
-                    CrashConnection:Disconnect()
-                    CrashConnection = nil
-                end
-                return
+    CrashConnection = RunService.Heartbeat:Connect(function()
+        if not CrasherVar then
+            if CrashConnection then
+                CrashConnection:Disconnect()
+                CrashConnection = nil
             end
+            return
+        end
 
-            local target = modules.BowController.GetNearestPlayer()
-            if target then
-                modules.BowController.Shoot(target)
-            end
-        end)
-    end
+        local target = modules.BowController.GetNearestPlayer()
+        if target then
+            modules.BowController.Shoot(target)
+        end
+    end)
+end
 
-    local CrasherSec = CombatTab:Section({
-        ["Name"] = "BowCrasher",
-        ["Side"] = 2
-    })
+local CrasherSec = UtilityTab:Section({
+    ["Name"] = "BowCrasher",
+    ["Side"] = 1
+})
 
-    CrasherSec:Toggle({
-        ["Name"] = "BowCrasher",
-        ["Default"] = false,
-        ["Flag"] = "BowCrasher",
-        ["Tooltip"] = "Uses Bow to crash players",
-        ["Callback"] = function(state)
-            CrasherVar = state
-            if state then
-                runCrasher()
-            else
-                if CrashConnection then
-                    CrashConnection:Disconnect()
-                    CrashConnection = nil
-                end
+CrasherSec:Toggle({
+    ["Name"] = "BowCrasher",
+    ["Default"] = false,
+    ["Flag"] = "BowCrasher",
+    ["Tooltip"] = "Uses Bow to crash players",
+    ["Callback"] = function(state)
+        CrasherVar = state
+        if state then
+            runCrasher()
+        else
+            if CrashConnection then
+                CrashConnection:Disconnect()
+                CrashConnection = nil
             end
         end
-    })
-
-end
+    end
+})
 
 --[[ Fly ]]
 local FlySec = MovementTab:Section({
@@ -771,6 +771,41 @@ FlySec:Slider({
     ["Flag"] = "FlySpeed",
     ["Callback"] = function(value)
         modules.FlyController:SetSpeed(value)
+    end
+})
+
+--[[ AutoLobby ]]
+local endMatch = PlayerGui:WaitForChild("MatchEnd"):WaitForChild("Canvas")
+
+local AutoLobbySec = UtilityTab:Section({
+    ["Name"] = "AutoLobby",
+    ["Side"] = 2
+})
+
+local AutoLobbyConnect
+
+AutoLobbySec:Toggle({
+    ["Name"] = "AutoLobby",
+    ["Flag"] = "AutoLobby",
+    ["Tooltip"] = "Lobby for you when match ends",
+    ["Default"] = false,
+    ["Callback"] = function(state)
+        if state then
+            AutoLobbyConnect = endMatch:GetPropertyChangedSignal("Visible"):Connect(function()
+                if endMatch.Visible then
+                    ReplicatedStorage.Network.Request_ReturnToLobby:FireServer()
+                end
+            end)
+
+            if endMatch.Visible then
+                ReplicatedStorage.Network.Request_ReturnToLobby:FireServer()
+            end
+        else
+            if AutoLobbyConnect then
+                AutoLobbyConnect:Disconnect()
+                AutoLobbyConnect = nil
+            end
+        end
     end
 })
 
