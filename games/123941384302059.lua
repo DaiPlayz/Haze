@@ -671,6 +671,66 @@ FlySec:Slider({
     end
 })
 
+--[[ FakeWS ]]
+local FakeWSSec = VisualsTab:Section({
+    ["Name"] = "FakeWS",
+    ["Side"] = 1
+})
+
+local FakeWSVar = false
+local FakeWSVal = 0
+local oldWS = 0
+
+FakeWSSec:Toggle({
+    ["Name"] = "Fake Winstreak",
+    ["Flag"] = "FakeWS",
+    ["Default"] = false,
+    ["Callback"] = function(state)
+        FakeWSVar = state
+        if state then
+            oldWS = LocalPlayer:GetAttribute("Streak") or 0
+            LocalPlayer:SetAttribute("Streak", FakeWSVal)
+        else
+            LocalPlayer:SetAttribute("Streak", oldWS)
+        end
+    end
+})
+
+FakeWSSec:Slider({
+    ["Name"] = "Fake Winstreaks",
+    ["Min"] = 0,
+    ["Max"] = 1000,
+    ["Default"] = 0,
+    ["Decimals"] = 1,
+    ["Flag"] = "FakeWSVal",
+    ["Callback"] = function(value)
+        FakeWSVal = value
+        if FakeWSVar then
+            LocalPlayer:SetAttribute("Streak", value)
+        end
+    end
+})
+
+--[[ Device Spoofer ]]
+local DeviceSSec = VisualsTab:Section({
+    ["Name"] = "Device Spoofer",
+    ["Side"] = 2
+})
+
+DeviceSSec:Dropdown({
+    ["Name"] = "Device Spoofer",
+    ["Flag"] = "DeviceSpoof",
+    ["Items"] = {"PC", "Mobile", "Console"},
+    ["Default"] = "PC",
+    ["Callback"] = function(value)
+        if value ~= "" then
+            LocalPlayer:SetAttribute("Platform", value)
+        else
+            return
+        end
+    end
+})
+
 --[[ Themes + Config ]]
 local ThemesSection = SettingsTab:Section({
     ["Name"] = "Settings",
