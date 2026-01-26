@@ -547,7 +547,7 @@ local FECape = FECapeSec:Toggle({
     end
 })
 
-local MultiDropdown = FECapeSec:Dropdown({
+local FECapeDropdown = FECapeSec:Dropdown({
     ["Name"] = "Cape Colors", 
     ["Flag"] = "CapeColors", 
     ["Items"] = Capelist, 
@@ -558,17 +558,38 @@ local MultiDropdown = FECapeSec:Dropdown({
     end
 })
 
---[[ Pro Cape ]]
-local ProCapeSec = VisualsTab:Section({
-    ["Name"] = "Pro Cape",
-    ["Side"] = 2
+--[[ Unique FE Capes ]]
+local UniqueFECapesSec = VisualsTab:Section({
+    Name = "Unique Capes",
+    Side = 2
 })
 
-local ProCape = ProCapeSec:Button({
-    ["Name"] = "Pro Cape",
-    ["Callback"] = function()
-        Library:Notification("Equipped Pro Cape | (yes its FE)", 5, Color3.fromRGB(185, 66, 245))
-        remotes.EquipCape:FireServer("Pro")
+local UniqueCapesData = {
+    Pro = {
+        Name = "Pro",
+        Notify = "Equipped Pro Cape | (yes its FE)"
+    },
+    Fire = {
+        Name = "Fire",
+        Notify = "Equipped Fire Cape | (yes its FE)"
+    }
+}
+
+UniqueFECapesSec:Dropdown({
+    Name = "Unique Capes",
+    Flag = "UniqueCapes",
+    Items = {"Pro", "Fire"},
+    Default = {"Pro"},
+    Multi = false,
+    Callback = function(value)
+        local UniqueCape = UniqueCapesData[value]
+
+        if UniqueCape then
+            Library:Notification(UniqueCape.Notify, 5, Color3.fromRGB(185, 66, 245))
+            remotes.EquipCape:FireServer(UniqueCape.Name)
+        else
+            remotes.EquipCape:FireServer("None")
+        end
     end
 })
 
