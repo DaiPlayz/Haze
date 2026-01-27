@@ -858,4 +858,26 @@ do
         ["Callback"] = function()
         Library:Unload()
     end})
+
+    task.spawn(function()
+        repeat task.wait() until Library and Library.Flags
+
+        local cfg = rawget(_G, "HazeAutoConfig")
+        if type(cfg) ~= "string" then return end
+
+        local path = cfg:find("/") and cfg or (Library.Folders.Configs .. "/" .. cfg)
+
+        if isfile(path) then
+            Library:LoadConfig(readfile(path))
+
+            task.wait(0.1)
+            for Index, _ in Library.Theme do
+                local flag = Library.Flags["Theme"..Index]
+                if flag then
+                    Library.Theme[Index] = flag.Color
+                    Library:ChangeTheme(Index, flag.Color)
+                end
+            end
+        end
+    end)
 end
