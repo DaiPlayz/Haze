@@ -1,5 +1,11 @@
 local HttpService = game:GetService("HttpService")
 
+shared = shared or {}
+
+function shared.AutoLoad(path)
+    shared.__HazeAutoLoad = path
+end
+
 local CONFIG = {
     ROOT = "Haze",
     REPO_URL = "https://raw.githubusercontent.com/7Smoker/Haze/main/",
