@@ -858,28 +858,4 @@ do
         ["Callback"] = function()
         Library:Unload()
     end})
-
-    task.spawn(function()
-        repeat task.wait() until Library and Library.LoadConfig
-
-        local path = shared.__HazeAutoLoad
-        if not path then return end
-
-        if isfile(path) then
-            local ConfigData = readfile(path)
-            Library:LoadConfig(ConfigData)
-
-            Library:Notification(
-                "AutoLoaded config: " .. path,
-                5,
-                Color3.fromRGB(0, 255, 0)
-            )
-        else
-            Library:Notification(
-                "AutoLoad failed (file not found)",
-                5,
-                Color3.fromRGB(255, 0, 0)
-            )
-        end
-    end)
 end
