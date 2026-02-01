@@ -11,6 +11,8 @@ local SoundService = game:GetService("SoundService")
 --[[ Libraries ]]
 local modules = {
     Whitelist = loadfile("Haze/libraries/Whitelist.lua")(),
+    Notifications = loadfile(LocalLibrary .. "/Notifications.lua")(),
+    FlyController = loadfile(LocalLibrary .. "/bedfight/FlyController.lua")(),
     ESPController = loadfile("Haze/libraries/modules/EspController.lua")()
 }
 
