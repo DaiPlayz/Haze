@@ -11,7 +11,12 @@ local userInputService = game:GetService('UserInputService')
 
 local localEntity = players.LocalPlayer
 
+if localEntity.PlayerGui:FindFirstChild('ScreenGuiHS') then
+    localEntity.PlayerGui.ScreenGuiHS:Destroy()
+end
+
 local screenGui = Instance.new('ScreenGui')
+screenGui.Name = 'ScreenGuiHS'
 screenGui.Parent = localEntity.PlayerGui
 screenGui.IgnoreGuiInset = true
 screenGui.ResetOnSpawn = false
