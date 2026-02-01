@@ -1,3 +1,4 @@
+--[[ Universal ]]
 local Library = loadfile("Haze/uis/HazeLibrary.lua")()
 
 local Window = Library:Window({

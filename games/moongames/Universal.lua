@@ -1,3 +1,4 @@
+--[[ Universal ]]
 local guiLibrary = loadfile("Haze/uis/MoonLibrary.lua")()
 
 local Players = game:GetService("Players")
