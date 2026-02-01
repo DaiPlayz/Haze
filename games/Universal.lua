@@ -1,4 +1,4 @@
-local Library = loadfile("Haze/libraries/Library.lua")()
+local Library = loadfile("Haze/uis/HazeLibrary.lua")()
 
 local Window = Library:Window({
     ["Name"] = "H A Z E",
@@ -193,7 +193,7 @@ CapeSection:Dropdown({
     ["Items"] = {"Cat","Waifu","Troll", "Wave"},
     ["Flag"] = "CapeTexture",
     ["Callback"] = function(v)
-        local path = "Haze/Assets/capes/"..v..".png"
+        local path = "Haze/assets/capes/"..v..".png"
         if isfile(path) then
             CapePNG = path
             if Capevar and LocalPlayer.Character then

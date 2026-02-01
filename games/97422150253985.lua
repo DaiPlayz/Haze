@@ -1,5 +1,5 @@
 --[[ Skybridge Duels Game ]]
-local Library = loadfile("Haze/libraries/Library.lua")()
+local Library = loadfile("Haze/uis/HazeLibrary.lua")()
 
 local Window = Library:Window({
     ["Name"] = "H A Z E",

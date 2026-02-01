@@ -1,0 +1,1 @@
+game.Players.LocalPlayer:Kick("im too lazy, maybe next time its gonna be supported join our discord for updates.")

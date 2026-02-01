@@ -1,7 +1,9 @@
 {
   "root": ["loader.lua", "loadstring.txt"],
 
-  "libraries": ["Library.lua", "Notifications.lua", "Whitelist.lua", "Discord.lua"],
+  "uis": ["HazeLibrary.lua", "MoonLibrary.lua"],
+
+  "libraries": ["Notifications.lua", "Whitelist.lua", "Discord.lua"],
 
   "libraries/bedfight": ["FlyController.lua", "SprintController.lua", "ScaffoldController.lua", "PartyController.lua"],
 
@@ -19,5 +21,7 @@
 
   "assets/audios": ["tutorial.txt"],
 
-  "games": ["71480482338212.lua", "71657866091528.lua", "97422150253985.lua", "123941384302059.lua", "Universal.lua"]
+  "games": ["71480482338212.lua", "71657866091528.lua", "97422150253985.lua", "123941384302059.lua", "Universal.lua"],
+
+  "games/moongames": ["71480482338212.lua", "Universal.lua"]
 }

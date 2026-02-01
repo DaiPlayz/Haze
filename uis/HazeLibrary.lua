@@ -8,7 +8,7 @@ if getgenv().Library then
     getgenv().Library:Unload()
 end
 
-local Library do 
+local Library do
     local UserInputService = game:GetService("UserInputService")
     local Players = game:GetService("Players")
     local Workspace = game:GetService("Workspace")
