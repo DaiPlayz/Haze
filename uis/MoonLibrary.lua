@@ -815,6 +815,27 @@ ArrayBackground = Arraylist.sliders.new({
 	end,
 })
 
+local modules = {
+    Discord = loadfile("Haze/libraries/discord.lua")()
+}
+
+local DiscordModule
+DiscordModule = guiLibrary.Windows.Extra:createModule({
+	["Name"] = "Discord",
+	["Function"] = function(state)
+		if not state then return end
+
+		modules.Discord:Join("https://discord.gg/W92SXVmB5X")
+		modules.Discord:Copy("https://discord.gg/W92SXVmB5X")
+
+		task.defer(function()
+			if DiscordModule.enabled then
+				DiscordModule:toggle(true)
+			end
+		end)
+	end
+})
+
 shared.guiLibrary = guiLibrary
 
 return guiLibrary
