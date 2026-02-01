@@ -42,13 +42,14 @@ local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 local HazeLicense = LocalPlayer:GetAttribute("HazeLicense")
 
 --[[ Libraries ]]
+local LocalLibrary = "Haze/libraries"
 local modules = {
-    Discord = loadfile("Haze/libraries/Discord.lua")(),
-    Whitelist = loadfile("Haze/libraries/Whitelist.lua")(),
-    ESPController = loadfile("Haze/libraries/modules/EspController.lua")(),
-    SwordController = loadfile("Haze/libraries/skybridge/SwordController.lua")(),
-    FlyController = loadfile("Haze/libraries/skybridge/FlyController.lua")(),
-    BowController = loadfile("Haze/libraries/skybridge/BowController.lua")()
+    Discord = loadfile(LocalLibrary .. "/Discord.lua")(),
+    Whitelist = loadfile(LocalLibrary .. "/Whitelist.lua")(),
+    ESPController = loadfile(LocalLibrary .. "/modules/EspController.lua")(),
+    SwordController = loadfile(LocalLibrary .. "/skybridge/SwordController.lua")(),
+    FlyController = loadfile(LocalLibrary .. "/skybridge/FlyController.lua")(),
+    BowController = loadfile(LocalLibrary .. "/skybridge/BowController.lua")()
 }
 
 --[[ Speed ]]

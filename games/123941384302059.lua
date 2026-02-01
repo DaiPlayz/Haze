@@ -39,12 +39,13 @@ local RunService = game:GetService("RunService")
 local SoundService = game:GetService("SoundService")
 
 --[[ Libraries ]]
+local LocalLibrary = "Haze/libraries"
 local modules = {
-    Discord = loadfile("Haze/libraries/Discord.lua")(),
-    Whitelist = loadfile("Haze/libraries/Whitelist.lua")(),
-    ESPController = loadfile("Haze/libraries/modules/EspController.lua")(),
-    PartyController = loadfile("Haze/libraries/skybridge/PartyController.lua")(),
-    FlyController = loadfile("Haze/libraries/skybridge/FlyController.lua")()
+    Discord = loadfile(LocalLibrary .. "/Discord.lua")(),
+    Whitelist = loadfile(LocalLibrary .. "/Whitelist.lua")(),
+    ESPController = loadfile(LocalLibrary .. "/modules/EspController.lua")(),
+    PartyController = loadfile(LocalLibrary .. "/skybridge/PartyController.lua")(),
+    FlyController = loadfile(LocalLibrary .. "/skybridge/FlyController.lua")()
 }
 
 --[[ Speed ]]
