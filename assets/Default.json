@@ -23,5 +23,5 @@
 
   "games": ["71480482338212.lua", "71657866091528.lua", "97422150253985.lua", "123941384302059.lua", "Universal.lua"],
 
-  "games/moongames": ["71480482338212.lua", "Universal.lua"]
+  "games/moongames": ["71480482338212.lua", "71657866091528.lua", "97422150253985", "123941384302059", "Universal.lua"]
 }
