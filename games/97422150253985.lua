@@ -39,13 +39,12 @@ local WCam = workspace.CurrentCamera
 local RunService = game:GetService("RunService")
 local SoundService = game:GetService("SoundService")
 local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
-local HazeLicense = LocalPlayer:GetAttribute("HazeLicense")
 
 --[[ Libraries ]]
 local LocalLibrary = "Haze/libraries"
 local modules = {
     Discord = loadfile(LocalLibrary .. "/Discord.lua")(),
-    Whitelist = loadfile(LocalLibrary .. "97422150253985/Whitelist.lua")(),
+    Whitelist = loadfile(LocalLibrary .. "/Whitelist.lua")(),
     ESPController = loadfile(LocalLibrary .. "/modules/EspController.lua")(),
     SwordController = loadfile(LocalLibrary .. "/skybridge/SwordController.lua")(),
     FlyController = loadfile(LocalLibrary .. "/skybridge/FlyController.lua")(),
