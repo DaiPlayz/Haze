@@ -83,7 +83,8 @@ function addToArray(Name: string, ExtraText)
 	Obj.BackgroundTransparency = (ArrayBackground and ArrayBackground.value / 100 or 0.5)
 	Obj.TextStrokeTransparency = 0.5
 	Obj.TextColor3 = guiLibrary.Pallete.Main
-	Obj.TextSize = 20
+	Obj.TextScaled = true
+	Obj.TextSize = 15
 	Obj.Text = Name
 	Obj.Font = Enum.Font.BuilderSans
 	Obj.Size = UDim2.new(0, 0, 0, 30)
@@ -833,7 +834,7 @@ local modules = {
 	Discord = loadfile(LocalLibrary .. "/discord.lua")()
 }
 
-modules.Notifications:Notify("Success", "Welcome " .. LocalPlayer.Name .. ".", 20)
+modules.Notifications:Notify("Success", "Welcome " .. LocalPlayer.Name .. ".", 5)
 
 local DiscordModule
 DiscordModule = guiLibrary.Windows.Extra:createModule({
