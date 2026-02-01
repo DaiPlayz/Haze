@@ -361,7 +361,7 @@ end)
 --[[ Cape ]]
 local Capevar = false
 
-local CapePNG = "Test/assets/capes/Cat.png"
+local CapePNG = "Haze/assets/capes/Cat.png"
 local CapeColor = Color3.fromRGB(255,255,255)
 
 local Cape, Motor
@@ -441,7 +441,7 @@ local CapeFiles = CapeModule.selectors.new({
     ["Default"] = "Wave",
     ["Selections"] = {"Cat", "Waifu", "Troll", "Wave"},
     ["Function"] = function(v)
-        local path = "Test/Assets/capes/"..v..".png"
+        local path = "Haze/assets/capes/"..v..".png"
         if isfile(path) then
             CapePNG = path
             if Capevar and LocalPlayer.Character then
@@ -607,7 +607,7 @@ local FOVModule = guiLibrary.Windows.Visuals:createModule({
 local FOVModuleVal = FOVModule.sliders.new({
     ["Name"] = "FOV",
     ["Minimum"] = 90,
-    ["Maximum"] = 200,
+    ["Maximum"] = 120,
     ["Default"] = 120,
     ["Function"] = function(value)
         FOVValue = value
@@ -803,7 +803,7 @@ local beatLoaded = false
 
 local function playBeat()
     if not beatLoaded then
-        local path = "Test/assets/audios/halo.mp3"
+        local path = "Haze/assets/audios/beat.mp3"
         local success, asset = pcall(function()
             return getcustomasset(path)
         end)
@@ -811,7 +811,7 @@ local function playBeat()
             MusicSound.SoundId = tostring(asset)
             beatLoaded = true
         else
-            warn("Failed to load halo.mp3")
+            warn("Failed to load beat.mp3")
             return
         end
     end
