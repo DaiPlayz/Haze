@@ -13,12 +13,8 @@ local SoundService = game:GetService("SoundService")
 local LocalLibrary = "Haze/libraries"
 local modules = {
     Entity = loadfile(LocalLibrary .. "/modules/Entity.lua")(),
-    Whitelist = loadfile(LocalLibrary .. "/Whitelist.lua")(),
-    Notifications = loadfile(LocalLibrary .. "/Notifications.lua")(),
     SprintController = loadfile(LocalLibrary .. "/bedfight/SprintController.lua")(),
-    ESPController = loadfile(LocalLibrary .. "/modules/EspController.lua")(),
     ScaffoldController = loadfile(LocalLibrary .. "/bedfight/ScaffoldController.lua")(),
-    FlyController = loadfile(LocalLibrary .. "/bedfight/FlyController.lua")(),
     PartyController = loadfile(LocalLibrary .. "/bedfight/PartyController.lua")(),
     EmotesController = loadfile(LocalLibrary .. "/bedfight/EmotesController.lua")()
 }

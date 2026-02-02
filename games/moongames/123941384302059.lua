@@ -12,8 +12,6 @@ local SoundService = game:GetService("SoundService")
 --[[ Libraries ]]
 local LocalLibrary = "Haze/libraries"
 local modules = {
-    Discord = loadfile(LocalLibrary .. "/Discord.lua")(),
-    Whitelist = loadfile(LocalLibrary .. "/Whitelist.lua")(),
     PartyController = loadfile(LocalLibrary .. "/skybridge/PartyController.lua")()
 }
 

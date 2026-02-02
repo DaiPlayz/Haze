@@ -9,13 +9,6 @@ local WCam = workspace.CurrentCamera
 local RunService = game:GetService("RunService")
 local SoundService = game:GetService("SoundService")
 
---[[ Libraries ]]
-local LocalLibrary = "Haze/libraries"
-local modules = {
-    Whitelist = loadfile(LocalLibrary .. "/Whitelist.lua")(),
-    Notifications = loadfile(LocalLibrary .. "/Notifications.lua")()
-}
-
 --[[ Speed ]]
 local SpeedVar = false
 local SpeedValue = 16

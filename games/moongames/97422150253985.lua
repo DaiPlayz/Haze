@@ -13,8 +13,6 @@ local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 --[[ Libraries ]]
 local LocalLibrary = "Haze/libraries"
 local modules = {
-    Discord = loadfile(LocalLibrary .. "/Discord.lua")(),
-    Whitelist = loadfile(LocalLibrary .. "/Whitelist.lua")(),
     SwordController = loadfile(LocalLibrary .. "/skybridge/SwordController.lua")(),
     BowController = loadfile(LocalLibrary .. "/skybridge/BowController.lua")()
 }
