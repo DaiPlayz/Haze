@@ -5,7 +5,7 @@
 
   "libraries": ["Notifications.lua", "Whitelist.lua", "Discord.lua"],
 
-  "libraries/bedfight": ["FlyController.lua", "SprintController.lua", "ScaffoldController.lua", "PartyController.lua"],
+  "libraries/bedfight": ["FlyController.lua", "SprintController.lua", "ScaffoldController.lua", "PartyController.lua", "EmotesController.lua"],
 
   "libraries/modules": ["EspController.lua", "Entity.lua"],
 

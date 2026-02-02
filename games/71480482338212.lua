@@ -49,7 +49,8 @@ local modules = {
     ESPController = loadfile(LocalLibrary .. "/modules/EspController.lua")(),
     ScaffoldController = loadfile(LocalLibrary .. "/bedfight/ScaffoldController.lua")(),
     FlyController = loadfile(LocalLibrary .. "/bedfight/FlyController.lua")(),
-    PartyController = loadfile(LocalLibrary .. "/bedfight/PartyController.lua")()
+    PartyController = loadfile(LocalLibrary .. "/bedfight/PartyController.lua")(),
+    EmotesController = loadfile(LocalLibrary .. "/bedfight/EmotesController.lua")()
 }
 
 local remotes = {
@@ -1128,6 +1129,50 @@ ViberSec:Button({
     ["Name"] = "Tutorial",
     ["Callback"] = function()
         Library:Notification("Place a song (.mp3) in the folder Haze/assets/audios then put the name of the file in the textbox (SONG FILE MUST BE UNDER 20mb and 7 Mins long)", 15, Color3.fromRGB(66, 245, 138))
+    end
+})
+
+--[[ Emote Exploit ]]
+local currentEmote
+local EmoteEXPVar = false
+
+local EmotesSec = UtilityTab:Section({
+    ["Name"] = "EmoteExploit",
+    ["Side"] = 2
+})
+
+local EmoteToggle = EmotesSec:Toggle({
+    ["Name"] = "EmoteExploit",
+    ["Default"] = false,
+    ["Tooltip"] = "Remake bedfight emotes in our ways",
+    ["Flag"] = "EmoteExploit",
+    ["Callback"] = function(state)
+        EmoteEXPVar = state
+        if not state then
+            modules.EmotesController:StopAll()
+            return
+        end
+
+        if currentEmote then
+            modules.EmotesController:StopAll()
+            modules.EmotesController:Play(currentEmote)
+        end
+    end
+})
+
+EmotesSec:Dropdown({
+    ["Name"] = "Emotes",
+    ["Flag"] = "EmotesList",
+    ["Items"] = {"Crystal", "Chair", "Make up"},
+    ["Default"] = "Crystal",
+    ["Callback"] = function(value)
+        if value == "Crystal" then
+            currentEmote = "CrystalIdle"
+        elseif value == "Chair" then
+            currentEmote = "Chair"
+        elseif value == "Make up" then
+            currentEmote = "Makeup"
+        end
     end
 })
 

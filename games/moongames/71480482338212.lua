@@ -19,7 +19,8 @@ local modules = {
     ESPController = loadfile(LocalLibrary .. "/modules/EspController.lua")(),
     ScaffoldController = loadfile(LocalLibrary .. "/bedfight/ScaffoldController.lua")(),
     FlyController = loadfile(LocalLibrary .. "/bedfight/FlyController.lua")(),
-    PartyController = loadfile(LocalLibrary .. "/bedfight/PartyController.lua")()
+    PartyController = loadfile(LocalLibrary .. "/bedfight/PartyController.lua")(),
+    EmotesController = loadfile(LocalLibrary .. "/bedfight/EmotesController.lua")()
 }
 
 local remotes = {
@@ -544,5 +545,65 @@ local KickModule = guiLibrary.Windows.Utility:createModule({
                 wait(0.1)
             end
         end)
+    end
+})
+
+--[[ Emote Exploit ]]
+local currentEmote
+local EmoteEXPVar = false
+
+local EmoteModule
+EmoteModule = guiLibrary.Windows.Utility:createModule({
+    ["Name"] = "EmoteExploit",
+    ["Description"] = "Remake bedfight emotes in our ways",
+    ["Function"] = function(state)
+        EmoteEXPVar = state
+        if not state then
+            modules.EmotesController:StopAll()
+            return
+        end
+
+        if currentEmote then
+            modules.EmotesController:StopAll()
+            modules.EmotesController:Play(currentEmote)
+        end
+
+        if currentEmote == "Makeup" then
+            task.spawn(function()
+                task.wait(5)
+                if EmoteModule.enabled then
+                    EmoteModule:toggle(true)
+                end
+            end)
+        end
+    end
+})
+
+local EmoteList = EmoteModule.selectors.new({
+    ["Name"] = "Emotes",
+    ["Default"] = "Crystal",
+    ["Selections"] = {"Crystal", "Chair", "Make up"},
+    ["Function"] = function(value)
+        if value == "Crystal" then
+            currentEmote = "CrystalIdle"
+        elseif value == "Chair" then
+            currentEmote = "Chair"
+        elseif value == "Make up" then
+            currentEmote = "Makeup"
+        end
+
+        if EmoteEXPVar then
+            modules.EmotesController:StopAll()
+            modules.EmotesController:Play(currentEmote)
+
+            if currentEmote == "Makeup" then
+                task.spawn(function()
+                    task.wait(3)
+                    if EmoteModule.enabled then
+                        EmoteModule:toggle(true)
+                    end
+                end)
+            end
+        end
     end
 })
