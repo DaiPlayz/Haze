@@ -11,7 +11,7 @@
 
   "libraries/skybridge": ["PartyController.lua", "SwordController.lua", "FlyController.lua", "BowController.lua"],
 
-  "libraries/yotuber": ["PlaceController.lua"],
+  "libraries/youtuber": ["PlaceController.lua"],
 
   "assets": ["Default.json"],
 
