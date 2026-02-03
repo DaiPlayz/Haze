@@ -1222,6 +1222,48 @@ local VibeModule = guiLibrary.Windows.Visuals:createModule({
     end
 })
 
+--[[ FOV ]]
+local FOVVar = false
+local FOVValue = 90
+local FOVConnection
+
+workspace:GetPropertyChangedSignal("CurrentCamera"):Connect(function()
+    WCam = workspace.CurrentCamera
+end)
+
+local function ManageFOV()
+    if FOVConnection then FOVConnection:Disconnect() end
+    
+    if FOVVar then
+        FOVConnection = RunService.RenderStepped:Connect(function()
+            WCam.FieldOfView = FOVValue
+        end)
+    else
+        WCam.FieldOfView = 70
+    end
+end
+
+local FOVModule = guiLibrary.Windows.Visuals:createModule({
+    ["Name"] = "FOV",
+    ["Function"] = function(state)
+        FOVVar = state
+        ManageFOV()
+    end,
+    ["ExtraText"] = function()
+        return tostring(FOVValue)
+    end
+})
+
+local FOVModuleVal = FOVModule.sliders.new({
+    ["Name"] = "FOV",
+    ["Minimum"] = 90,
+    ["Maximum"] = 120,
+    ["Default"] = 120,
+    ["Function"] = function(value)
+        FOVValue = value
+    end
+})
+
 shared.guiLibrary = guiLibrary
 
 return guiLibrary
