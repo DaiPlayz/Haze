@@ -84,9 +84,6 @@ local AutoPlaceModule = guiLibrary.Windows.Combat:createModule({
         else
             modules.PlaceController:Stop()
         end
-    end,
-    ["ExtraText"] = function()
-        return AutoPlaceTarget
     end
 })
 
