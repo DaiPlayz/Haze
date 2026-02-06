@@ -114,6 +114,35 @@ local function syncFile(FilePath)
     end
 end
 
+local function cachefiles(root, validFiles)
+    local map = {}
+    for _, f in ipairs(validFiles) do
+        map[f] = true
+    end
+
+    local function scan(dir)
+        for _, item in ipairs(listfiles(dir)) do
+            local rel = item:sub(#root + 2):gsub("\\", "/")
+
+            if not rel:match("^configs/") and not rel:match("^themes/") and rel ~= "config.txt" then
+                if isfolder(item) then
+                    scan(item)
+                    if #listfiles(item) == 0 then
+                        delfolder(item)
+                    end
+                elseif isfile(item) and not map[rel] then
+                    delfile(item)
+                    if Notifications then
+                        Notifications:Notify("Error", "Cache: " .. rel, 3)
+                    end
+                end
+            end
+        end
+    end
+
+    scan(root)
+end
+
 ensureFolder(CONFIG.ROOT)
 
 local installFiles = InstallFiles()
@@ -121,6 +150,8 @@ local installFiles = InstallFiles()
 for _, file in ipairs(installFiles) do
     syncFile(file)
 end
+
+cachefiles(CONFIG.ROOT, installFiles)
 
 local LoaderPath = CONFIG.ROOT .. "/loader.lua"
 if isfile(LoaderPath) then

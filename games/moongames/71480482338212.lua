@@ -4,10 +4,7 @@ local guiLibrary = loadfile("Haze/uis/MoonLibrary.lua")()
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local Lighting = game:GetService("Lighting")
-local WCam = workspace.CurrentCamera
 local RunService = game:GetService("RunService")
-local SoundService = game:GetService("SoundService")
 
 --[[ Libraries ]]
 local LocalLibrary = "Haze/libraries"
@@ -26,6 +23,8 @@ local remotes = {
     EquipCape = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("EquipCape"),
     TakeItemFromChest = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("TakeItemFromChest")
 }
+
+local Swords = {"Emerald Sword", "Diamond Sword", "Iron Sword", "Stone Sword", "Wooden Sword"}
 
 --[[ Speed ]]
 local SpeedVar = false
@@ -81,8 +80,6 @@ local SpeedValueMod = SpeedModule.sliders.new({
 })
 
 --[[ KillAura ]]
-local Swords = {"Emerald Sword", "Diamond Sword", "Iron Sword", "Stone Sword", "Wooden Sword"}
-
 local KAVar = false
 local HighVar = false
 local AnimsVar = false
@@ -311,8 +308,6 @@ local NukerModule = guiLibrary.Windows.Utility:createModule({
 })
 
 --[[ Killaura and Nuker Holder ]]
-local Swords = {"Emerald Sword", "Diamond Sword", "Iron Sword", "Stone Sword", "Wooden Sword"}
-
 local function getbestsword()
     local container = {LocalPlayer.Backpack, LocalPlayer.Character}
     for _, parent in ipairs(container) do
@@ -475,28 +470,34 @@ local ScaffoldModule = guiLibrary.Windows.Utility:createModule({
 })
 
 --[[ Spam Invites ]]
+local InviteSpamVar = false
 local InviteModule = guiLibrary.Windows.Utility:createModule({
     ["Name"] = "Spam Invites",
     ["Description"] = "Invites everyone in your party",
     ["Function"] = function(state)
-        spawn(function()
-            while state do
+        InviteSpam = state
+
+        task.spawn(function()
+            while InviteSpam do
                 modules.PartyController:InviteAll()
-                wait(0.1)
+                wait(.1)
             end
         end)
     end
 })
 
 --[[ Kick Spam ]]
+local KickExpVar = false
 local KickModule = guiLibrary.Windows.Utility:createModule({
     ["Name"] = "KickExploit",
     ["Description"] = "Spam Kick everyone for party, everyone in server will get spam kicked even if not in party",
     ["Function"] = function(state)
-        spawn(function()
-            while state do
+        KickExpVar = state
+
+        task.spawn(function()
+            while KickExpVar do
                 modules.PartyController:KickAll()
-                wait(0.1)
+                wait(.1)
             end
         end)
     end

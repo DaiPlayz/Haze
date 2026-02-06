@@ -3,11 +3,8 @@ local guiLibrary = loadfile("Haze/uis/MoonLibrary.lua")()
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local Lighting = game:GetService("Lighting")
 local LocalPlayer = Players.LocalPlayer
-local WCam = workspace.CurrentCamera
 local RunService = game:GetService("RunService")
-local SoundService = game:GetService("SoundService")
 local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 
 --[[ Libraries ]]
@@ -85,7 +82,7 @@ local AutoWinModule = guiLibrary.Windows.Combat:createModule({
             end
 
             local tpIndex = 1
-            spawn(function()
+            task.spawn(function()
                 while AutoWinVar do
                     local character = LocalPlayer.Character
                     if character and character:FindFirstChild("HumanoidRootPart") then

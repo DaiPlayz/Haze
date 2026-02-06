@@ -3,11 +3,8 @@ local guiLibrary = loadfile("Haze/uis/MoonLibrary.lua")()
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local Lighting = game:GetService("Lighting")
 local LocalPlayer = Players.LocalPlayer
-local WCam = workspace.CurrentCamera
 local RunService = game:GetService("RunService")
-local SoundService = game:GetService("SoundService")
 local Character = LocalPlayer.Character
 
 --[[ Libraries ]]

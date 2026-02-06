@@ -2,12 +2,8 @@
 local guiLibrary = loadfile("Haze/uis/MoonLibrary.lua")()
 
 local Players = game:GetService("Players")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local Lighting = game:GetService("Lighting")
 local LocalPlayer = Players.LocalPlayer
-local WCam = workspace.CurrentCamera
 local RunService = game:GetService("RunService")
-local SoundService = game:GetService("SoundService")
 
 --[[ Libraries ]]
 local LocalLibrary = "Haze/libraries"
@@ -69,26 +65,32 @@ local SpeedValueMod = SpeedModule.sliders.new({
 })
 
 --[[ Spam Invites ]]
+local InviteSpamVar = false
 local InvitesModule = guiLibrary.Windows.Utility:createModule({
     ["Name"] = "Spam Invites",
     ["Function"] = function(state)
-        spawn(function()
-            while state do
+        InviteSpamVar = state
+
+        task.spawn(function()
+            while InviteSpamVar do
                 modules.PartyController:InviteAll()
-                wait(0.01)
+                task.wait(.1)
             end
         end)
     end
 })
 
 --[[ Party Kick ]]
+local KickSpamVar = false
 local KicksModule = guiLibrary.Windows.Utility:createModule({
     ["Name"] = "Spam Kicks",
     ["Function"] = function(state)
-        spawn(function()
-            while state do
+        KickSpamVar = state
+
+        task.spawn(function()
+            while KickSpamVar do
                 modules.PartyController:KickAll()
-                wait(0.01)
+                wait(.1)
             end
         end)
     end
