@@ -1,5 +1,5 @@
 --[[ Be a YouTuber! ]]
-local guiLibrary = loadfile("Haze/uis/MoonLibrary.lua")()
+local guiLibrary = loadfile("Haze/uis/HazeLibrary.lua")()
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")

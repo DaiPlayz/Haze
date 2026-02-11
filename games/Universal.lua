@@ -1,5 +1,5 @@
 --[[ Universal ]]
-local guiLibrary = loadfile("Haze/uis/MoonLibrary.lua")()
+local guiLibrary = loadfile("Haze/uis/HazeLibrary.lua")()
 
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer

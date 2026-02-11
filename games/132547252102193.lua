@@ -1,5 +1,5 @@
 --[[ 1 Kill = 1 Armor ]]
-local guiLibrary = loadfile("Haze/uis/MoonLibrary.lua")()
+local guiLibrary = loadfile("Haze/uis/HazeLibrary.lua")()
 
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
@@ -10,7 +10,7 @@ local RunService = game:GetService("RunService")
 local LocalLibrary = "Haze/libraries"
 local modules = {
     Entity = loadfile(LocalLibrary .. "/modules/Entity.lua")(),
-    Notifications = loadfile(LocalLibrary .. "/Notifications.lua")(),
+    Notifications = loadfile(LocalLibrary .. "/Notifications.lua")()
 }
 
 --[[ Remotes ]]
