@@ -16,7 +16,6 @@ local modules = {
 --[[ Remotes ]]
 local remotes = {
     ApplyDamage = ReplicatedStorage:WaitForChild("Packages"):WaitForChild("Knit"):WaitForChild("Services"):WaitForChild("CombatService"):WaitForChild("RF"):WaitForChild("ApplyDamage"),
-    SwingRemote = ReplicatedStorage:WaitForChild("Packages"):WaitForChild("Knit"):WaitForChild("Services"):WaitForChild("SpeedService"):WaitForChild("RF"):WaitForChild("SwingSword"),
     InviteRemote = game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("Knit"):WaitForChild("Services"):WaitForChild("InviteService"):WaitForChild("RF"):WaitForChild("SendClanInvite")
 }
 
@@ -105,25 +104,12 @@ SpeedModule.selectors.new({
 
 --[[ KillAura ]]
 local KillAuraVar = false
-local KAAnims = false
 local KARange = 20
-local KADelay = 0.1
-local LastAttack = 0
 
 local KillAuraModule = guiLibrary.Windows.Combat:createModule({
     ["Name"] = "KillAura",
     ["Function"] = function(state)
         KillAuraVar = state
-    end
-})
-
-KillAuraModule.sliders.new({
-    ["Name"] = "Delay",
-    ["Minimum"] = 0.05,
-    ["Maximum"] = 1,
-    ["Default"] = 0.1,
-    ["Function"] = function(value)
-        KADelay = value
     end
 })
 
@@ -137,27 +123,16 @@ KillAuraModule.sliders.new({
     end
 })
 
-KillAuraModule.toggles.new({
-    ["Name"] = "Animations",
-    ["Default"] = false,
-    ["Function"] = function(state)
-        KAAnims = state
+task.spawn(function()
+    while true do
+        task.wait(0.1)
+        if not KillAuraVar then continue end
+
+        local targetPlayer = modules.Entity.nearPlayer(KARange)
+        if not targetPlayer or not targetPlayer.Character then continue end
+
+        remotes.ApplyDamage:InvokeServer(targetPlayer.Character)
     end
-})
-
-RunService.Heartbeat:Connect(function()
-    if not KillAuraVar then return end
-    if time() - LastAttack < KADelay then return end
-
-    local targetPlayer = modules.Entity.nearPlayer(KARange)
-    if not targetPlayer or not targetPlayer.Character then return end
-
-    if KAAnims then
-        remotes.SwingRemote:InvokeServer()
-    end
-
-    remotes.ApplyDamage:InvokeServer(targetPlayer.Character)
-    LastAttack = time()
 end)
 
 --[[ TPAura ]]
