@@ -64,7 +64,7 @@ local function InstallFiles()
 
     local json = httpGet(url)
     if not json then
-            Notifications:Notify("Warning", "Failed to download files list. Report this to the devs", 4)
+            Notifications:Notify("Error", "Failed to download files list. Report this to the devs", 5, Color3.fromRGB(255, 0, 0))
         return {}
     end
 
@@ -73,7 +73,7 @@ local function InstallFiles()
     end)
 
     if not success or type(data) ~= "table" then
-            Notifications:Notify("Warning", "Invalid files in the JSON. Report this to the devs", 4)
+            Notifications:Notify("Error", "Invalid files in the JSON. Report this to the devs", 5, Color3.fromRGB(255, 0, 0))
         return {}
     end
 
@@ -85,7 +85,7 @@ local function syncFile(FilePath)
     local content = httpGet(url)
 
     if not content then
-            Notifications:Notify("Warning", "Failed to download: " .. FilePath, 4)
+            Notifications:Notify("Fail", "Failed to download: " .. FilePath, 5, Color3.fromRGB(255, 0, 0))
         return
     end
 
@@ -100,14 +100,14 @@ local function syncFile(FilePath)
     if not existing then
         write(LocalPath, content)
         if Notifications then
-            Notifications:Notify("Success", "Installed: " .. FilePath, 4)
+            Notifications:Notify("Installer", "Installed: " .. FilePath, 5, Color3.fromRGB(255, 255, 255))
         else
             print("[Haze] Installed:", FilePath)
         end
     elseif existing ~= content then
         write(LocalPath, content)
         if Notifications then
-            Notifications:Notify("Success", "Updated: " .. FilePath, 4)
+            Notifications:Notify("Update", "Updated: " .. FilePath, 5, Color3.fromRGB(255, 255, 0))
         else
             print("[Haze] Updated:", FilePath)
         end
@@ -134,7 +134,7 @@ local function cachefiles(root, validFiles)
                 elseif isfile(item) and not map[rel] then
                     delfile(item)
                     if Notifications then
-                        Notifications:Notify("Error", "Cache: " .. rel, 3)
+                        Notifications:Notify("Cache", "Cache: " .. rel, 5, Color3.fromRGB(255, 0, 0))
                     end
                 end
             end
@@ -161,14 +161,14 @@ if isfile(LoaderPath) then
         pcall(fn)
     else
         if Notifications then
-            Notifications:Notify("Warning", "Failed to run loader.lua", 5)
+            Notifications:Notify("Error", "Failed to run loader.lua", 5, Color3.fromRGB(255, 0, 0))
         else
             warn("[Haze] Failed to run loader.lua")
         end
     end
 else
     if Notifications then
-        Notifications:Notify("Warning", "loader.lua missing", 5)
+        Notifications:Notify("Error", "loader.lua missing", 5, Color3.fromRGB(255, 0, 0))
     else
         warn("[Haze] loader.lua missing")
     end

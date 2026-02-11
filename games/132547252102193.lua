@@ -311,8 +311,8 @@ RunService.Heartbeat:Connect(function()
             end
             root.Velocity = Vector3.zero
             root.CFrame = CFrame.new(root.Position.X, p.Position.Y + 5, root.Position.Z)
-            if tick() - LastNotify > 5 then 
-                modules.Notifications:Notify("Warning", "Targeting DISABLED to prevent dying!", 5)
+            if tick() - LastNotify > 5 then
+                modules.Notifications:Notify("JesusMode", "Targeting DISABLED to prevent dying!", 5)
                 LastNotify = tick()
             end
         end

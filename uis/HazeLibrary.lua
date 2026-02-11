@@ -1025,7 +1025,7 @@ local modules = {
 	Discord = loadfile(LocalLibrary .. "/discord.lua")()
 }
 
-modules.Notifications:Notify("Success", "Welcome " .. LocalPlayer.Name .. ".", 5)
+modules.Notifications:Notify("HAZE", "Welcome " .. LocalPlayer.Name .. ".", 5)
 
 local DiscordModule
 DiscordModule = guiLibrary.Windows.Extra:createModule({

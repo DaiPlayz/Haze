@@ -15,14 +15,14 @@ function Discord:Join(inviteUrl, silent)
 
     if not inviteCode then
         if not silent then
-            Notifications:Notify("Error","Discord invite has expired! Report this to the devs, ScriptIsFocus",3)
+            Notifications:Notify("Error", "Discord invite has expired! Report this to the devs, ScriptIsFocus", 5, Color3.fromRGB(255, 0, 0))
         end
         return false
     end
 
     if not http_request then
         if not silent then
-            Notifications:Notify("Warning","Executor doesnt support http_request!",3)
+            Notifications:Notify("Warning", "Executor doesnt support http_request!", 5, Color3.fromRGB(255, 150, 0))
         end
         return false
     end
@@ -45,9 +45,9 @@ function Discord:Join(inviteUrl, silent)
 
     if not silent then
         if success then
-            Notifications:Notify("Success","Make sure to join our discord server!",3)
+            Notifications:Notify("Discord", "Make sure to join our discord server!", 5, Color3.fromRGB(0, 255, 0))
         else
-            Notifications:Notify("Error","Discord RPC failed, open manually",3)
+            Notifications:Notify("Error", "Discord RPC failed, open manually", 5, Color3.fromRGB(255, 0, 0))
         end
     end
     return success
