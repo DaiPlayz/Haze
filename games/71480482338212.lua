@@ -48,7 +48,7 @@ local modules = {
     SprintController = loadfile(LocalLibrary .. "/bedfight/SprintController.lua")(),
     ESPController = loadfile(LocalLibrary .. "/modules/EspController.lua")(),
     ScaffoldController = loadfile(LocalLibrary .. "/bedfight/ScaffoldController.lua")(),
-    FlyController = loadfile(LocalLibrary .. "/bedfight/FlyController.lua")(),
+    FlyController = loadfile(LocalLibrary .. "/modules/FlyController.lua")(),
     PartyController = loadfile(LocalLibrary .. "/bedfight/PartyController.lua")(),
     EmotesController = loadfile(LocalLibrary .. "/bedfight/EmotesController.lua")()
 }

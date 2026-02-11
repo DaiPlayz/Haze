@@ -5,9 +5,9 @@
 
   "libraries": ["Notifications.lua", "Whitelist.lua", "Discord.lua"],
 
-  "libraries/bedfight": ["FlyController.lua", "SprintController.lua", "ScaffoldController.lua", "PartyController.lua", "EmotesController.lua"],
+  "libraries/bedfight": ["SprintController.lua", "ScaffoldController.lua", "PartyController.lua", "EmotesController.lua"],
 
-  "libraries/modules": ["EspController.lua", "Entity.lua"],
+  "libraries/modules": ["EspController.lua", "Entity.lua", "FlyController.lua"],
 
   "libraries/skybridge": ["PartyController.lua", "SwordController.lua", "FlyController.lua", "BowController.lua"],
 

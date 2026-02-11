@@ -8,11 +8,15 @@ local textService = game:GetService('TextService')
 local httpService = game:GetService('HttpService')
 local tweenService = game:GetService('TweenService')
 local userInputService = game:GetService('UserInputService')
+local lighting = game:GetService('Lighting')
 
 local localEntity = players.LocalPlayer
 
 if localEntity.PlayerGui:FindFirstChild('ScreenGuiHS') then
     localEntity.PlayerGui.ScreenGuiHS:Destroy()
+end
+if lighting:FindFirstChild('GuiBlur') then
+    lighting.GuiBlur:Destroy()
 end
 
 local screenGui = Instance.new('ScreenGui')
@@ -24,16 +28,48 @@ local clickGui = Instance.new('Frame')
 clickGui.Parent = screenGui
 clickGui.Size = UDim2.fromScale(1, 1)
 clickGui.BackgroundTransparency = 1
+local blur = Instance.new('BlurEffect')
+blur.Name = 'GuiBlur'
+blur.Size = 20
+blur.Parent = lighting
 local arrayList = Instance.new('Frame')
 arrayList.Parent = screenGui
-arrayList.Position = UDim2.new(0.5, -10, 0.1, 0)
-arrayList.Size = UDim2.fromScale(0.5, 0.8)
+arrayList.Position = UDim2.new(1, -10, 0, 60) 
+arrayList.Size = UDim2.new(0, 200, 1, 0)
+arrayList.AnchorPoint = Vector2.new(1, 0)
 arrayList.BackgroundTransparency = 1
 arrayList.Visible = false
+
 local arraylistSort = Instance.new('UIListLayout')
 arraylistSort.Parent = arrayList
 arraylistSort.SortOrder = Enum.SortOrder.LayoutOrder
 arraylistSort.HorizontalAlignment = Enum.HorizontalAlignment.Right
+arraylistSort.Padding = UDim.new(0, 2)
+
+local logoFrame = Instance.new('Frame')
+logoFrame.Parent = arrayList
+logoFrame.Size = UDim2.new(1, 0, 0, 60)
+logoFrame.BackgroundTransparency = 1
+logoFrame.LayoutOrder = -1
+
+local logoText = Instance.new('TextLabel')
+logoText.Parent = logoFrame
+logoText.Size = UDim2.fromScale(1, 1)
+logoText.Position = UDim2.fromOffset(-10, 0)
+logoText.BackgroundTransparency = 1
+logoText.Text = "HAZE"
+logoText.TextColor3 = Color3.fromRGB(255, 255, 255)
+logoText.TextSize = 45
+logoText.Font = Enum.Font.BuilderSansExtraBold
+logoText.TextXAlignment = Enum.TextXAlignment.Right
+logoText.RichText = true
+
+local uiStroke = Instance.new("UIStroke")
+uiStroke.Parent = logoText
+uiStroke.Thickness = 2
+uiStroke.Transparency = 0.8
+uiStroke.Color = Color3.fromRGB(0, 0, 0)
+
 local uiScale = Instance.new('UIScale')
 uiScale.Parent = screenGui
 uiScale.Scale = math.clamp(screenGui.AbsoluteSize.X / 1920, 0.8, 1.2)
@@ -70,75 +106,68 @@ local guiLibrary = {
 table.insert(guiLibrary.Collection, userInputService.InputBegan:Connect(function(Input: InputObject)
 	if not userInputService:GetFocusedTextBox() and Input.KeyCode == Enum.KeyCode.RightShift then
 		clickGui.Visible = not clickGui.Visible
+		local targetBlur = clickGui.Visible and 20 or 0
+		tweenService:Create(blur, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = targetBlur}):Play()
 	end
 end))
 
 local aids = {}
 function addToArray(Name: string, ExtraText)
-	local Obj = Instance.new('TextLabel')
-	Obj.Name = Name
-	Obj.Parent = arrayList
-	Obj.BorderSizePixel = 0
-	Obj.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-	Obj.BackgroundTransparency = (ArrayBackground and ArrayBackground.value / 100 or 0.5)
-	Obj.TextStrokeTransparency = 0.5
-	Obj.TextColor3 = guiLibrary.Pallete.Main
-	Obj.TextScaled = true
-	Obj.TextSize = 15
-	Obj.Text = Name
-	Obj.Font = Enum.Font.BuilderSans
-	Obj.Size = UDim2.new(0, 0, 0, 30)
-	Obj.TextWrapped = true
-	Obj.RichText = true
-	local SideLine = Instance.new('Frame')
-	SideLine.Parent = Obj
-	SideLine.Position = UDim2.fromScale(1, 0)
-	SideLine.Size = UDim2.new(0, 4, 1, 0)
-	SideLine.BorderSizePixel = 0
-	SideLine.BackgroundColor3 = guiLibrary.Pallete.changeColor(guiLibrary.Pallete.Main, 0.7)
-	
-	local aider; aider = guiLibrary.Pallete.Changed.Event:Connect(function()
-		Obj.TextColor3 = guiLibrary.Pallete.Main
-		SideLine.BackgroundColor3 = guiLibrary.Pallete.changeColor(guiLibrary.Pallete.Main, 0.7)
-	end)
-	
-	Obj:SetAttribute('Orig', Name)
-	
-	if ExtraText and typeof(ExtraText()) == 'string' then
-		Obj:SetAttribute('Orig', Name .. ' [' .. ExtraText() .. ']')
-		Obj.Text = Name .. ' <font color="rgb(200,200,200)">[' .. ExtraText() .. ']</font>'
-	end
-	
-	task.spawn(function()
-		repeat
-			task.wait() --runService.Heartbeat:Wait()
-			
-			Obj:SetAttribute('Orig', Name)
-			if ExtraText then
-				Obj.Text = Name .. ' <font color="rgb(200,200,200)">[' .. ExtraText() .. ']</font>'
-				Obj:SetAttribute('Orig', ' ' .. Name .. ' [' .. ExtraText() .. ']' .. ' ')
-			else
-				Obj.Text = Name
-			end
-		until Obj == nil or Obj:SetAttribute('Destroying')
-	end)
-	
-	Obj.Destroying:Once(function()
-		aider:Disconnect()
-	end)
+    local Obj = Instance.new('Frame')
+    Obj.Name = Name
+    Obj.Parent = arrayList
+    Obj.BorderSizePixel = 0
+    Obj.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    Obj.BackgroundTransparency = (ArrayBackground and ArrayBackground.value / 100 or 0.5)
+    Obj.Size = UDim2.new(0, 0, 0, 28)
+    Obj.ClipsDescendants = false
 
-	table.insert(aids, Obj)
-	table.sort(aids, function(a, b)
-		return textService:GetTextSize(a.Text, a.TextSize, a.Font, Vector2.zero).X > textService:GetTextSize(b.Text, b.TextSize, b.Font, Vector2.zero).X
-	end)
+    local SideLine = Instance.new('Frame')
+    SideLine.Parent = Obj
+    SideLine.Position = UDim2.fromScale(1, 0)
+    SideLine.AnchorPoint = Vector2.new(1, 0)
+    SideLine.Size = UDim2.new(0, 3, 1, 0)
+    SideLine.BorderSizePixel = 0
+    SideLine.BackgroundColor3 = guiLibrary.Pallete.Main
 
-	tweenService:Create(Obj, TweenInfo.new(0.15), {
-		Size = UDim2.new(0, textService:GetTextSize(' ' .. Obj:GetAttribute('Orig') .. ' ', Obj.TextSize, Obj.Font, Vector2.zero).X, 0, 30)
-	}):Play()
+    local ModuleText = Instance.new('TextLabel')
+    ModuleText.Parent = Obj
+    ModuleText.Size = UDim2.new(1, -10, 1, 0)
+    ModuleText.Position = UDim2.fromScale(0, 0)
+    ModuleText.BackgroundTransparency = 1
+    ModuleText.TextColor3 = Color3.fromRGB(255, 255, 255)
+    ModuleText.TextSize = 17
+    ModuleText.Font = Enum.Font.BuilderSans
+    ModuleText.TextXAlignment = Enum.TextXAlignment.Right
+    ModuleText.RichText = true
 
-	for i,v in aids do
-		v.LayoutOrder = i
-	end
+    local aider = guiLibrary.Pallete.Changed.Event:Connect(function()
+        SideLine.BackgroundColor3 = guiLibrary.Pallete.changeColor(guiLibrary.Pallete.Main, 0.7)
+    end)
+
+    task.spawn(function()
+        repeat
+            task.wait()
+            local textContent = Name
+            local pureText = Name
+            if ExtraText and typeof(ExtraText()) == 'string' then
+                textContent = Name .. ' <font color="rgb(180,180,180)">' .. ExtraText() .. '</font>'
+                pureText = Name .. " " .. ExtraText()
+            end
+            
+            ModuleText.Text = textContent
+            local textSize = textService:GetTextSize(pureText, ModuleText.TextSize, ModuleText.Font, Vector2.new(1000, 1000))
+            tweenService:Create(Obj, TweenInfo.new(0.2), {Size = UDim2.fromOffset(textSize.X + 18, 28)}):Play()
+        until Obj == nil or Obj:GetAttribute('Destroying')
+    end)
+
+    Obj.Destroying:Once(function() aider:Disconnect() end)
+    table.insert(aids, Obj)
+    table.sort(aids, function(a, b)
+        return a.Size.X.Offset > b.Size.X.Offset
+    end)
+
+    for i, v in ipairs(aids) do v.LayoutOrder = i end
 end
 
 local function removeFromArray(Name: string)
@@ -193,15 +222,75 @@ function guiLibrary:getWindow(Name: string)
 	
 	return self.Windows[Name] or {}
 end
+local function makeDraggable(topbarobject, object, name)
+	local dragging = false
+	local dragInput, dragStart, startPos
+
+	local function update(input)
+		local delta = input.Position - dragStart
+		local targetPos = UDim2.new(
+			startPos.X.Scale, 
+			startPos.X.Offset + delta.X, 
+			startPos.Y.Scale, 
+			startPos.Y.Offset + delta.Y
+		)
+		tweenService:Create(object, TweenInfo.new(0.05), {Position = targetPos}):Play()
+	end
+
+	topbarobject.InputBegan:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+			dragging = true
+			dragStart = input.Position
+			startPos = object.Position
+
+			input.Changed:Connect(function()
+				if input.UserInputState == Enum.UserInputState.End then
+					dragging = false
+					
+					if not guiLibrary.Config.WindowPositions then 
+						guiLibrary.Config.WindowPositions = {} 
+					end
+					
+					guiLibrary.Config.WindowPositions[name] = {
+						X = object.Position.X.Offset,
+						Y = object.Position.Y.Offset
+					}
+
+					guiLibrary.saveCFG(guiLibrary.CfgName)
+				end
+			end)
+		end
+	end)
+
+	topbarobject.InputChanged:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+			dragInput = input
+		end
+	end)
+
+	userInputService.InputChanged:Connect(function(input)
+		if input == dragInput and dragging then
+			update(input)
+		end
+	end)
+end
 function guiLibrary:createWindow(Name: string)
 	assert(typeof(Name) == 'string', 'Name variable is not string')
 	
 	local Frame = Instance.new('Frame')
 	Frame.Parent = clickGui
-	Frame.Position = UDim2.fromOffset(75 + (aidedFrame * 190), 75)
+	
+	if guiLibrary.Config.WindowPositions and guiLibrary.Config.WindowPositions[Name] then
+		local saved = guiLibrary.Config.WindowPositions[Name]
+		Frame.Position = UDim2.fromOffset(saved.X, saved.Y)
+	else
+		Frame.Position = UDim2.fromOffset(75 + (aidedFrame * 190), 75)
+	end
+
 	Frame.Size = UDim2.fromOffset(185, 35)
 	Frame.BorderSizePixel = 0
 	Frame.BackgroundColor3 = Color3.fromRGB(18, 18, 18)
+	makeDraggable(Frame, Frame, Name)
 	local Label = Instance.new('TextLabel')
 	Label.Parent = Frame
 	Label.Position = UDim2.fromOffset(8, 0)
@@ -218,6 +307,54 @@ function guiLibrary:createWindow(Name: string)
 	Modules.Size = UDim2.fromScale(1, 0)
 	Modules.AutomaticSize = Enum.AutomaticSize.Y
 	Modules.BackgroundTransparency = 1
+	local collapsed = false
+    Frame.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton2 then
+            collapsed = not collapsed
+            local easingStyle = collapsed and Enum.EasingStyle.Quart or Enum.EasingStyle.Back
+            local duration = 0.3
+            
+            if collapsed then
+                Modules.AutomaticSize = Enum.AutomaticSize.None
+                Modules.ClipsDescendants = true
+                
+                tweenService:Create(Modules, TweenInfo.new(duration, easingStyle, Enum.EasingDirection.In), {
+                    Size = UDim2.new(1, 0, 0, 0)
+                }):Play()
+                
+                for _, child in ipairs(Modules:GetChildren()) do
+                    if child:IsA("Frame") then
+                        tweenService:Create(child, TweenInfo.new(duration/2), {BackgroundTransparency = 1}):Play()
+                    end
+                end
+                
+                task.delay(duration, function() 
+                    if collapsed then Modules.Visible = false end 
+                end)
+            else
+                Modules.Visible = true
+                Modules.Size = UDim2.new(1, 0, 0, 0)
+
+                for _, child in ipairs(Modules:GetChildren()) do
+                    if child:IsA("Frame") then
+                        child.BackgroundTransparency = 1
+                        tweenService:Create(child, TweenInfo.new(duration), {BackgroundTransparency = 0}):Play()
+                    end
+                end
+
+                local tween = tweenService:Create(Modules, TweenInfo.new(duration, easingStyle, Enum.EasingDirection.Out), {
+                    Size = UDim2.new(1, 0, 0, 150)
+                })
+                tween:Play()
+                
+                tween.Completed:Once(function()
+                    if not collapsed then
+                        Modules.AutomaticSize = Enum.AutomaticSize.Y
+                    end
+                end)
+            end
+        end
+    end)
 	local ModulesSort = Instance.new('UIListLayout')
 	ModulesSort.Parent = Modules
 	ModulesSort.SortOrder = Enum.SortOrder.LayoutOrder
@@ -829,7 +966,7 @@ local LocalLibrary = "Haze/libraries"
 local modules = {
     Whitelist = loadfile(LocalLibrary .. "/Whitelist.lua")(),
     Notifications = loadfile(LocalLibrary .. "/Notifications.lua")(),
-    FlyController = loadfile(LocalLibrary .. "/bedfight/FlyController.lua")(),
+    FlyController = loadfile(LocalLibrary .. "/modules/FlyController.lua")(),
     ESPController = loadfile(LocalLibrary .. "/modules/EspController.lua")(),
 	Discord = loadfile(LocalLibrary .. "/discord.lua")()
 }
