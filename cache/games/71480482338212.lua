@@ -1,0 +1,1487 @@
+--[[ BedFight ]]
+local Library = loadfile("Haze/uis/HazeLibrary.lua")()
+
+local Window = Library:Window({
+    ["Name"] = "H A Z E",
+    ["GradientTitle"] = {
+        ["Enabled"] = true,
+        ["Start"] = Color3.fromRGB(66, 245, 138),
+        ["Middle"] = Color3.fromRGB(66, 191, 245),
+        ["End"] = Color3.fromRGB(245, 66, 200),
+        ["Speed"] = 1
+    }
+})
+
+local Watermark = Library:Watermark("H A Z E", {"Haze/assets/lib/logo.png", Color3.fromRGB(66, 245, 138)}, false)
+
+local KeybindList = Library:KeybindList()
+
+local CombatTab = Window:Page({Name = "Combat", Columns = 2})
+local MovementTab = Window:Page({Name = "Movement", Columns = 2})
+local UtilityTab = Window:Page({Name = "Utility", Columns = 2})
+local VisualsTab = Window:Page({Name = "Visuals",  Columns = 2})
+local PlayersTab = Window:Page({Name = "Players", Columns = 1})
+local SettingsTab = Window:Page({Name = "Settings", Columns = 2})
+
+PlayersTab:PlayerList({
+    ["Name"] = "Playerlist",
+    ["Flag"] = "Playerlist",
+    ["Callback"] = function()
+        print(Players)
+    end
+})
+
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Lighting = game:GetService("Lighting")
+local WCam = workspace.CurrentCamera
+local RunService = game:GetService("RunService")
+local SoundService = game:GetService("SoundService")
+
+--[[ Libraries ]]
+local LocalLibrary = "Haze/libraries"
+local modules = {
+    Entity = loadfile(LocalLibrary .. "/modules/Entity.lua")(),
+    Discord = loadfile(LocalLibrary .. "/Discord.lua")(),
+    Whitelist = loadfile(LocalLibrary .. "/Whitelist.lua")(),
+    SprintController = loadfile(LocalLibrary .. "/bedfight/SprintController.lua")(),
+    ESPController = loadfile(LocalLibrary .. "/modules/EspController.lua")(),
+    ScaffoldController = loadfile(LocalLibrary .. "/bedfight/ScaffoldController.lua")(),
+    FlyController = loadfile(LocalLibrary .. "/modules/FlyController.lua")(),
+    PartyController = loadfile(LocalLibrary .. "/bedfight/PartyController.lua")(),
+    EmotesController = loadfile(LocalLibrary .. "/bedfight/EmotesController.lua")()
+}
+
+local remotes = {
+    SwordHitRemote = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("ItemsRemotes"):WaitForChild("SwordHit"),
+    MineBlockRemote = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("ItemsRemotes"):WaitForChild("MineBlock"),
+    EquipRemote = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("ItemsRemotes"):WaitForChild("EquipTool"),
+    EquipCape = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("EquipCape"),
+    TakeItemFromChest = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("TakeItemFromChest")
+}
+
+--[[ Speed ]]
+local gmt = getrawmetatable(game)
+setreadonly(gmt, false)
+local oldindex = gmt.__index
+
+gmt.__index = newcclosure(function(self, b)
+    if b == "JumpPower" then return 50 end
+    if b == "WalkSpeed" then return 16 end
+    return oldindex(self, b)
+end)
+setreadonly(gmt, true)
+
+local SpeedVar = false
+local SpeedValue = 16
+
+RunService.Heartbeat:Connect(function()
+    if SpeedVar then
+        local Character = LocalPlayer.Character
+        local Humanoid = Character and Character:FindFirstChildOfClass("Humanoid")
+        if Humanoid then
+            Humanoid.WalkSpeed = SpeedValue
+        end
+    end
+end)
+
+local SpeedSection = MovementTab:Section({
+    ["Name"] = "Speed",
+    ["Side"] = 1
+})
+
+SpeedSection:Toggle({
+    ["Name"] = "Speed", 
+    ["Default"] = false, 
+    ["Flag"] = "SpeedTog",
+    ["Tooltip"] = "Makes you walk faster",
+    ["Risky"] = false,
+    ["Callback"] = function(State)
+        SpeedVar = State        if not State then
+            local Character = LocalPlayer.Character
+            local Humanoid = Character and Character:FindFirstChildOfClass("Humanoid")
+            if Humanoid then Humanoid.WalkSpeed = 16 end
+        end
+    end
+})
+
+SpeedSection:Slider({
+    ["Name"] = "Speed",
+    ["Flag"] = "SpeedVal",
+    ["Min"] = 16,
+    ["Default"] = 16,
+    ["Max"] = 32,
+    ["Suffix"] = "studs",
+    ["Decimals"] = 1,
+    ["Callback"] = function(Value)
+        SpeedValue = Value
+    end
+})
+
+--[[ KillAura ]]
+local Swords = {"Emerald Sword", "Diamond Sword", "Iron Sword", "Stone Sword", "Wooden Sword"}
+
+local KAVar = false
+local HighVar = false
+local AnimsVar = false
+local AnimMode = "Respect Delay"
+local currentHighlight = nil
+local LastAnimTime = 0
+
+local SwingSound = Instance.new("Sound")
+SwingSound.SoundId = "rbxassetid://104766549106531"
+SwingSound.Volume = 1
+SwingSound.Parent = workspace
+
+local SwingAnimation = Instance.new("Animation")
+SwingAnimation.AnimationId = "rbxassetid://123800159244236"
+
+local function getnearplayer()
+    local closest, closestDist = nil, math.huge
+    local myChar = LocalPlayer.Character
+    local myRoot = myChar and myChar:FindFirstChild("HumanoidRootPart")
+    local myTeam = LocalPlayer.Team
+
+    if not myRoot or not modules.Entity.isAlive(myChar) then
+        return nil
+    end
+
+    for _, p in ipairs(Players:GetPlayers()) do
+        if p ~= LocalPlayer and p.Character and modules.Entity.isAlive(p.Character) then
+            local root = p.Character:FindFirstChild("HumanoidRootPart")
+            if root then
+                local dist = (root.Position - myRoot.Position).Magnitude
+                if dist <= 20 and dist < closestDist then
+
+                    local AttackData = false
+                    if myTeam == nil or myTeam.Name == "Spectators" then
+                        AttackData = true
+                    else
+                        if p.Team ~= myTeam then
+                            AttackData = true
+                        end
+                    end
+
+                    if AttackData then
+                        closestDist = dist
+                        closest = p
+                    end
+                end
+            end
+        end
+    end
+    return closest
+end
+
+local function updhighlight(target)
+    if currentHighlight then
+        currentHighlight:Destroy()
+        currentHighlight = nil
+    end
+    if HighVar and target and target.Character then
+        local highlight = Instance.new("Highlight")
+        highlight.Adornee = target.Character
+        highlight.FillColor = Color3.fromRGB(0, 255, 0)
+        highlight.OutlineColor = Color3.fromRGB(0, 255, 0)
+        highlight.FillTransparency = 0.5
+        highlight.OutlineTransparency = 0
+        highlight.Parent = workspace
+        currentHighlight = highlight
+    end
+end
+
+local function playanims()
+    local char = LocalPlayer.Character
+    if not char then return end
+    local humanoid = char:FindFirstChildOfClass("Humanoid")
+    if not humanoid then return end
+    local animator = humanoid:FindFirstChildWhichIsA("Animator")
+    if not animator then
+        animator = Instance.new("Animator")
+        animator.Parent = humanoid
+    end
+    local track = animator:LoadAnimation(SwingAnimation)
+    track:Play()
+end
+
+local function runKA()
+    task.spawn(function()
+        while KAVar do
+            local target = getnearplayer()
+            updhighlight(target)
+
+            if target then
+                for _, sword in ipairs(Swords) do
+                    remotes.SwordHitRemote:FireServer(target.Character, sword)
+                end
+
+                if AnimsVar then
+                    if AnimMode == "No Delay" then
+                        playanims()
+                        SwingSound:Play()
+                    elseif AnimMode == "Respect Delay" then
+                        local now = tick()
+                        if now - LastAnimTime > 0.5 then
+                            playanims()
+                            SwingSound:Play()
+                            LastAnimTime = now
+                        end
+                    end
+                end
+            end
+            task.wait(0.01)
+        end
+        updhighlight(nil)
+    end)
+end
+
+local KASec = CombatTab:Section({
+    ["Name"] = "Killaura",
+    ["Side"] = 1
+})
+
+KASec:Toggle({
+    ["Name"] = "Killaura",
+    ["Default"] = false,
+    ["Flag"] = "Killaura",
+    ["Tooltip"] = "Attacks players around you",
+    ["Callback"] = function(state)
+        KAVar = state
+        if state then
+            runKA()
+        end
+    end
+})
+
+KASec:Toggle({
+    ["Name"] = "Highlight",
+    ["Default"] = false,
+    ["Flag"] = "KA_Highlight",
+    ["Tooltip"] = "Highlight the target",
+    ["Callback"] = function(state)
+        HighVar = state
+        if not state and currentHighlight then
+            currentHighlight:Destroy()
+            currentHighlight = nil
+        end
+    end
+})
+
+KASec:Toggle({
+    ["Name"] = "Anims",
+    ["Default"] = false,
+    ["Flag"] = "KA_Anims",
+    ["Callback"] = function(state)
+        AnimsVar = state
+    end
+})
+
+KASec:Dropdown({
+    ["Name"] = "Delay",
+    ["Flag"] = "KA_Delay",
+    ["Items"] = {"No Delay", "Respect Delay"},
+    ["Multi"] = false,
+    ["Default"] = "Respect Delay",
+    ["Callback"] = function(value)
+        AnimMode = value
+    end
+})
+
+--[[ Nuker ]]
+local NukerSec = CombatTab:Section({
+    ["Name"] = "Nuker",
+    ["Side"] = 2
+})
+
+local NukerVar = false
+
+local function getnearbed(range)
+    local bedsContainer = workspace:FindFirstChild("BedsContainer")
+    if not bedsContainer or not LocalPlayer.Character or not LocalPlayer.Character.PrimaryPart then return nil end
+
+    local closestBed, closestDist
+    for _, bed in ipairs(bedsContainer:GetChildren()) do
+        local hitbox = bed:FindFirstChild("BedHitbox")
+        if hitbox then
+            local distance = (LocalPlayer.Character.PrimaryPart.Position - hitbox.Position).Magnitude
+            if distance <= range and (not closestDist or distance < closestDist) then
+                closestBed, closestDist = hitbox, distance
+            end
+        end
+    end
+    return closestBed
+end
+
+local function getpickaxe()
+    if LocalPlayer.Backpack then
+        for _, item in ipairs(LocalPlayer.Backpack:GetChildren()) do
+            if item.Name:lower():find("pickaxe") then return item end
+        end
+    end
+    if LocalPlayer.Character then
+        for _, item in ipairs(LocalPlayer.Character:GetChildren()) do
+            if item.Name:lower():find("pickaxe") then return item end
+        end
+    end
+end
+
+local function breakbed(pick, hitbox)
+    if not pick or not hitbox then return end
+    local model = hitbox.Parent
+    local pos = hitbox.Position
+    local origin = pos + Vector3.new(0, 3, 0)
+    local direction = (pos - origin).Unit
+    remotes.MineBlockRemote:FireServer(
+        pick.Name,
+        model,
+        vector.create(pos.X, pos.Y, pos.Z),
+        vector.create(origin.X, origin.Y, origin.Z),
+        vector.create(direction.X, direction.Y, direction.Z)
+    )
+end
+
+NukerSec:Toggle({
+    ["Name"] = "Nuker",
+    ["Flag"] = "Nuker",
+    ["Default"] = false,
+    ["Callback"] = function(state)
+        NukerVar = state
+        if state then
+            task.spawn(function()
+                while NukerVar do
+                    task.wait(0.1)
+                    if not LocalPlayer.Character or not LocalPlayer.Character.PrimaryPart then
+                        continue
+                    end
+
+                    local bedHitbox = getnearbed(30)
+                    local pickaxe = getpickaxe()
+                    if bedHitbox and pickaxe then
+                        breakbed(pickaxe, bedHitbox)
+                    end
+                end
+            end)
+        end
+    end
+})
+
+--[[ Killaura and Nuker Holder ]]
+local Swords = {"Emerald Sword", "Diamond Sword", "Iron Sword", "Stone Sword", "Wooden Sword"}
+
+local function getbestsword()
+    local container = {LocalPlayer.Backpack, LocalPlayer.Character}
+    for _, parent in ipairs(container) do
+        if parent then
+            for _, swordName in ipairs(Swords) do
+                local tool = parent:FindFirstChild(swordName)
+                if tool then return tool.Name end
+            end
+        end
+    end
+end
+
+
+local currentTool = nil
+
+RunService.Heartbeat:Connect(function()
+    local pickaxe = getpickaxe()
+    local sword = getbestsword()
+    local targetTool = nil
+
+    local nearBed = getnearbed(30)
+
+    if NukerVar and not KAVar then
+        if pickaxe and nearBed then
+            targetTool = pickaxe.Name
+        end
+    elseif KAVar and not NukerVar then
+        targetTool = sword
+    elseif NukerVar and KAVar then
+        if currentTool ~= sword and sword then
+            targetTool = sword
+        elseif pickaxe and nearBed and currentTool ~= pickaxe then
+            targetTool = pickaxe.Name
+        end
+    end
+
+    if targetTool and targetTool ~= currentTool then
+        remotes.EquipRemote:FireServer(targetTool)
+        currentTool = targetTool
+    end
+end)
+
+--[[ Cape ]]
+local Capevar = false
+
+local CapePNG = "Haze/Assets/capes/Cat.png"
+local CapeColor = Color3.fromRGB(255,255,255)
+
+local Cape, Motor
+
+local CapeSection = VisualsTab:Section({
+    ["Name"] = "Cape",
+    ["Side"] = 1
+})
+
+local function torso(char)
+    return char:FindFirstChild("UpperTorso")
+        or char:FindFirstChild("Torso")
+        or char:FindFirstChild("HumanoidRootPart")
+end
+
+local function clear()
+    if Cape then Cape:Destroy() Cape = nil end
+    if Motor then Motor:Destroy() Motor = nil end
+end
+
+local function build(char)
+    clear()
+    local t = torso(char)
+    if not t then return end
+
+    Cape = Instance.new("Part")
+    Cape.Size = Vector3.new(2,4,0.1)
+    Cape.Color = CapeColor
+    Cape.Material = Enum.Material.SmoothPlastic
+    Cape.Massless = true
+    Cape.CanCollide = false
+    Cape.CastShadow = false
+    Cape.Parent = WCam
+
+    local gui = Instance.new("SurfaceGui", Cape)
+    gui.Adornee = Cape
+    gui.SizingMode = Enum.SurfaceGuiSizingMode.PixelsPerStud
+
+    local img = Instance.new("ImageLabel", gui)
+    img.Size = UDim2.fromScale(1,1)
+    img.BackgroundTransparency = 1
+    img.Image = CapePNG:find("rbxasset") and CapePNG or getcustomasset(CapePNG)
+
+    Motor = Instance.new("Motor6D", Cape)
+    Motor.Part0 = Cape
+    Motor.Part1 = t
+    Motor.MaxVelocity = 0.08
+    Motor.C0 = CFrame.new(0,2,0) * CFrame.Angles(0, math.rad(-90), 0)
+    Motor.C1 = CFrame.new(0, t.Size.Y/2, 0.45) * CFrame.Angles(0, math.rad(90), 0)
+
+    task.spawn(function()
+        while Capevar and Cape and Motor do
+            local root = char:FindFirstChild("HumanoidRootPart")
+            if root then
+                local v = math.min(root.Velocity.Magnitude, 90)
+                Motor.DesiredAngle = math.rad(6 + v) +
+                    (v > 1 and math.abs(math.cos(tick()*5))/3 or 0)
+            end
+
+            local d = (WCam.CFrame.Position - WCam.Focus.Position).Magnitude
+            gui.Enabled = d > 0.6
+            Cape.Transparency = d > 0.6 and 0 or 1
+            task.wait()
+        end
+    end)
+end
+
+local CapeTog = CapeSection:Toggle({
+    ["Name"] = "Cape",
+    ["Flag"] = "CapeToggle",
+    ["Callback"] = function(v)
+        Capevar = v
+        if v and LocalPlayer.Character then
+            build(LocalPlayer.Character)
+        else
+            clear()
+        end
+    end
+})
+
+CapeSection:Dropdown({
+    ["Name"] = "Capes",
+    ["Items"] = {"Cat","Waifu","Troll", "Wave"},
+    ["Flag"] = "CapeTexture",
+    ["Callback"] = function(v)
+        local path = "Haze/Assets/capes/"..v..".png"
+        if isfile(path) then
+            CapePNG = path
+            if Capevar and LocalPlayer.Character then
+                build(LocalPlayer.Character)
+            end
+        end
+    end
+})
+
+CapeTog:Colorpicker({
+    ["Name"] = "Cape Color",
+    ["Flag"] = "CapeColor",
+    ["Default"] = CapeColor,
+    ["Callback"] = function(c)
+        CapeColor = c
+        if Cape then Cape.Color = c end
+    end
+})
+
+--[[ FECape ]]
+local FECapeSec = VisualsTab:Section({
+    ["Name"] = "LGBTQ Cape",
+    ["Side"] = 1
+})
+
+local FECapeVar = false
+
+local Capelist = {"Black", "White", "Red", "Yellow", "Green", "Blue", "Pink"}
+local SelectedColors = {"Black", "White", "Red", "Yellow", "Green", "Blue", "Pink"}
+
+local FECape = FECapeSec:Toggle({
+    ["Name"] = "LGBTQ Cape",
+    ["Default"] = false,
+    ["Flag"] = "FECape",
+    ["Tooltip"] = "Im sorry for this, FE btw",
+    ["Risky"] = false,
+    ["Callback"] = function(state)
+        FECapeVar = state
+        while FECapeVar do
+            for _, color in ipairs(SelectedColors) do
+               remotes.EquipCape:FireServer(color)
+                wait(.1)
+                if not FECapeVar then break end
+            end
+        end
+    end
+})
+
+local FECapeDropdown = FECapeSec:Dropdown({
+    ["Name"] = "Cape Colors", 
+    ["Flag"] = "CapeColors", 
+    ["Items"] = Capelist, 
+    ["Default"] = {"Pink", "White", "Blue"},
+    ["Multi"] = true,
+    ["Callback"] = function(values)
+        SelectedColors = values
+    end
+})
+
+--[[ Unique FE Capes ]]
+local UniqueFECapesSec = VisualsTab:Section({
+    Name = "Unique Capes",
+    Side = 2
+})
+
+local UniqueCapesData = {
+    Pro = {
+        Name = "Pro",
+        Notify = "Equipped Pro Cape | (yes its FE)"
+    },
+    Fire = {
+        Name = "Fire",
+        Notify = "Equipped Fire Cape | (yes its FE)"
+    }
+}
+
+UniqueFECapesSec:Dropdown({
+    Name = "Unique Capes",
+    Flag = "UniqueCapes",
+    Items = {"Pro", "Fire"},
+    Default = {"Pro"},
+    Multi = false,
+    Callback = function(value)
+        local UniqueCape = UniqueCapesData[value]
+
+        if UniqueCape then
+            Library:Notification(UniqueCape.Notify, 5, Color3.fromRGB(185, 66, 245))
+            remotes.EquipCape:FireServer(UniqueCape.Name)
+        else
+            remotes.EquipCape:FireServer("None")
+        end
+    end
+})
+
+--[[ Vibe ]]
+local VibeSec = VisualsTab:Section({
+    ["Name"] = "Vibe",
+    ["Side"] = 2
+})
+
+VibeSec:Toggle({
+    ["Name"] = "Vibe",
+    ["Flag"] = "Vibe",
+    ["Callback"] = function(state)
+        if state then
+            Lighting.TimeOfDay = "00:00:00"
+            Lighting.Technology = Enum.Technology.Future
+
+            if not Lighting:FindFirstChild("VibeSky") then
+                local sky = Instance.new("Sky")
+                sky.Name = "VibeSky"
+                sky.SkyboxBk = ""; sky.SkyboxDn = ""; sky.SkyboxFt = ""
+                sky.SkyboxLf = ""; sky.SkyboxRt = ""; sky.SkyboxUp = ""
+                sky.Parent = Lighting
+
+                local atm = Instance.new("Atmosphere")
+                atm.Density = 0.3
+                atm.Offset = 0
+                atm.Color = Color3.fromRGB(255,182,193)
+                atm.Decay = Color3.fromRGB(50,0,80)
+                atm.Glare = 0.5
+                atm.Haze = 0.1
+                atm.Parent = Lighting
+            end
+
+            if not Workspace:FindFirstChild("Snowing") then
+                local p = Instance.new("Part")
+                p.Name = "Snowing"
+                p.Anchored = true
+                p.CanCollide = false
+                p.Size = Vector3.new(500,1,500)
+                p.Position = Vector3.new(0,150,0)
+                p.Transparency = 1
+                p.Parent = Workspace
+
+                local e = Instance.new("ParticleEmitter")
+                e.Texture = "rbxassetid://258128463"
+                e.Rate = 200
+                e.Lifetime = NumberRange.new(8,15)
+                e.Speed = NumberRange.new(5,10)
+                e.SpreadAngle = Vector2.new(360,0)
+                e.Size = NumberSequence.new(2)
+                e.VelocityInheritance = 0
+                e.Acceleration = Vector3.new(0,-50,0)
+                e.Color = ColorSequence.new{
+                    ColorSequenceKeypoint.new(0, Color3.fromRGB(255,182,193)),
+                    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(173,216,230)),
+                    ColorSequenceKeypoint.new(1, Color3.fromRGB(50,0,80))
+                }
+                e.LightEmission = 0.9
+                e.Parent = p
+            end
+        else
+            Lighting.TimeOfDay = "14:00:00"
+            Lighting.Technology = Enum.Technology.Compatibility
+
+            if Workspace:FindFirstChild("Snowing") then Workspace.Snowing:Destroy() end
+            if Lighting:FindFirstChild("VibeSky") then Lighting.VibeSky:Destroy() end
+            for _, a in pairs(Lighting:GetChildren()) do if a:IsA("Atmosphere") then a:Destroy() end end
+        end
+    end
+})
+
+--[[ FOV ]]
+local FOVVar = false
+local FOVValue = 90
+local FOVConnection
+
+workspace:GetPropertyChangedSignal("CurrentCamera"):Connect(function()
+    WCam = workspace.CurrentCamera
+end)
+
+local FOVSec = VisualsTab:Section({
+    ["Name"] = "FOV",
+    ["Side"] = 1
+})
+
+local function ManageFOV()
+    if FOVConnection then FOVConnection:Disconnect() end
+    
+    if FOVVar then
+        FOVConnection = RunService.RenderStepped:Connect(function()
+            WCam.FieldOfView = FOVValue
+        end)
+    else
+        WCam.FieldOfView = 70
+    end
+end
+
+FOVSec:Toggle({
+    ["Name"] = "FOV",
+    ["Default"] = false,
+    ["Flag"] = "FOV_Toggle",
+    ["Tooltip"] = "Incrase your foc",
+    ["Callback"] = function(state)
+        FOVVar = state
+        ManageFOV()
+    end
+})
+
+FOVSec:Slider({
+    ["Name"] = "FOV",
+    ["Min"] = 70,
+    ["Max"] = 120,
+    ["Default"] = 90,
+    ["Decimals"] = 1,
+    ["Flag"] = "FOV_Value",
+    ["Callback"] = function(val)
+        FOVValue = val
+    end
+})
+
+--[[ ChestStealer ]]
+local ChestStealSec = UtilityTab:Section({
+    ["Name"] = "Chest Stealer",
+    ["Side"] = 1
+})
+
+local TeamColors = {"Red", "Orange", "Yellow", "Green", "Blue", "Purple", "Pink", "Brown"}
+
+local CSVar = false
+
+local CSTog = ChestStealSec:Toggle({
+    ["Name"] = "Chest Stealer",
+    ["Default"] = false,
+    ["Flag"] = "Chest_Stealer",
+    ["Tooltip"] = "Steal loot from every chest",
+    ["Risky"] = false,
+    ["Callback"] = function(state)
+        CSVar = state
+        if state then
+            spawn(function()
+                while CSVar do
+                    for _, color in ipairs(TeamColors) do
+                        for num = 1, 20 do
+                            if not CSVar then break end
+                            remotes.TakeItemFromChest:FireServer(color, num, "1")
+                            task.wait(.1)
+                        end
+                        if not CSVar then break end
+                    end
+                end
+            end)
+        end
+    end
+})
+
+--[[ Velocity ]]
+local VelocityUtils = require(ReplicatedStorage:WaitForChild("Modules"):WaitForChild("VelocityUtils"))
+
+local VelocityVar = false
+local originalCreate
+
+local VelocitySec = UtilityTab:Section({
+    ["Name"] = "Velocity",
+    ["Side"] = 2
+})
+
+VelocitySec:Toggle({
+    ["Name"] = "Velocity",
+    ["Default"] = false,
+    ["Flag"] = "Velocity",
+    ["Tooltip"] = "Bypasses the knockback in our ways",
+    ["Callback"] = function(state)
+        VelocityVar = state
+        originalCreate = hookfunction(VelocityUtils.Create, function(...)
+            if VelocityVar then
+                return nil
+            end
+            return originalCreate(...)
+        end)
+    end
+})
+
+--[[ AutoSprint ]]
+local SprintSec = UtilityTab:Section({
+    ["Name"] = "AutoSprint",
+    ["Side"] = 1
+})
+
+SprintSec:Toggle({
+    ["Name"] = "AutoSprint",
+    ["Default"] = false,
+    ["Flag"] = "AutoSprint",
+    ["Tooltip"] = "Sprints for you",
+    ["Callback"] = function(state)
+        modules.SprintController:SetState(state)
+    end
+})
+
+--[[ ESP ]]
+local ESPSec = VisualsTab:Section({
+    ["Name"] = "ESP",
+    ["Side"] = 1
+})
+
+ESPSec:Toggle({
+    ["Name"] = "ESP",
+    ["Default"] = false,
+    ["Flag"] = "ESP",
+    ["Callback"] = function(state)
+        modules.ESPController.Enabled = state
+    end
+})
+
+ESPSec:Toggle({
+    ["Name"] = "Vibe ESP",
+    ["Default"] = true,
+    ["Flag"] = "ESP_Vibe",
+    ["Tooltip"] = "Give a good vibe to the esp boxes",
+    ["Callback"] = function(state)
+        modules.ESPController.UseGradient = state
+    end
+})
+
+ESPSec:Dropdown({
+    ["Name"] = "Theme",
+    ["Flag"] = "ESP_Theme",
+    ["Items"] = {"Haze", "Aqua", "Nova"},
+    ["Default"] = "Haze",
+    ["Callback"] = function(val)
+        if val and val ~= "" then
+            modules.ESPController.Theme = val
+        else
+            modules.ESPController.Theme = "Haze"
+        end
+    end
+})
+
+ESPSec:Toggle({
+    ["Name"] = "Team Check",
+    ["Default"] = false,
+    ["Flag"] = "ESP_TeamCheck",
+    ["Callback"] = function(state)
+        modules.ESPController.TeamCheck = state
+    end
+})
+
+ESPSec:Toggle({
+    ["Name"] = "Ignore Team",
+    ["Default"] = false,
+    ["Flag"] = "ESP_NoTeam",
+    ["Callback"] = function(state)
+        modules.ESPController.NoTeam = state
+    end
+})
+
+--[[ Scaffold ]]
+local ScaffoldSec = UtilityTab:Section({
+    ["Name"] = "Scaffold",
+    ["Side"] = 2
+})
+
+local ScaffoldKey = ScaffoldSec:Label("Scaffold", "Left"):Keybind({
+    ["Name"] = "Scaffold",
+    ["Flag"] = "Scaffold",
+    ["Default"] = Enum.KeyCode.V,
+    ["Mode"] = "Toggle",
+    ["Callback"] = function(state)
+        modules.ScaffoldController:SetState(state)
+    end
+})
+
+--[[ Fly ]]
+local FlySec = MovementTab:Section({
+    ["Name"] = "Fly",
+    ["Side"] = 2
+})
+
+local FlyKey = FlySec:Label("Fly", "Left"):Keybind({
+    ["Name"] = "Fly",
+    ["Flag"] = "Fly",
+    ["Default"] = Enum.KeyCode.R,
+    ["Mode"] = "Toggle",
+    ["Callback"] = function(state)
+        modules.FlyController:Toggle(state)
+    end
+})
+
+FlySec:Toggle({
+    ["Name"] = "Vertical",
+    ["Flag"] = "Vertical",
+    ["Default"] = false,
+    ["Callback"] = function(state)
+        modules.FlyController:SetVertical(state)
+    end
+})
+
+--[[ Spam Invites ]]
+local PartySec = UtilityTab:Section({
+    ["Name"] = "Party Utilities",
+    ["Side"] = 1
+})
+
+PartySec:Toggle({
+    ["Name"] = "Spam Invites",
+    ["Flag"] = "InviteSpam",
+    ["Tooltip"] = "Invites everyone in your party",
+    ["Default"] = false,
+    ["Callback"] = function(state)
+        spawn(function()
+            while state do
+                modules.PartyController:InviteAll()
+                wait(0.1)
+            end
+        end)
+    end
+})
+
+PartySec:Toggle({
+    ["Name"] = "KickExploit",
+    ["Flag"] = "KickSpam",
+    ["Tooltip"] = "Spam Kick everyone for party, everyone in server will get spam kicked even if not in party",
+    ["Default"] = false,
+    ["Callback"] = function(state)
+        spawn(function()
+            while state do
+                modules.PartyController:KickAll()
+                wait(0.1)
+            end
+        end)
+    end
+})
+
+--[[ Reverbs ]]
+local RevertReverbs = SoundService.AmbientReverb
+local ReverbsSec = VisualsTab:Section({
+    ["Name"] = "Reverbs",
+    ["Side"] = 2
+})
+
+ReverbsSec:Toggle({
+    ["Name"] = "Reverbs",
+    ["Flag"] = "Reverbs",
+    ["Default"] = false,
+    ["Callback"] = function(state)
+        if state then
+            SoundService.AmbientReverb = Enum.ReverbType.SewerPipe
+        else
+            SoundService.AmbientReverb = RevertReverbs
+        end
+    end
+})
+
+--[[ Viber ]]
+local oldFOV = WCam.FieldOfView
+local ReverbBackup = SoundService.AmbientReverb
+local oldRevert = {
+    ClockTime = Lighting.ClockTime,
+    Brightness = Lighting.Brightness,
+    FogEnd = Lighting.FogEnd,
+    Ambient = Lighting.Ambient,
+    OutdoorAmbient = Lighting.OutdoorAmbient
+}
+
+local ViberSec = VisualsTab:Section({
+    ["Name"] = "Viber",
+    ["Side"] = 2
+})
+
+local volumeVal = 1
+
+local MusicSound = Instance.new("Sound")
+MusicSound.Parent = SoundService
+MusicSound.Looped = true
+MusicSound.Volume = volumeVal
+
+local viberVar = false
+local reverbsvibervar = false
+local fovConnection
+local snowConnection
+local glowingsnow = {}
+
+local function getAudioAsset(name)
+    if not name or name == "" then return end
+
+    local path = "Haze/assets/audios/" .. name .. ".mp3"
+    local success, asset = pcall(function()
+        return getcustomasset(path)
+    end)
+
+    if success and asset then
+        MusicSound.SoundId = asset
+        if viberVar then
+            MusicSound:Play()
+        end
+    end
+end
+
+ViberSec:Toggle({
+    ["Name"] = "Viber",
+    ["Flag"] = "ViberToggle",
+    ["Default"] = false,
+    ["Callback"] = function(state)
+        viberVar = state
+
+        if state then
+            if MusicSound.SoundId ~= "" then
+                MusicSound:Play()
+            end
+
+            if reverbsvibervar then
+                SoundService.AmbientReverb = Enum.ReverbType.Cave
+            end
+
+            Lighting.ClockTime = 23
+            Lighting.Brightness = 2
+            Lighting.FogEnd = 1000
+            Lighting.Ambient = Color3.fromRGB(120,120,140)
+            Lighting.OutdoorAmbient = Color3.fromRGB(80,80,100)
+
+            fovConnection = RunService.RenderStepped:Connect(function()
+                if MusicSound.IsPlaying then
+                    local bass = MusicSound.PlaybackLoudness / 150
+                    WCam.FieldOfView = oldFOV + bass * 15
+                else
+                    WCam.FieldOfView = oldFOV
+                end
+            end)
+
+            snowConnection = RunService.RenderStepped:Connect(function(dt)
+                local loudness = MusicSound.IsPlaying and MusicSound.PlaybackLoudness or 0
+                local bassScale = math.clamp(loudness / 100, 0.5, 6)
+                local rainbow = loudness >= 280
+
+                for _ = 1, math.floor(6 * bassScale) do
+                    local s = Instance.new("Part")
+                    s.Anchored = true
+                    s.CanCollide = false
+                    s.Size = Vector3.new(0.5,0.5,0.5)
+                    s.Material = Enum.Material.Neon
+                    s.Color = rainbow
+                        and Color3.fromHSV(math.random(),1,1)
+                        or Color3.fromRGB(180,220,255)
+
+                    s.Position = Vector3.new(
+                        math.random(-500 , 500),
+                        80,
+                        math.random(-500 , 500)
+                    )
+                    s.Parent = workspace
+                    table.insert(glowingsnow,s)
+                end
+
+                for i = #glowingsnow, 1, -1 do
+                    local s = glowingsnow[i]
+                    if not s or not s.Parent then
+                        table.remove(glowingsnow, i)
+                        continue
+                    end
+
+                    local fall = dt * 14 * bassScale
+                    s.Position -= Vector3.new(0, fall, 0)
+
+                    local params = RaycastParams.new()
+                    params.FilterDescendantsInstances = { s }
+                    params.FilterType = Enum.RaycastFilterType.Blacklist
+
+                    local hit = workspace:Raycast(
+                        s.Position,
+                        Vector3.new(0, -fall, 0),
+                        params
+                    )
+
+                    if hit or s.Position.Y <= 0 then
+                        s:Destroy()
+                        table.remove(glowingsnow, i)
+                    end
+                end
+            end)
+
+        else
+            MusicSound:Stop()
+            WCam.FieldOfView = oldFOV
+            SoundService.AmbientReverb = ReverbBackup
+
+            for k,v in pairs(oldRevert) do
+                Lighting[k] = v
+            end
+
+            if fovConnection then fovConnection:Disconnect() end
+            if snowConnection then snowConnection:Disconnect() end
+
+            for _,s in ipairs(glowingsnow) do
+                if s and s.Parent then s:Destroy() end
+            end
+            glowingsnow = {}
+        end
+    end
+})
+
+ViberSec:Toggle({
+    ["Name"] = "Reverbs",
+    ["Flag"] = "ViberReverb",
+    ["Default"] = false,
+    ["Callback"] = function(state)
+        reverbsvibervar = state
+        if viberVar then
+            SoundService.AmbientReverb = state and Enum.ReverbType.Cave or ReverbBackup
+        end
+    end
+})
+
+ViberSec:Textbox({
+    ["Name"] = "Asset Name",
+    ["Flag"] = "MusicInput",
+    ["Default"] = "",
+    ["Placeholder"] = "song name (must be in Haze/assets/audios)",
+    ["Callback"] = getAudioAsset
+})
+
+ViberSec:Slider({
+    ["Name"] = "Volume",
+    ["Min"] = 0.5,
+    ["Max"] = 10,
+    ["Default"] = 1,
+    ["Decimals"] = 0.1,
+    ["Flag"] = "ViberVolume",
+    ["Callback"] = function(value)
+        volumeVal = value
+        MusicSound.Volume = value
+    end
+})
+
+ViberSec:Button({
+    ["Name"] = "Tutorial",
+    ["Callback"] = function()
+        Library:Notification("Place a song (.mp3) in the folder Haze/assets/audios then put the name of the file in the textbox (SONG FILE MUST BE UNDER 20mb and 7 Mins long)", 15, Color3.fromRGB(66, 245, 138))
+    end
+})
+
+--[[ Emote Exploit ]]
+local currentEmote
+local EmoteEXPVar = false
+
+local EmotesSec = UtilityTab:Section({
+    ["Name"] = "EmoteExploit",
+    ["Side"] = 2
+})
+
+local EmoteToggle = EmotesSec:Toggle({
+    ["Name"] = "EmoteExploit",
+    ["Default"] = false,
+    ["Tooltip"] = "Remake bedfight emotes in our ways",
+    ["Flag"] = "EmoteExploit",
+    ["Callback"] = function(state)
+        EmoteEXPVar = state
+        if not state then
+            modules.EmotesController:StopAll()
+            return
+        end
+
+        if currentEmote then
+            modules.EmotesController:StopAll()
+            modules.EmotesController:Play(currentEmote)
+        end
+    end
+})
+
+EmotesSec:Dropdown({
+    ["Name"] = "Emotes",
+    ["Flag"] = "EmotesList",
+    ["Items"] = {"Crystal", "Chair", "Make up"},
+    ["Default"] = "Crystal",
+    ["Callback"] = function(value)
+        if value == "Crystal" then
+            currentEmote = "CrystalIdle"
+        elseif value == "Chair" then
+            currentEmote = "Chair"
+        elseif value == "Make up" then
+            currentEmote = "Makeup"
+        end
+    end
+})
+
+--[[ Themes + Config ]]
+local ThemesSection = SettingsTab:Section({
+    ["Name"] = "Settings",
+    ["Side"] = 1
+})
+
+do
+    for Index, Value in Library.Theme do 
+        Library.ThemeColorpickers[Index] = ThemesSection:Label(Index, "Left"):Colorpicker({
+            ["Name"] = Index,
+            ["Flag"] = "Theme" .. Index,
+            ["Default"] = Value,
+            ["Callback"] = function(Value)
+                Library.Theme[Index] = Value
+                Library:ChangeTheme(Index, Value)
+            end
+        })
+    end
+
+    ThemesSection:Dropdown({
+        ["Name"] = "Themes list",
+        ["Items"] = {"Default", "Bitchbot", "Onetap", "Aqua"},
+        ["Default"] = "Default",
+        ["Callback"] = function(Value)
+            local ThemeData = Library.Themes[Value]
+
+            if not ThemeData then 
+                return
+            end
+
+            for Index, Value in Library.Theme do 
+                Library.Theme[Index] = ThemeData[Index]
+                Library:ChangeTheme(Index, ThemeData[Index])
+
+                Library.ThemeColorpickers[Index]:Set(ThemeData[Index])
+            end
+
+            task.wait(0.3)
+
+        Library:Thread(function()
+            for Index, Value in Library.Theme do 
+                Library.Theme[Index] = Library.Flags["Theme"..Index].Color
+                Library:ChangeTheme(Index, Library.Flags["Theme"..Index].Color)
+            end    
+        end)
+    end})
+
+    local ThemeName
+    local SelectedTheme 
+
+    local ThemesListbox = ThemesSection:Listbox({
+        ["Name"] = "Themes List",
+        ["Flag"] = "Themes List",
+        ["Items"] = { },
+        ["Multi"] = false,
+        ["Default"] = nil,
+        ["Callback"] = function(Value)
+            SelectedTheme = Value
+        end
+    })
+
+    ThemesSection:Textbox({
+        ["Name"] = "Name",
+        ["Flag"] = "Theme Name",
+        ["Default"] = "",
+        ["Placeholder"] = ". . .",
+        ["Callback"] = function(Value)
+            ThemeName = Value
+        end
+    })
+
+    ThemesSection:Button({
+        ["Name"] = "Save Theme",
+        ["Callback"] = function()
+            if ThemeName == "" then 
+                return
+            end
+
+            if not isfile(Library.Folders.Themes .. "/" .. ThemeName .. ".json") then
+                writefile(Library.Folders.Themes .. "/" .. ThemeName .. ".json", Library:GetTheme())
+
+                Library:RefreshThemeList(ThemesListbox)
+            else
+                Library:Notification("Theme " .. ThemeName .. ".json already exists", 3, Color3.fromRGB(66, 245, 138))
+                return
+            end
+        end
+    }):SubButton({
+        ["Name"] = "Load Theme",
+        ["Callback"] = function()
+            if SelectedTheme then
+                Library:LoadTheme(readfile(Library.Folders.Themes .. "/" .. SelectedTheme))
+            end
+        end
+    })
+
+    ThemesSection:Button({
+        ["Name"] = "Refresh Themes",
+        ["Callback"] = function()
+            Library:RefreshThemeList(ThemesListbox)
+        end
+    })
+
+    Library:RefreshThemeList(ThemesListbox)
+end
+
+local ConfigsSection = SettingsTab:Section({
+    ["Name"] = "Configs",
+    ["Side"] = 2
+})
+
+do
+    local ConfigName
+    local SelectedConfig
+
+    local ConfigsListbox = ConfigsSection:Listbox({
+        ["Name"] = "Configs list",
+        ["Flag"] = "Configs List",
+        ["Items"] = { },
+        ["Multi"] = false,
+        ["Default"] = nil,
+        ["Callback"] = function(Value)
+            SelectedConfig = Value
+        end
+    })
+
+    ConfigsSection:Textbox({
+        ["Name"] = "Name",
+        ["Flag"] = "Config Name",
+        ["Default"] = "",
+        ["Placeholder"] = ". . .",
+        ["Callback"] = function(Value)
+            ConfigName = Value
+        end
+    })
+
+    ConfigsSection:Button({
+        ["Name"] = "Load Config",
+        ["Callback"] = function()
+            if SelectedConfig then
+                Library:LoadConfig(readfile("Haze/Configs/" .. SelectedConfig))
+            end
+
+            Library:Thread(function()
+                task.wait(0.1)
+
+                for Index, Value in Library.Theme do 
+                    Library.Theme[Index] = Library.Flags["Theme"..Index].Color
+                    Library:ChangeTheme(Index, Library.Flags["Theme"..Index].Color)
+                end    
+            end)
+        end
+    }):SubButton({
+        ["Name"] = "Save Config",
+        ["Callback"] = function()
+            if SelectedConfig then
+                Library:SaveConfig(SelectedConfig)
+            end
+        end
+    })
+
+    ConfigsSection:Button({
+        ["Name"] = "Create Config",
+        ["Callback"] = function()
+            if ConfigName == "" then 
+                return
+            end
+
+            if not isfile(Library.Folders.Configs .. "/" .. ConfigName .. ".json") then
+                writefile(Library.Folders.Configs .. "/" .. ConfigName .. ".json", Library:GetConfig())
+
+                Library:RefreshConfigsList(ConfigsListbox)
+            else
+                Library:Notification("Config " .. ConfigName .. ".json already exists", 3, Color3.fromRGB(66, 245, 138))
+                return
+            end
+        end
+    }):SubButton({
+        ["Name"] = "Delete Config",
+        ["Callback"] = function()
+            if SelectedConfig then
+                Library:DeleteConfig(SelectedConfig)
+
+                Library:RefreshConfigsList(ConfigsListbox)
+            end
+        end
+    })
+
+    ConfigsSection:Button({
+        ["Name"] = "Refresh Configs",
+        ["Callback"] = function()
+            Library:RefreshConfigsList(ConfigsListbox)
+        end
+    })
+
+    Library:RefreshConfigsList(ConfigsListbox)
+
+    ConfigsSection:Label("Menu Keybind", "Left"):Keybind({
+        ["Name"] = "Menu Keybind",
+        ["Flag"] = "Menu Keybind",
+        ["Default"] = Enum.KeyCode.RightShift,
+        ["Mode"] = "Toggle",
+        ["Callback"] = function(Value)
+        Library.MenuKeybind = Library.Flags["Menu Keybind"].Key
+    end})
+
+    ConfigsSection:Toggle({
+        ["Name"] = "Watermark",
+        ["Flag"] = "Watermark",
+        ["Default"] = false,
+        ["Callback"] = function(Value)
+        Watermark:SetVisibility(Value)
+    end})
+
+    ConfigsSection:Toggle({
+        ["Name"] = "Keybind List",
+        ["Flag"] = "Keybind List",
+        ["Default"] = false,
+        ["Callback"] = function(Value)
+        KeybindList:SetVisibility(Value)
+    end})
+
+    ConfigsSection:Dropdown({
+        ["Name"] = "Style",
+        ["Flag"] = "Tweening Style",
+        ["Default"] = "Exponential",
+        ["Items"] = {"Linear", "Sine", "Quad", "Cubic", "Quart", "Quint", "Exponential", "Circular", "Back", "Elastic", "Bounce"},
+        ["Callback"] = function(Value)
+        Library.Tween.Style = Enum.EasingStyle[Value]
+    end})
+
+    ConfigsSection:Dropdown({
+        ["Name"] = "Direction",
+        ["Flag"] = "Tweening Direction",
+        ["Default"] = "Out",
+        ["Items"] = {"In", "Out", "InOut"},
+        ["Callback"] = function(Value)
+        Library.Tween.Direction = Enum.EasingDirection[Value]
+    end})
+
+    ConfigsSection:Slider({
+        ["Name"] = "Tweening Time",
+        ["Min"] = 0,
+        ["Max"] = 5,
+        ["Default"] = 0.25,
+        ["Decimals"] = 0.01,
+        ["Flag"] = "Tweening Time",
+        ["Callback"] = function(Value)
+        Library.Tween.Time = Value
+    end})
+
+    ConfigsSection:Button({
+        ["Name"] = "Discord",
+        ["Callback"] = function()
+        modules.Discord:Join("https://discord.gg/W92SXVmB5X")
+        modules.Discord:Copy("https://discord.gg/W92SXVmB5X")
+    end})
+
+    ConfigsSection:Button({
+    ["Name"] = "Uninject",
+    ["Callback"] = function()
+            SpeedVar = false
+            KAVar = false
+            HighVar = false
+            AnimsVar = false
+            NukerVar = false
+            Capevar = false
+            FECapeVar = false
+            FOVVar = false
+            CSVar = false
+            VelocityVar = false
+
+            Lighting.TimeOfDay = "14:00:00"
+            Lighting.Technology = Enum.Technology.Compatibility
+
+            if Workspace:FindFirstChild("Snowing") then Workspace.Snowing:Destroy() end
+            if Lighting:FindFirstChild("VibeSky") then Lighting.VibeSky:Destroy() end
+            for _, a in pairs(Lighting:GetChildren()) do if a:IsA("Atmosphere") then a:Destroy() end end
+
+            modules.SprintController:SetState(false)
+            modules.ScaffoldController:SetState(false)
+            modules.FlyController:Toggle(false)
+
+            Library:Unload()
+        end
+    })
+
+    task.spawn(function()
+        repeat task.wait() until Library and Library.Flags
+
+        local cfg = rawget(_G, "HazeAutoConfig")
+        if type(cfg) ~= "string" then return end
+
+        local path = cfg:find("/") and cfg or (Library.Folders.Configs .. "/" .. cfg)
+
+        if isfile(path) then
+            Library:LoadConfig(readfile(path))
+
+            task.wait(0.1)
+            for Index, _ in Library.Theme do
+                local flag = Library.Flags["Theme"..Index]
+                if flag then
+                    Library.Theme[Index] = flag.Color
+                    Library:ChangeTheme(Index, flag.Color)
+                end
+            end
+        end
+    end)
+end
