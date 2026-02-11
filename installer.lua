@@ -124,7 +124,8 @@ local function cachefiles(root, validFiles)
         for _, item in ipairs(listfiles(dir)) do
             local rel = item:sub(#root + 2):gsub("\\", "/")
 
-            if not rel:match("^configs/") and not rel:match("^themes/") and rel ~= "config.txt" then
+            if not rel:match("^configs/") and not rel:match("^themes/") and not rel:match("^assets/audios/") and rel ~= "config.txt" then
+                
                 if isfolder(item) then
                     scan(item)
                     if #listfiles(item) == 0 then
