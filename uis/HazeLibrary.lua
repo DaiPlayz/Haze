@@ -157,7 +157,7 @@ subLogoText.BackgroundTransparency = 1
 subLogoText.Text = ""
 subLogoText.TextColor3 = Color3.fromRGB(200, 200, 200)
 subLogoText.TextSize = 16
-subLogoText.Font = Enum.Font.BuilderSansItalic
+subLogoText.Font = Enum.Font.BuilderSansExtraBold
 subLogoText.TextXAlignment = Enum.TextXAlignment.Right
 subLogoText.RichText = true
 
