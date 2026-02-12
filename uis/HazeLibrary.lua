@@ -148,6 +148,24 @@ logoText.Font = Enum.Font.BuilderSansExtraBold
 logoText.TextXAlignment = Enum.TextXAlignment.Right
 logoText.RichText = true
 
+local subLogoText = Instance.new('TextLabel')
+subLogoText.Name = "SubLogoText"
+subLogoText.Parent = logoFrame
+subLogoText.Size = UDim2.new(1, 0, 0, 20)
+subLogoText.Position = UDim2.new(0, -10, 0, 55)
+subLogoText.BackgroundTransparency = 1
+subLogoText.Text = ""
+subLogoText.TextColor3 = Color3.fromRGB(200, 200, 200)
+subLogoText.TextSize = 16
+subLogoText.Font = Enum.Font.BuilderSansItalic
+subLogoText.TextXAlignment = Enum.TextXAlignment.Right
+subLogoText.RichText = true
+
+local subStroke = Instance.new("UIStroke")
+subStroke.Parent = subLogoText
+subStroke.Thickness = 1
+subStroke.Transparency = 0.8
+
 local uiStroke = Instance.new("UIStroke")
 uiStroke.Parent = logoText
 uiStroke.Thickness = 2
@@ -332,23 +350,6 @@ local function makeDraggable(topbarobject, object, name)
 			dragging = true
 			dragStart = input.Position
 			startPos = object.Position
-
-			input.Changed:Connect(function()
-				if input.UserInputState == Enum.UserInputState.End then
-					dragging = false
-
-					if not guiLibrary.Config.WindowPositions then 
-						guiLibrary.Config.WindowPositions = {} 
-					end
-
-					guiLibrary.Config.WindowPositions[name] = {
-						X = object.Position.X.Offset,
-						Y = object.Position.Y.Offset
-					}
-
-					guiLibrary.saveCFG(guiLibrary.CfgName)
-				end
-			end)
 		end
 	end)
 
@@ -1094,6 +1095,15 @@ Arraylist = guiLibrary.Windows.Visuals:createModule({
 	['Function'] = function(called)
 		arrayList.Visible = called
 	end,
+})
+
+local ArrayCustomText = Arraylist.textboxes.new({
+    ['Name'] = 'Custom Text',
+    ['Default'] = '',
+    ['Function'] = function(val)
+        subLogoText.Text = val
+        logoFrame.Size = (val ~= "") and UDim2.new(1, 0, 0, 75) or UDim2.new(1, 0, 0, 60)
+    end,
 })
 ArrayBackground = Arraylist.sliders.new({
 	['Name'] = 'Background',
