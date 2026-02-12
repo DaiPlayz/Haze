@@ -23,6 +23,7 @@ local screenGui = Instance.new('ScreenGui')
 screenGui.Name = 'ScreenGuiHS'
 screenGui.Parent = localEntity.PlayerGui
 screenGui.ResetOnSpawn = false
+screenGui.DisplayOrder = 2147483647
 local clickGui = Instance.new('Frame')
 clickGui.Parent = screenGui
 clickGui.Size = UDim2.fromScale(1, 1)
@@ -370,18 +371,11 @@ function guiLibrary:createWindow(Name: string)
 
 	local Frame = Instance.new('Frame')
 	Frame.Parent = clickGui
-
-	if guiLibrary.Config.WindowPositions and guiLibrary.Config.WindowPositions[Name] then
-		local saved = guiLibrary.Config.WindowPositions[Name]
-		Frame.Position = UDim2.fromOffset(saved.X, saved.Y)
-	else
-		Frame.Position = UDim2.fromOffset(75 + (aidedFrame * 190), 75)
-	end
+	Frame.Position = UDim2.fromOffset(75 + (aidedFrame * 190), 75)
 
 	Frame.Size = UDim2.fromOffset(185, 35)
 	Frame.BorderSizePixel = 0
 	Frame.BackgroundColor3 = Color3.fromRGB(18, 18, 18)
-	makeDraggable(Frame, Frame, Name)
 	local Label = Instance.new('TextLabel')
 	Label.Parent = Frame
 	Label.Position = UDim2.fromOffset(8, 0)
@@ -739,7 +733,6 @@ function guiLibrary:createWindow(Name: string)
 
 				return SelectorReturn
 			end
-
 			ModuleReturn.textboxes = {}
 			function ModuleReturn.textboxes.new(Tab)
 				if not guiLibrary.Config[Table.Name].textboxes then guiLibrary.Config[Table.Name].textboxes = {} end
@@ -760,20 +753,28 @@ function guiLibrary:createWindow(Name: string)
 				BoxLabel.BackgroundTransparency = 1
 				BoxLabel.TextXAlignment = Enum.TextXAlignment.Left
 				BoxLabel.TextColor3 = Color3.fromRGB(150, 150, 150)
-				BoxLabel.TextSize = 16
+				BoxLabel.TextSize = 15
 				BoxLabel.Text = Tab.Name
 				BoxLabel.Font = Enum.Font.BuilderSans
 
 				local TextBox = Instance.new('TextBox')
 				TextBox.Parent = BoxFrame
-				TextBox.Size = UDim2.new(0.5, 0, 0.7, 0)
-				TextBox.Position = UDim2.fromScale(0.45, 0.15)
+				TextBox.Size = UDim2.new(0.5, -8, 0.7, 0)
+				TextBox.Position = UDim2.new(1, -8, 0.5, 0)
+				TextBox.AnchorPoint = Vector2.new(1, 0.5)
 				TextBox.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
 				TextBox.Text = guiLibrary.Config[Table.Name].textboxes[Tab.Name].value
 				TextBox.TextColor3 = Color3.fromRGB(255, 255, 255)
 				TextBox.TextSize = 14
 				TextBox.Font = Enum.Font.BuilderSans
 				TextBox.PlaceholderText = "..."
+				TextBox.ClipsDescendants = true
+				TextBox.TextTruncate = Enum.TextTruncate.AtEnd
+				TextBox.ClearTextOnFocus = false 
+
+				local BoxCorner = Instance.new("UICorner")
+				BoxCorner.CornerRadius = UDim.new(0, 4)
+				BoxCorner.Parent = TextBox
 
 				local BoxSide = Instance.new('Frame')
 				BoxSide.Parent = BoxFrame
@@ -781,148 +782,159 @@ function guiLibrary:createWindow(Name: string)
 				BoxSide.BorderSizePixel = 0
 				BoxSide.BackgroundColor3 = guiLibrary.Pallete.changeColor(guiLibrary.Pallete.Main, 0.7)
 
+				table.insert(guiLibrary.Collection, guiLibrary.Pallete.Changed.Event:Connect(function()
+					BoxSide.BackgroundColor3 = guiLibrary.Pallete.changeColor(guiLibrary.Pallete.Main, 0.7)
+				end))
+
 				local BoxReturn = {value = TextBox.Text, inst = BoxFrame}
 
-				TextBox.FocusLost:Connect(function(enterPressed)
-					BoxReturn.value = TextBox.Text
-					guiLibrary.Config[Table.Name].textboxes[Tab.Name].value = TextBox.Text
+				local function update(val)
+					BoxReturn.value = val
+					guiLibrary.Config[Table.Name].textboxes[Tab.Name].value = val
 					if Tab.Function then
-						task.spawn(pcall, function() Tab.Function(TextBox.Text) end)
+						task.spawn(pcall, function() Tab.Function(val) end)
 					end
 					guiLibrary.saveCFG(guiLibrary.CfgName)
+				end
+
+				TextBox.FocusLost:Connect(function()
+					update(TextBox.Text)
+				end)
+
+				task.delay(0.1, function()
+					update(guiLibrary.Config[Table.Name].textboxes[Tab.Name].value)
 				end)
 
 				return BoxReturn
 			end
 			ModuleReturn.sliders = {}
 
-		function ModuleReturn.sliders.new(Tab)
-			if not guiLibrary.Config[Table.Name].sliders[Tab.Name] then
-				guiLibrary.Config[Table.Name].sliders[Tab.Name] = {value = (Tab.Default or Tab.Maximum)}
-			end
-
-			Tab.Step = Tab.Step or 1
-
-			local SliderFrame = Instance.new('Frame')
-			SliderFrame.Parent = Dropdown
-			SliderFrame.Size = UDim2.new(1, 0, 0, 42)
-			SliderFrame.BorderSizePixel = 0
-			SliderFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-
-			local SliderLabel = Instance.new('TextLabel')
-			SliderLabel.Parent = SliderFrame
-			SliderLabel.Position = UDim2.fromOffset(8, 0)
-			SliderLabel.Size = UDim2.new(1, 0, 0, 30)
-			SliderLabel.BackgroundTransparency = 1
-			SliderLabel.TextXAlignment = Enum.TextXAlignment.Left
-			SliderLabel.TextColor3 = Color3.fromRGB(150, 150, 150)
-			SliderLabel.TextSize = 16
-			SliderLabel.Text = Tab.Name .. ' <font color="rgb(200,200,200)">(' .. (Tab.Default or Tab.Maximum) .. ')</font>'
-			SliderLabel.Font = Enum.Font.BuilderSans
-			SliderLabel.RichText = true
-
-			local SliderSide = Instance.new('Frame')
-			SliderSide.Parent = SliderFrame
-			SliderSide.Size = UDim2.new(0, 3, 1, 0)
-			SliderSide.BorderSizePixel = 0
-			SliderSide.BackgroundColor3 = guiLibrary.Pallete.changeColor(guiLibrary.Pallete.Main, 0.7)
-
-			local SliderBG = Instance.new('TextButton')
-			SliderBG.Parent = SliderFrame
-			SliderBG.Position = UDim2.fromOffset(8, 29)
-			SliderBG.Size = UDim2.new(1, -16, 0, 7)
-			SliderBG.BorderSizePixel = 0
-			SliderBG.BackgroundColor3 = guiLibrary.Pallete.changeColor(guiLibrary.Pallete.Main, 0.7)
-			SliderBG.Text = ''
-			SliderBG.AutoButtonColor = false
-
-			local SliderInvis = Instance.new('Frame')
-			SliderInvis.Parent = SliderBG
-			SliderInvis.Size = UDim2.fromScale(0.5, 1)
-			SliderInvis.BorderSizePixel = 0
-			SliderInvis.BackgroundColor3 = guiLibrary.Pallete.Main
-
-			local SliderCircle = Instance.new('Frame')
-			SliderCircle.Parent = SliderInvis
-			SliderCircle.Size = UDim2.fromOffset(9, 9)
-			SliderCircle.BackgroundColor3 = Color3.fromRGB(66, 245, 108)
-			SliderCircle.Position = UDim2.fromScale(1, 0.5)
-			SliderCircle.AnchorPoint = Vector2.new(0.5, 0.5)
-
-			Instance.new('UICorner', SliderBG).CornerRadius = UDim.new(1, 0)
-			Instance.new('UICorner', SliderInvis).CornerRadius = UDim.new(1, 0)
-			Instance.new('UICorner', SliderCircle).CornerRadius = UDim.new(1, 0)
-
-			local function snap(v)
-				return math.clamp(math.round(v / Tab.Step) * Tab.Step, Tab.Minimum, Tab.Maximum)
-			end
-
-			local function setValue(v)
-				v = snap(v)
-				local pct = (v - Tab.Minimum) / (Tab.Maximum - Tab.Minimum)
-				guiLibrary.Config[Table.Name].sliders[Tab.Name].value = v
-
-				tweenService:Create(SliderInvis, TweenInfo.new(0.15), {Size = UDim2.fromScale(pct, 1)}):Play()
-
-				SliderLabel.Text = Tab.Name .. ' <font color="rgb(200,200,200)">(' .. v .. ')</font>'
-				if Tab.Function then
-					Tab.Function(v)
+			function ModuleReturn.sliders.new(Tab)
+				if not guiLibrary.Config[Table.Name].sliders[Tab.Name] then
+					guiLibrary.Config[Table.Name].sliders[Tab.Name] = {value = (Tab.Default or Tab.Maximum)}
 				end
-				guiLibrary.saveCFG(guiLibrary.CfgName)
-			end
 
-			local dragging = false
-			
-			local function updateInput(input)
-				local pos = input.Position.X
-				local rel = math.clamp((pos - SliderBG.AbsolutePosition.X) / SliderBG.AbsoluteSize.X, 0, 1)
-				setValue(Tab.Minimum + (Tab.Maximum - Tab.Minimum) * rel)
-			end
+				Tab.Step = Tab.Step or 1
 
-			-- MOBILE & PC SUPPORTED CONNECTIONS
-			table.insert(guiLibrary.Collection, SliderBG.InputBegan:Connect(function(i)
-				if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
-					dragging = true
-					updateInput(i)
-				end
-			end))
+				local SliderFrame = Instance.new('Frame')
+				SliderFrame.Parent = Dropdown
+				SliderFrame.Size = UDim2.new(1, 0, 0, 42)
+				SliderFrame.BorderSizePixel = 0
+				SliderFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
 
-			table.insert(guiLibrary.Collection, userInputService.InputEnded:Connect(function(i)
-				if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
-					dragging = false
-				end
-			end))
+				local SliderLabel = Instance.new('TextLabel')
+				SliderLabel.Parent = SliderFrame
+				SliderLabel.Position = UDim2.fromOffset(8, 0)
+				SliderLabel.Size = UDim2.new(1, 0, 0, 30)
+				SliderLabel.BackgroundTransparency = 1
+				SliderLabel.TextXAlignment = Enum.TextXAlignment.Left
+				SliderLabel.TextColor3 = Color3.fromRGB(150, 150, 150)
+				SliderLabel.TextSize = 16
+				SliderLabel.Text = Tab.Name .. ' <font color="rgb(200,200,200)">(' .. (Tab.Default or Tab.Maximum) .. ')</font>'
+				SliderLabel.Font = Enum.Font.BuilderSans
+				SliderLabel.RichText = true
 
-			table.insert(guiLibrary.Collection, userInputService.InputChanged:Connect(function(i)
-				if dragging and (i.UserInputType == Enum.UserInputType.MouseMovement or i.UserInputType == Enum.UserInputType.Touch) then
-					updateInput(i)
-				end
-			end))
-
-			table.insert(guiLibrary.Collection, guiLibrary.Pallete.Changed.Event:Connect(function()
-				SliderInvis.BackgroundColor3 = guiLibrary.Pallete.Main
+				local SliderSide = Instance.new('Frame')
+				SliderSide.Parent = SliderFrame
+				SliderSide.Size = UDim2.new(0, 3, 1, 0)
+				SliderSide.BorderSizePixel = 0
 				SliderSide.BackgroundColor3 = guiLibrary.Pallete.changeColor(guiLibrary.Pallete.Main, 0.7)
+
+				local SliderBG = Instance.new('TextButton')
+				SliderBG.Parent = SliderFrame
+				SliderBG.Position = UDim2.fromOffset(8, 29)
+				SliderBG.Size = UDim2.new(1, -16, 0, 7)
+				SliderBG.BorderSizePixel = 0
 				SliderBG.BackgroundColor3 = guiLibrary.Pallete.changeColor(guiLibrary.Pallete.Main, 0.7)
-			end))
+				SliderBG.Text = ''
+				SliderBG.AutoButtonColor = false
 
-			local SliderReturn = {value = guiLibrary.Config[Table.Name].sliders[Tab.Name].value, inst = SliderFrame}
-			
-			function SliderReturn:set(val)
-				val = snap(val)
-				self.value = val
-				SliderInvis.Size = UDim2.fromScale((val - Tab.Minimum) / (Tab.Maximum - Tab.Minimum), 1)
-				SliderLabel.Text = Tab.Name .. ' <font color="rgb(200,200,200)">(' .. val .. ')</font>'
-				if Tab.Function then
-					Tab.Function(val)
+				local SliderInvis = Instance.new('Frame')
+				SliderInvis.Parent = SliderBG
+				SliderInvis.Size = UDim2.fromScale(0.5, 1)
+				SliderInvis.BorderSizePixel = 0
+				SliderInvis.BackgroundColor3 = guiLibrary.Pallete.Main
+
+				local SliderCircle = Instance.new('Frame')
+				SliderCircle.Parent = SliderInvis
+				SliderCircle.Size = UDim2.fromOffset(9, 9)
+				SliderCircle.BackgroundColor3 = Color3.fromRGB(66, 245, 108)
+				SliderCircle.Position = UDim2.fromScale(1, 0.5)
+				SliderCircle.AnchorPoint = Vector2.new(0.5, 0.5)
+
+				Instance.new('UICorner', SliderBG).CornerRadius = UDim.new(1, 0)
+				Instance.new('UICorner', SliderInvis).CornerRadius = UDim.new(1, 0)
+				Instance.new('UICorner', SliderCircle).CornerRadius = UDim.new(1, 0)
+
+				local function snap(v)
+					return math.clamp(math.round(v / Tab.Step) * Tab.Step, Tab.Minimum, Tab.Maximum)
 				end
+
+				local function setValue(v)
+					v = snap(v)
+					local pct = (v - Tab.Minimum) / (Tab.Maximum - Tab.Minimum)
+					guiLibrary.Config[Table.Name].sliders[Tab.Name].value = v
+
+					tweenService:Create(SliderInvis, TweenInfo.new(0.15), {Size = UDim2.fromScale(pct, 1)}):Play()
+
+					SliderLabel.Text = Tab.Name .. ' <font color="rgb(200,200,200)">(' .. v .. ')</font>'
+					if Tab.Function then
+						Tab.Function(v)
+					end
+					guiLibrary.saveCFG(guiLibrary.CfgName)
+				end
+
+				local dragging = false
+				
+				local function updateInput(input)
+					local pos = input.Position.X
+					local rel = math.clamp((pos - SliderBG.AbsolutePosition.X) / SliderBG.AbsoluteSize.X, 0, 1)
+					setValue(Tab.Minimum + (Tab.Maximum - Tab.Minimum) * rel)
+				end
+
+				table.insert(guiLibrary.Collection, SliderBG.InputBegan:Connect(function(i)
+					if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
+						dragging = true
+						updateInput(i)
+					end
+				end))
+
+				table.insert(guiLibrary.Collection, userInputService.InputEnded:Connect(function(i)
+					if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
+						dragging = false
+					end
+				end))
+
+				table.insert(guiLibrary.Collection, userInputService.InputChanged:Connect(function(i)
+					if dragging and (i.UserInputType == Enum.UserInputType.MouseMovement or i.UserInputType == Enum.UserInputType.Touch) then
+						updateInput(i)
+					end
+				end))
+
+				table.insert(guiLibrary.Collection, guiLibrary.Pallete.Changed.Event:Connect(function()
+					SliderInvis.BackgroundColor3 = guiLibrary.Pallete.Main
+					SliderSide.BackgroundColor3 = guiLibrary.Pallete.changeColor(guiLibrary.Pallete.Main, 0.7)
+					SliderBG.BackgroundColor3 = guiLibrary.Pallete.changeColor(guiLibrary.Pallete.Main, 0.7)
+				end))
+
+				local SliderReturn = {value = guiLibrary.Config[Table.Name].sliders[Tab.Name].value, inst = SliderFrame}
+				
+				function SliderReturn:set(val)
+					val = snap(val)
+					self.value = val
+					SliderInvis.Size = UDim2.fromScale((val - Tab.Minimum) / (Tab.Maximum - Tab.Minimum), 1)
+					SliderLabel.Text = Tab.Name .. ' <font color="rgb(200,200,200)">(' .. val .. ')</font>'
+					if Tab.Function then
+						Tab.Function(val)
+					end
+				end
+
+				task.delay(0.2, function()
+					SliderReturn:set(SliderReturn.value)
+				end)
+
+				return SliderReturn
 			end
-
-			task.delay(0.2, function()
-				SliderReturn:set(SliderReturn.value)
-			end)
-
-			return SliderReturn
-		end
 
 			HideModule = ModuleReturn.toggles.new({
 				['Name'] = 'HideModule',
