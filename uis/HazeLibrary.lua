@@ -13,16 +13,15 @@ local lighting = game:GetService('Lighting')
 local localEntity = players.LocalPlayer
 
 if localEntity.PlayerGui:FindFirstChild('ScreenGuiHS') then
-    localEntity.PlayerGui.ScreenGuiHS:Destroy()
+	localEntity.PlayerGui.ScreenGuiHS:Destroy()
 end
 if lighting:FindFirstChild('GuiBlur') then
-    lighting.GuiBlur:Destroy()
+	lighting.GuiBlur:Destroy()
 end
 
 local screenGui = Instance.new('ScreenGui')
 screenGui.Name = 'ScreenGuiHS'
 screenGui.Parent = localEntity.PlayerGui
-screenGui.IgnoreGuiInset = true
 screenGui.ResetOnSpawn = false
 local clickGui = Instance.new('Frame')
 clickGui.Parent = screenGui
@@ -34,11 +33,96 @@ blur.Size = 20
 blur.Parent = lighting
 local arrayList = Instance.new('Frame')
 arrayList.Parent = screenGui
-arrayList.Position = UDim2.new(1, -10, 0, 60) 
+arrayList.Position = UDim2.new(1, -10, 0, -40) 
 arrayList.Size = UDim2.new(0, 200, 1, 0)
 arrayList.AnchorPoint = Vector2.new(1, 0)
 arrayList.BackgroundTransparency = 1
 arrayList.Visible = false
+
+local mobileToggleButton = Instance.new('TextButton')
+mobileToggleButton.Name = 'MobileToggle'
+mobileToggleButton.Parent = screenGui
+mobileToggleButton.Size = UDim2.fromOffset(100, 42)
+mobileToggleButton.Position = UDim2.new(0, 25, 0, 0)
+mobileToggleButton.BackgroundColor3 = Color3.fromRGB(15,15,15)
+mobileToggleButton.Text = ""
+mobileToggleButton.AutoButtonColor = false
+mobileToggleButton.Visible = userInputService.TouchEnabled
+
+local btnCorner = Instance.new("UICorner")
+btnCorner.CornerRadius = UDim.new(0, 10)
+btnCorner.Parent = mobileToggleButton
+
+local textLabel = Instance.new("TextLabel")
+textLabel.Name = "GradientText"
+textLabel.Parent = mobileToggleButton
+textLabel.Size = UDim2.fromScale(1, 1)
+textLabel.BackgroundTransparency = 1
+textLabel.Text = "HAZE"
+textLabel.Font = Enum.Font.BuilderSansExtraBold
+textLabel.TextSize = 24
+textLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+
+local textGradient = Instance.new("UIGradient")
+textGradient.Color = ColorSequence.new({
+	ColorSequenceKeypoint.new(0, Color3.fromRGB(66, 245, 108)),
+	ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255, 255, 255)),
+	ColorSequenceKeypoint.new(1, Color3.fromRGB(66, 245, 108))
+})
+textGradient.Rotation = 0
+textGradient.Parent = textLabel
+
+local textStroke = Instance.new("UIStroke")
+textStroke.Thickness = 1
+textStroke.Color = Color3.fromRGB(66, 245, 108)
+textStroke.Transparency = 0.8
+textStroke.Parent = textLabel
+
+task.spawn(function()
+	while true do
+		textGradient.Offset = Vector2.new(-1, 0)
+		local tween = tweenService:Create(textGradient, TweenInfo.new(2, Enum.EasingStyle.Exponential, Enum.EasingDirection.InOut), {
+			Offset = Vector2.new(1, 0)
+		})
+		tween:Play()
+		tween.Completed:Wait()
+
+		task.wait(0.5)
+	end
+end)
+
+mobileToggleButton.MouseButton1Click:Connect(function()
+	local shrink = tweenService:Create(mobileToggleButton, TweenInfo.new(0.1), {Size = UDim2.fromOffset(95, 38)})
+	shrink:Play()
+	shrink.Completed:Wait()
+	tweenService:Create(mobileToggleButton, TweenInfo.new(0.3, Enum.EasingStyle.Bounce), {Size = UDim2.fromOffset(100, 42)}):Play()
+	clickGui.Visible = not clickGui.Visible
+	local targetBlur = clickGui.Visible and 20 or 0
+	tweenService:Create(blur, TweenInfo.new(0.3), {Size = targetBlur}):Play()
+end)
+
+local dragging, dragInput, dragStart, startPos
+
+mobileToggleButton.InputBegan:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+		dragging = true
+		dragStart = input.Position
+		startPos = mobileToggleButton.Position
+	end
+end)
+
+userInputService.InputChanged:Connect(function(input)
+	if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+		local delta = input.Position - dragStart
+		mobileToggleButton.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+	end
+end)
+
+userInputService.InputEnded:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+		dragging = false
+	end
+end)
 
 local arraylistSort = Instance.new('UIListLayout')
 arraylistSort.Parent = arrayList
@@ -74,15 +158,21 @@ local uiScale = Instance.new('UIScale')
 uiScale.Parent = screenGui
 uiScale.Scale = math.clamp(screenGui.AbsoluteSize.X / 1920, 0.8, 1.2)
 
+local function updateScale()
+	uiScale.Scale = math.clamp(screenGui.AbsoluteSize.X / 1920, 0.5, 1.2)
+end
+screenGui:GetPropertyChangedSignal("AbsoluteSize"):Connect(updateScale)
+updateScale()
+
 if not runService:IsStudio() then
 	local folders = {'Haze', 'Haze/configs', 'Haze/libraries'}
-	
+
 	for i,v in folders do
 		if not isfolder(v) then
 			makefolder(v)
 		end
 	end
-	
+
 	if not isfile('Haze/config.txt') then
 		writefile('Haze/config.txt', 'Default')
 	end
@@ -113,61 +203,61 @@ end))
 
 local aids = {}
 function addToArray(Name: string, ExtraText)
-    local Obj = Instance.new('Frame')
-    Obj.Name = Name
-    Obj.Parent = arrayList
-    Obj.BorderSizePixel = 0
-    Obj.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-    Obj.BackgroundTransparency = (ArrayBackground and ArrayBackground.value / 100 or 0.5)
-    Obj.Size = UDim2.new(0, 0, 0, 28)
-    Obj.ClipsDescendants = false
+	local Obj = Instance.new('Frame')
+	Obj.Name = Name
+	Obj.Parent = arrayList
+	Obj.BorderSizePixel = 0
+	Obj.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+	Obj.BackgroundTransparency = (ArrayBackground and ArrayBackground.value / 100 or 0.5)
+	Obj.Size = UDim2.new(0, 0, 0, 28)
+	Obj.ClipsDescendants = false
 
-    local SideLine = Instance.new('Frame')
-    SideLine.Parent = Obj
-    SideLine.Position = UDim2.fromScale(1, 0)
-    SideLine.AnchorPoint = Vector2.new(1, 0)
-    SideLine.Size = UDim2.new(0, 3, 1, 0)
-    SideLine.BorderSizePixel = 0
-    SideLine.BackgroundColor3 = guiLibrary.Pallete.Main
+	local SideLine = Instance.new('Frame')
+	SideLine.Parent = Obj
+	SideLine.Position = UDim2.fromScale(1, 0)
+	SideLine.AnchorPoint = Vector2.new(1, 0)
+	SideLine.Size = UDim2.new(0, 3, 1, 0)
+	SideLine.BorderSizePixel = 0
+	SideLine.BackgroundColor3 = guiLibrary.Pallete.Main
 
-    local ModuleText = Instance.new('TextLabel')
-    ModuleText.Parent = Obj
-    ModuleText.Size = UDim2.new(1, -10, 1, 0)
-    ModuleText.Position = UDim2.fromScale(0, 0)
-    ModuleText.BackgroundTransparency = 1
-    ModuleText.TextColor3 = Color3.fromRGB(255, 255, 255)
-    ModuleText.TextSize = 17
-    ModuleText.Font = Enum.Font.BuilderSans
-    ModuleText.TextXAlignment = Enum.TextXAlignment.Right
-    ModuleText.RichText = true
+	local ModuleText = Instance.new('TextLabel')
+	ModuleText.Parent = Obj
+	ModuleText.Size = UDim2.new(1, -10, 1, 0)
+	ModuleText.Position = UDim2.fromScale(0, 0)
+	ModuleText.BackgroundTransparency = 1
+	ModuleText.TextColor3 = Color3.fromRGB(255, 255, 255)
+	ModuleText.TextSize = 17
+	ModuleText.Font = Enum.Font.BuilderSans
+	ModuleText.TextXAlignment = Enum.TextXAlignment.Right
+	ModuleText.RichText = true
 
-    local aider = guiLibrary.Pallete.Changed.Event:Connect(function()
-        SideLine.BackgroundColor3 = guiLibrary.Pallete.changeColor(guiLibrary.Pallete.Main, 0.7)
-    end)
+	local aider = guiLibrary.Pallete.Changed.Event:Connect(function()
+		SideLine.BackgroundColor3 = guiLibrary.Pallete.changeColor(guiLibrary.Pallete.Main, 0.7)
+	end)
 
-    task.spawn(function()
-        repeat
-            task.wait()
-            local textContent = Name
-            local pureText = Name
-            if ExtraText and typeof(ExtraText()) == 'string' then
-                textContent = Name .. ' <font color="rgb(180,180,180)">' .. ExtraText() .. '</font>'
-                pureText = Name .. " " .. ExtraText()
-            end
-            
-            ModuleText.Text = textContent
-            local textSize = textService:GetTextSize(pureText, ModuleText.TextSize, ModuleText.Font, Vector2.new(1000, 1000))
-            tweenService:Create(Obj, TweenInfo.new(0.2), {Size = UDim2.fromOffset(textSize.X + 18, 28)}):Play()
-        until Obj == nil or Obj:GetAttribute('Destroying')
-    end)
+	task.spawn(function()
+		repeat
+			task.wait()
+			local textContent = Name
+			local pureText = Name
+			if ExtraText and typeof(ExtraText()) == 'string' then
+				textContent = Name .. ' <font color="rgb(180,180,180)">' .. ExtraText() .. '</font>'
+				pureText = Name .. " " .. ExtraText()
+			end
 
-    Obj.Destroying:Once(function() aider:Disconnect() end)
-    table.insert(aids, Obj)
-    table.sort(aids, function(a, b)
-        return a.Size.X.Offset > b.Size.X.Offset
-    end)
+			ModuleText.Text = textContent
+			local textSize = textService:GetTextSize(pureText, ModuleText.TextSize, ModuleText.Font, Vector2.new(1000, 1000))
+			tweenService:Create(Obj, TweenInfo.new(0.2), {Size = UDim2.fromOffset(textSize.X + 18, 28)}):Play()
+		until Obj == nil or Obj:GetAttribute('Destroying')
+	end)
 
-    for i, v in ipairs(aids) do v.LayoutOrder = i end
+	Obj.Destroying:Once(function() aider:Disconnect() end)
+	table.insert(aids, Obj)
+	table.sort(aids, function(a, b)
+		return a.Size.X.Offset > b.Size.X.Offset
+	end)
+
+	for i, v in ipairs(aids) do v.LayoutOrder = i end
 end
 
 local function removeFromArray(Name: string)
@@ -179,7 +269,7 @@ local function removeFromArray(Name: string)
 				--Size = UDim2.fromOffset(0, 30)
 			}):Play()
 			v:SetAttribute('Destroying', true)
-			
+
 			task.delay(0.1, function()
 				tweenService:Create(v.Frame, TweenInfo.new(0.05), {Transparency = 1}):Play()
 			end)
@@ -193,7 +283,7 @@ end
 
 function guiLibrary.saveCFG(Name: string)
 	if runService:IsStudio() then return end
-	
+
 	writefile('Haze/configs/'..game.PlaceId..'.json', httpService:JSONEncode(guiLibrary.Config))
 end
 
@@ -208,18 +298,18 @@ end
 function guiLibrary.Pallete.changeColor(Color: Color3, Decided: number)
 	assert(typeof(Color) == 'Color3', 'Color sent is not valid Color3 Value.')
 	assert(typeof(Decided) == 'number', 'Change value is not number.')
-	
+
 	local R = math.round(Color.R * 255) * Decided
 	local G = math.round(Color.G * 255) * Decided
 	local B = math.round(Color.B * 255) * Decided
-	
+
 	return Color3.fromRGB(R, G, B)
 end
 
 local aidedFrame = 0
 function guiLibrary:getWindow(Name: string)
 	assert(typeof(Name) == 'string', 'Name variable is not string')
-	
+
 	return self.Windows[Name] or {}
 end
 local function makeDraggable(topbarobject, object, name)
@@ -246,11 +336,11 @@ local function makeDraggable(topbarobject, object, name)
 			input.Changed:Connect(function()
 				if input.UserInputState == Enum.UserInputState.End then
 					dragging = false
-					
+
 					if not guiLibrary.Config.WindowPositions then 
 						guiLibrary.Config.WindowPositions = {} 
 					end
-					
+
 					guiLibrary.Config.WindowPositions[name] = {
 						X = object.Position.X.Offset,
 						Y = object.Position.Y.Offset
@@ -276,10 +366,10 @@ local function makeDraggable(topbarobject, object, name)
 end
 function guiLibrary:createWindow(Name: string)
 	assert(typeof(Name) == 'string', 'Name variable is not string')
-	
+
 	local Frame = Instance.new('Frame')
 	Frame.Parent = clickGui
-	
+
 	if guiLibrary.Config.WindowPositions and guiLibrary.Config.WindowPositions[Name] then
 		local saved = guiLibrary.Config.WindowPositions[Name]
 		Frame.Position = UDim2.fromOffset(saved.X, saved.Y)
@@ -308,65 +398,65 @@ function guiLibrary:createWindow(Name: string)
 	Modules.AutomaticSize = Enum.AutomaticSize.Y
 	Modules.BackgroundTransparency = 1
 	local collapsed = false
-    Frame.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton2 then
-            collapsed = not collapsed
-            local easingStyle = collapsed and Enum.EasingStyle.Quart or Enum.EasingStyle.Back
-            local duration = 0.3
-            
-            if collapsed then
-                Modules.AutomaticSize = Enum.AutomaticSize.None
-                Modules.ClipsDescendants = true
-                
-                tweenService:Create(Modules, TweenInfo.new(duration, easingStyle, Enum.EasingDirection.In), {
-                    Size = UDim2.new(1, 0, 0, 0)
-                }):Play()
-                
-                for _, child in ipairs(Modules:GetChildren()) do
-                    if child:IsA("Frame") then
-                        tweenService:Create(child, TweenInfo.new(duration/2), {BackgroundTransparency = 1}):Play()
-                    end
-                end
-                
-                task.delay(duration, function() 
-                    if collapsed then Modules.Visible = false end 
-                end)
-            else
-                Modules.Visible = true
-                Modules.Size = UDim2.new(1, 0, 0, 0)
+	Frame.InputBegan:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseButton2 then
+			collapsed = not collapsed
+			local easingStyle = collapsed and Enum.EasingStyle.Quart or Enum.EasingStyle.Back
+			local duration = 0.3
 
-                for _, child in ipairs(Modules:GetChildren()) do
-                    if child:IsA("Frame") then
-                        child.BackgroundTransparency = 1
-                        tweenService:Create(child, TweenInfo.new(duration), {BackgroundTransparency = 0}):Play()
-                    end
-                end
+			if collapsed then
+				Modules.AutomaticSize = Enum.AutomaticSize.None
+				Modules.ClipsDescendants = true
 
-                local tween = tweenService:Create(Modules, TweenInfo.new(duration, easingStyle, Enum.EasingDirection.Out), {
-                    Size = UDim2.new(1, 0, 0, 150)
-                })
-                tween:Play()
-                
-                tween.Completed:Once(function()
-                    if not collapsed then
-                        Modules.AutomaticSize = Enum.AutomaticSize.Y
-                    end
-                end)
-            end
-        end
-    end)
+				tweenService:Create(Modules, TweenInfo.new(duration, easingStyle, Enum.EasingDirection.In), {
+					Size = UDim2.new(1, 0, 0, 0)
+				}):Play()
+
+				for _, child in ipairs(Modules:GetChildren()) do
+					if child:IsA("Frame") then
+						tweenService:Create(child, TweenInfo.new(duration/2), {BackgroundTransparency = 1}):Play()
+					end
+				end
+
+				task.delay(duration, function() 
+					if collapsed then Modules.Visible = false end 
+				end)
+			else
+				Modules.Visible = true
+				Modules.Size = UDim2.new(1, 0, 0, 0)
+
+				for _, child in ipairs(Modules:GetChildren()) do
+					if child:IsA("Frame") then
+						child.BackgroundTransparency = 1
+						tweenService:Create(child, TweenInfo.new(duration), {BackgroundTransparency = 0}):Play()
+					end
+				end
+
+				local tween = tweenService:Create(Modules, TweenInfo.new(duration, easingStyle, Enum.EasingDirection.Out), {
+					Size = UDim2.new(1, 0, 0, 150)
+				})
+				tween:Play()
+
+				tween.Completed:Once(function()
+					if not collapsed then
+						Modules.AutomaticSize = Enum.AutomaticSize.Y
+					end
+				end)
+			end
+		end
+	end)
 	local ModulesSort = Instance.new('UIListLayout')
 	ModulesSort.Parent = Modules
 	ModulesSort.SortOrder = Enum.SortOrder.LayoutOrder
-	
+
 	aidedFrame += 1
-	
+
 	self.Windows[Name] = {
 		modules = {},
 		createModule = function(self, Table)
 			assert(typeof(Table) == 'table', 'Variable Table is not table type')
 			assert(typeof(Table.Name) == 'string', 'Name variable is not string')
-			
+
 			if not guiLibrary.Config[Table.Name] then
 				guiLibrary.Config[Table.Name] = {
 					enabled = false,
@@ -376,7 +466,7 @@ function guiLibrary:createWindow(Name: string)
 					selectors = {},
 				}
 			end
-			
+
 			local ModuleFrame = Instance.new('Frame')
 			ModuleFrame.Parent = Modules
 			ModuleFrame.Size = UDim2.new(1, 0, 0, 35)
@@ -415,13 +505,13 @@ function guiLibrary:createWindow(Name: string)
 			DropdownSort.Parent = Dropdown
 			DropdownSort.SortOrder = Enum.SortOrder.LayoutOrder
 			local HideModule
-			
+
 			if guiLibrary.Config[Table.Name].keybind ~= 'Unknown' then
 				ModuleLabel.Text = '<font color="rgb(200,200,200)">['..guiLibrary.Config[Table.Name].keybind..']</font> ' .. Table.Name
 			else
 				ModuleLabel.Text = Table.Name
 			end
-			
+
 			if Table.Description then
 				local Description = Instance.new('TextLabel')
 				Description.Parent = screenGui
@@ -435,12 +525,12 @@ function guiLibrary:createWindow(Name: string)
 				Description.Size = UDim2.new(0, textService:GetTextSize('  ' .. Table.Description .. '  ', Description.TextSize, Description.Font, Vector2.zero).X, 0, 20)
 				Description.Visible = false
 				Description.AnchorPoint = Vector2.new(-0.5, 0.5)
-				
+
 				local isHovering = false
 				table.insert(guiLibrary.Collection, ModuleFrame.MouseEnter:Connect(function()
 					isHovering = true
 					Description.Visible = true
-					
+
 					repeat
 						task.wait()
 						local pos = UDim2.fromOffset(userInputService:GetMouseLocation().X + 10, userInputService:GetMouseLocation().Y)
@@ -453,7 +543,7 @@ function guiLibrary:createWindow(Name: string)
 					Description.Visible = false
 				end))
 			end
-			
+
 			local ModuleReturn = {enabled = false, collection = {}}
 			function ModuleReturn:Clean(v1, v2)
 				task.spawn(function()
@@ -479,35 +569,35 @@ function guiLibrary:createWindow(Name: string)
 			function ModuleReturn:toggle(silent: boolean)
 				self.enabled = not self.enabled
 				guiLibrary.Config[Table.Name].enabled = self.enabled
-				
+
 				tweenService:Create(ModuleSide, TweenInfo.new(0.15), {BackgroundTransparency = self.enabled and 0 or 1}):Play()
 				tweenService:Create(ModuleLabel, TweenInfo.new(0.15), {TextColor3 = self.enabled and guiLibrary.Pallete.Main or Color3.fromRGB(200,200,200)}):Play()
 
 				if not self.enabled then
 					self:CleanTable()
 				end
-				
+
 				if Table.Function then
 					task.spawn(pcall, function()
 						Table.Function(self.enabled)
 					end)
 				end
-				
+
 				if self.enabled then
 					addToArray(Table.Name, Table.ExtraText or nil)
 				else
 					removeFromArray(Table.Name)
 				end
-				
+
 				guiLibrary.saveCFG(guiLibrary.CfgName)
 			end
-			
+
 			ModuleReturn.toggles = {}
 			function ModuleReturn.toggles.new(Tab)
 				if not guiLibrary.Config[Table.Name].toggles[Tab.Name] then
 					guiLibrary.Config[Table.Name].toggles[Tab.Name] = {enabled = false}
 				end
-				
+
 				local ToggleFrame = Instance.new('Frame')
 				ToggleFrame.Parent = Dropdown
 				ToggleFrame.Size = UDim2.new(1, 0, 0, 30)
@@ -533,7 +623,7 @@ function guiLibrary:createWindow(Name: string)
 				function ToggleReturn:toggle()
 					self.enabled = not self.enabled
 					guiLibrary.Config[Table.Name].toggles[Tab.Name].enabled = self.enabled
-					
+
 					tweenService:Create(ToggleLabel, TweenInfo.new(0.15), {TextColor3 = self.enabled and guiLibrary.Pallete.changeColor(guiLibrary.Pallete.Main, 0.7) or Color3.fromRGB(150, 150, 150)}):Play()
 
 					if Tab.Function then
@@ -541,7 +631,7 @@ function guiLibrary:createWindow(Name: string)
 							Tab.Function(self.enabled)
 						end)
 					end
-					
+
 					guiLibrary.saveCFG(guiLibrary.CfgName)
 				end
 
@@ -550,12 +640,12 @@ function guiLibrary:createWindow(Name: string)
 				end))
 				table.insert(guiLibrary.Collection, guiLibrary.Pallete.Changed.Event:Connect(function()
 					ToggleSide.BackgroundColor3 = guiLibrary.Pallete.changeColor(guiLibrary.Pallete.Main, 0.7)
-					
+
 					if ToggleReturn.enabled then
 						ToggleLabel.TextColor3 = guiLibrary.Pallete.Main
 					end
 				end))
-				
+
 				if guiLibrary.Config[Table.Name].toggles[Tab.Name].enabled then
 					task.delay(0.1, function()
 						ToggleReturn:toggle()
@@ -564,13 +654,13 @@ function guiLibrary:createWindow(Name: string)
 
 				return ToggleReturn
 			end
-			
+
 			ModuleReturn.selectors = {}
 			function ModuleReturn.selectors.new(Tab)
 				if not guiLibrary.Config[Table.Name].selectors[Tab.Name] then
 					guiLibrary.Config[Table.Name].selectors[Tab.Name] = {value = Tab.Default or Tab.Selections[1] or 'nil'}
 				end
-				
+
 				local SelectorFrame = Instance.new('Frame')
 				SelectorFrame.Parent = Dropdown
 				SelectorFrame.Size = UDim2.new(1, 0, 0, 30)
@@ -606,18 +696,18 @@ function guiLibrary:createWindow(Name: string)
 				function SelectorReturn:select(Name: string)
 					self.value = Name
 					guiLibrary.Config[Table.Name].selectors[Tab.Name].value = self.value
-					
+
 					SelectedLabel.Text = self.value
-					
+
 					if Tab.Function then
 						task.spawn(pcall, function()
 							Tab.Function(self.value)
 						end)
 					end
-					
+
 					guiLibrary.saveCFG(guiLibrary.CfgName)
 				end
-				
+
 				local Index = 1
 				for i,v in Tab.Selections do
 					if v == SelectorReturn.value then
@@ -629,7 +719,7 @@ function guiLibrary:createWindow(Name: string)
 					if Index > #Tab.Selections then
 						Index = 1
 					end
-					
+
 					SelectorReturn:select(Tab.Selections[Index])
 				end))
 				table.insert(guiLibrary.Collection, SelectorLabel.MouseButton2Down:Connect(function()
@@ -643,25 +733,25 @@ function guiLibrary:createWindow(Name: string)
 				table.insert(guiLibrary.Collection, guiLibrary.Pallete.Changed.Event:Connect(function()
 					SelectorSide.BackgroundColor3 = guiLibrary.Pallete.changeColor(guiLibrary.Pallete.Main, 0.7)
 				end))
-				
+
 				SelectorReturn:select(SelectorReturn.value)
 
 				return SelectorReturn
 			end
-			
+
 			ModuleReturn.textboxes = {}
 			function ModuleReturn.textboxes.new(Tab)
 				if not guiLibrary.Config[Table.Name].textboxes then guiLibrary.Config[Table.Name].textboxes = {} end
 				if not guiLibrary.Config[Table.Name].textboxes[Tab.Name] then
 					guiLibrary.Config[Table.Name].textboxes[Tab.Name] = {value = Tab.Default or ""}
 				end
-				
+
 				local BoxFrame = Instance.new('Frame')
 				BoxFrame.Parent = Dropdown
 				BoxFrame.Size = UDim2.new(1, 0, 0, 35)
 				BoxFrame.BorderSizePixel = 0
 				BoxFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-				
+
 				local BoxLabel = Instance.new('TextLabel')
 				BoxLabel.Parent = BoxFrame
 				BoxLabel.Position = UDim2.fromOffset(8, 0)
@@ -683,7 +773,7 @@ function guiLibrary:createWindow(Name: string)
 				TextBox.TextSize = 14
 				TextBox.Font = Enum.Font.BuilderSans
 				TextBox.PlaceholderText = "..."
-				
+
 				local BoxSide = Instance.new('Frame')
 				BoxSide.Parent = BoxFrame
 				BoxSide.Size = UDim2.new(0, 3, 1, 0)
@@ -691,7 +781,7 @@ function guiLibrary:createWindow(Name: string)
 				BoxSide.BackgroundColor3 = guiLibrary.Pallete.changeColor(guiLibrary.Pallete.Main, 0.7)
 
 				local BoxReturn = {value = TextBox.Text, inst = BoxFrame}
-				
+
 				TextBox.FocusLost:Connect(function(enterPressed)
 					BoxReturn.value = TextBox.Text
 					guiLibrary.Config[Table.Name].textboxes[Tab.Name].value = TextBox.Text
@@ -708,9 +798,9 @@ function guiLibrary:createWindow(Name: string)
 				if not guiLibrary.Config[Table.Name].sliders[Tab.Name] then
 					guiLibrary.Config[Table.Name].sliders[Tab.Name] = {value = (Tab.Default or Tab.Maximum)}
 				end
-				
+
 				Tab.Step = Tab.Step or 1
-				
+
 				local SliderFrame = Instance.new('Frame')
 				SliderFrame.Parent = Dropdown
 				SliderFrame.Size = UDim2.new(1, 0, 0, 42)
@@ -754,33 +844,33 @@ function guiLibrary:createWindow(Name: string)
 				Instance.new('UICorner', SliderBG).CornerRadius = UDim.new(1, 0)
 				Instance.new('UICorner', SliderInvis).CornerRadius = UDim.new(1, 0)
 				Instance.new('UICorner', SliderCircle).CornerRadius = UDim.new(1, 0)
-				
+
 				local function snap(v)
 					return math.clamp(math.round(v / Tab.Step) * Tab.Step, Tab.Minimum, Tab.Maximum)
 				end
-				
+
 				local function setValue(v)
 					v = snap(v)
 					local pct = (v - Tab.Minimum) / (Tab.Maximum - Tab.Minimum)
-					
+
 					guiLibrary.Config[Table.Name].sliders[Tab.Name].value = v
 
 					tweenService:Create(SliderInvis, TweenInfo.new(0.15), {Size = UDim2.fromScale(pct, 1)}):Play()
-					
+
 					SliderLabel.Text = Tab.Name .. ' <font color="rgb(200,200,200)">(' .. v .. ')</font>'
 					if Tab.Function then
 						Tab.Function(v)
 					end
-					
+
 					guiLibrary.saveCFG(guiLibrary.CfgName)
 				end
-				
+
 				local dragging = false
 				local function updateInput(x)
 					local rel = math.clamp((x - SliderBG.AbsolutePosition.X) / SliderBG.AbsoluteSize.X, 0, 1)
 					setValue(Tab.Minimum + (Tab.Maximum - Tab.Minimum) * rel)
 				end
-				
+
 				table.insert(guiLibrary.Collection, SliderBG.InputBegan:Connect(function(i)
 					if i.UserInputType == Enum.UserInputType.MouseButton1 then
 						dragging = true
@@ -802,12 +892,12 @@ function guiLibrary:createWindow(Name: string)
 					SliderSide.BackgroundColor3 = guiLibrary.Pallete.changeColor(guiLibrary.Pallete.Main, 0.7)
 					SliderBG.BackgroundColor3 = guiLibrary.Pallete.changeColor(guiLibrary.Pallete.Main, 0.7)
 				end))
-				
+
 				local SliderReturn = {value = guiLibrary.Config[Table.Name].sliders[Tab.Name].value, inst = SliderFrame}
 				function SliderReturn:set(val)
 					val = snap(val)
 					self.value = val
-					
+
 					SliderInvis.Size = UDim2.fromScale((val - Tab.Minimum) / (Tab.Maximum - Tab.Minimum), 1)
 					SliderCircle.Position = UDim2.fromScale(1, 0.5)
 					SliderLabel.Text = Tab.Name .. ' <font color="rgb(200,200,200)">(' .. val .. ')</font>'
@@ -815,14 +905,14 @@ function guiLibrary:createWindow(Name: string)
 						Tab.Function(val)
 					end
 				end
-				
+
 				task.delay(0.2, function()
 					SliderReturn:set(SliderReturn.value)
 				end)
-				
+
 				return SliderReturn
 			end
-			
+
 			HideModule = ModuleReturn.toggles.new({
 				['Name'] = 'HideModule',
 				['Function'] = function(called)
@@ -833,7 +923,7 @@ function guiLibrary:createWindow(Name: string)
 					end
 				end,
 			})
-			
+
 			local Hovering = false
 			table.insert(guiLibrary.Collection, guiLibrary.Pallete.Changed.Event:Connect(function()
 				if ModuleReturn.enabled then
@@ -867,13 +957,13 @@ function guiLibrary:createWindow(Name: string)
 							else
 								guiLibrary.Config[Table.Name].keybind = Input.KeyCode.Name
 							end
-							
+
 							if guiLibrary.Config[Table.Name].keybind ~= 'Unknown' then
 								ModuleLabel.Text = '<font color="rgb(200,200,200)">['..guiLibrary.Config[Table.Name].keybind..']</font> ' .. Table.Name
 							else
 								ModuleLabel.Text = Table.Name
 							end
-							
+
 							guiLibrary.saveCFG(guiLibrary.CfgName)
 						end
 					end)
@@ -882,17 +972,17 @@ function guiLibrary:createWindow(Name: string)
 					ModuleReturn:toggle(false)
 				end
 			end))
-			
+
 			if guiLibrary.Config[Table.Name].enabled then
 				ModuleReturn:toggle(true)
 			end
-			
+
 			ModuleReturn.inst = ModuleFrame
-			
+
 			return ModuleReturn
 		end,
 	}
-	
+
 	return self.Windows[Name]
 end
 
@@ -930,7 +1020,7 @@ CustomColor = Interface.toggles.new({
 		InterfaceColorR.inst.Visible = called
 		InterfaceColorG.inst.Visible = called
 		InterfaceColorB.inst.Visible = called
-		
+
 		if not called then
 			guiLibrary.Pallete.Main = Color3.fromRGB(66, 245, 108)
 			guiLibrary.Pallete.Changed:Fire()
@@ -951,7 +1041,7 @@ InterfaceColorR = Interface.sliders.new({
 		if not Interface.enabled or not CustomColor.enabled then
 			return
 		end
-		
+
 		guiLibrary.Pallete.Main = Color3.fromRGB(val, getColorFixed(guiLibrary.Pallete.Main.G), getColorFixed(guiLibrary.Pallete.Main.B))
 		guiLibrary.Pallete.Changed:Fire()
 	end,
