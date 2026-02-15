@@ -60,7 +60,7 @@ local function PlaceBlock(blockName, pos)
     local cloneTemplate = BlocksFolder:FindFirstChild(blockName)
     if cloneTemplate then
         local clone = cloneTemplate:Clone()
-        clone.Parent = workspace
+        clone.Parent = workspace:FindFirstChild('PlayersBlocksContainer') or workspace:WaitForChild('FakeBlocksContainer')
         clone.Position = pos
 
         task.delay(0.5, function()
@@ -72,14 +72,11 @@ end
 function ScaffoldController:SetState(state: boolean)
     IsEnabled = state
 
-    if Connection then
-        Connection:Disconnect()
-        Connection = nil
-    end
+    RunService:UnbindFromRenderStep('Scaffold')
 
     if not state then return end
 
-    Connection = RunService.PostSimulation:Connect(function()
+    RunService:BindToRenderStep('Scaffold', math.huge, function()
         if not IsEnabled then return end
 
         local pos = ScaffoldPos()
