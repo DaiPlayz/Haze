@@ -22,9 +22,9 @@ local TeamColors = {
 }
 
 local function roundPos(pos: Vector3)
-    local x = math.floor(pos.X / 3) * 3
+    local x = math.floor(pos.X / 3 + 0.5) * 3
     local y = math.floor(pos.Y / 3) * 3
-    local z = math.floor(pos.Z / 3) * 3
+    local z = math.floor(pos.Z / 3 + 0.5) * 3
     return Vector3.new(x, y, z)
 end
 
