@@ -75,8 +75,8 @@ local SpeedModule = guiLibrary.Windows.Movement:createModule({
 local SpeedValueMod = SpeedModule.sliders.new({
     ["Name"] = "Speed Value",
     ["Minimum"] = 16,
-    ["Maximum"] = 32,
-    ["Default"] = 16,
+    ["Maximum"] = 28,
+    ["Default"] = 28,
     ["Function"] = function(value)
         SpeedValue = value
     end
