@@ -165,7 +165,7 @@ local function runCrasher()
     end)
 end
 
-local CrasherModule = guiLibrary.Windows.Extra:createModule({
+local CrasherModule = guiLibrary.Windows.Exploit:createModule({
     ["Name"] = "Crasher",
     ["Function"] = function(state)
         CrasherVar = state

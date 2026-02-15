@@ -104,12 +104,24 @@ SpeedModule.selectors.new({
 
 --[[ KillAura ]]
 local KillAuraVar = false
+local FaceTargetVar = false
 local KARange = 20
+local currentTargetPart = nil
+local character = Players.LocalPlayer.Character or Players.LocalPlayer.CharacterAdded:Wait()
+local rootPart = character:WaitForChild("HumanoidRootPart")
 
 local KillAuraModule = guiLibrary.Windows.Combat:createModule({
     ["Name"] = "KillAura",
     ["Function"] = function(state)
         KillAuraVar = state
+    end
+})
+
+KillAuraModule.toggles.new({
+    ["Name"] = "FaceTarget",
+    ["Default"] = false,
+    ["Function"] = function(state)
+        FaceTargetVar = state
     end
 })
 
@@ -126,12 +138,32 @@ KillAuraModule.sliders.new({
 task.spawn(function()
     while true do
         task.wait(0.1)
-        if not KillAuraVar then continue end
+        if not KillAuraVar then 
+            currentTargetPart = nil
+            continue 
+        end
 
         local targetPlayer = modules.Entity.nearPlayer(KARange)
-        if not targetPlayer or not targetPlayer.Character then continue end
+        if targetPlayer and targetPlayer.Character then
+            currentTargetPart = targetPlayer.Character:FindFirstChild("HumanoidRootPart")
+            remotes.ApplyDamage:InvokeServer(targetPlayer.Character)
+        else
+            currentTargetPart = nil
+        end
+    end
+end)
 
-        remotes.ApplyDamage:InvokeServer(targetPlayer.Character)
+RunService.RenderStepped:Connect(function()
+    if not KillAuraVar or not FaceTargetVar or not currentTargetPart then 
+        return 
+    end
+
+    if character and rootPart then
+        local targetPos = currentTargetPart.Position
+        local myPos = rootPart.Position
+        local lookAtPos = Vector3.new(targetPos.X, myPos.Y, targetPos.Z)
+        local targetCFrame = CFrame.lookAt(myPos, lookAtPos)
+        rootPart.CFrame = rootPart.CFrame:Lerp(targetCFrame, 0.15) 
     end
 end)
 
@@ -223,9 +255,10 @@ local TargetSafeModule = guiLibrary.Windows.Combat:createModule({
                     local newPosition = targetRoot.Position + Vector3.new(offsetX, 3, offsetZ)
 
                     if LookAtTarget then
-                        myRoot.CFrame = CFrame.new(newPosition, targetRoot.Position)
+                        local lookPos = Vector3.new(targetRoot.Position.X, newPosition.Y, targetRoot.Position.Z)
+                        myRoot.CFrame = CFrame.lookAt(newPosition, lookPos)
                     else
-                        myRoot.CFrame = CFrame.new(newPosition)
+                        myRoot.CFrame = (myRoot.CFrame - myRoot.Position) + newPosition
                     end
                 end
             end)

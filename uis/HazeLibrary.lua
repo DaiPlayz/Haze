@@ -12,15 +12,15 @@ local lighting = game:GetService('Lighting')
 
 local localEntity = players.LocalPlayer
 
-if localEntity.PlayerGui:FindFirstChild('ScreenGuiHS') then
-	localEntity.PlayerGui.ScreenGuiHS:Destroy()
+if localEntity.PlayerGui:FindFirstChild('HazeScreen') then
+	localEntity.PlayerGui.HazeScreen:Destroy()
 end
-if lighting:FindFirstChild('GuiBlur') then
-	lighting.GuiBlur:Destroy()
+if lighting:FindFirstChild('BlurUI') then
+	lighting.BlurUI:Destroy()
 end
 
 local screenGui = Instance.new('ScreenGui')
-screenGui.Name = 'ScreenGuiHS'
+screenGui.Name = 'HazeScreen'
 screenGui.Parent = localEntity.PlayerGui
 screenGui.ResetOnSpawn = false
 screenGui.DisplayOrder = 2147483647
@@ -29,12 +29,12 @@ clickGui.Parent = screenGui
 clickGui.Size = UDim2.fromScale(1, 1)
 clickGui.BackgroundTransparency = 1
 local blur = Instance.new('BlurEffect')
-blur.Name = 'GuiBlur'
+blur.Name = 'BlurUI'
 blur.Size = 20
 blur.Parent = lighting
 local arrayList = Instance.new('Frame')
 arrayList.Parent = screenGui
-arrayList.Position = UDim2.new(1, -10, 0, -40) 
+arrayList.Position = UDim2.new(1, -10, 0, 60)
 arrayList.Size = UDim2.new(0, 200, 1, 0)
 arrayList.AnchorPoint = Vector2.new(1, 0)
 arrayList.BackgroundTransparency = 1
@@ -149,6 +149,12 @@ logoText.Font = Enum.Font.BuilderSansExtraBold
 logoText.TextXAlignment = Enum.TextXAlignment.Right
 logoText.RichText = true
 
+local uiStroke = Instance.new("UIStroke")
+uiStroke.Parent = logoText
+uiStroke.Thickness = 2.5
+uiStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Contextual
+uiStroke.Color = Color3.fromRGB(0, 0, 0)
+
 local subLogoText = Instance.new('TextLabel')
 subLogoText.Name = "SubLogoText"
 subLogoText.Parent = logoFrame
@@ -161,6 +167,12 @@ subLogoText.TextSize = 16
 subLogoText.Font = Enum.Font.BuilderSansExtraBold
 subLogoText.TextXAlignment = Enum.TextXAlignment.Right
 subLogoText.RichText = true
+
+local uiStroke = Instance.new("UIStroke")
+uiStroke.Parent = subLogoText
+uiStroke.Thickness = 1.5
+uiStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Contextual
+uiStroke.Color = Color3.fromRGB(0, 0, 0)
 
 local subStroke = Instance.new("UIStroke")
 subStroke.Parent = subLogoText
@@ -241,7 +253,7 @@ function addToArray(Name: string, ExtraText)
 
 	local ModuleText = Instance.new('TextLabel')
 	ModuleText.Parent = Obj
-	ModuleText.Size = UDim2.new(1, -10, 1, 0)
+	ModuleText.Size = UDim2.new(1, -5, 1, 0)
 	ModuleText.Position = UDim2.fromScale(0, 0)
 	ModuleText.BackgroundTransparency = 1
 	ModuleText.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -331,73 +343,63 @@ function guiLibrary:getWindow(Name: string)
 
 	return self.Windows[Name] or {}
 end
-local function makeDraggable(topbarobject, object, name)
-	local dragging = false
-	local dragInput, dragStart, startPos
-
-	local function update(input)
-		local delta = input.Position - dragStart
-		local targetPos = UDim2.new(
-			startPos.X.Scale, 
-			startPos.X.Offset + delta.X, 
-			startPos.Y.Scale, 
-			startPos.Y.Offset + delta.Y
-		)
-		tweenService:Create(object, TweenInfo.new(0.05), {Position = targetPos}):Play()
-	end
-
-	topbarobject.InputBegan:Connect(function(input)
-		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-			dragging = true
-			dragStart = input.Position
-			startPos = object.Position
-		end
-	end)
-
-	topbarobject.InputChanged:Connect(function(input)
-		if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
-			dragInput = input
-		end
-	end)
-
-	userInputService.InputChanged:Connect(function(input)
-		if input == dragInput and dragging then
-			update(input)
-		end
-	end)
-end
 function guiLibrary:createWindow(Name: string)
 	assert(typeof(Name) == 'string', 'Name variable is not string')
 
 	local Frame = Instance.new('Frame')
 	Frame.Parent = clickGui
-	Frame.Position = UDim2.fromOffset(75 + (aidedFrame * 190), 75)
-
-	Frame.Size = UDim2.fromOffset(185, 35)
+	Frame.Position = UDim2.fromOffset(50 + (aidedFrame * 235), 70)
+	Frame.Size = UDim2.fromOffset(210, 40)
 	Frame.BorderSizePixel = 0
-	Frame.BackgroundColor3 = Color3.fromRGB(18, 18, 18)
+	Frame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+	local Corner = Instance.new("UICorner")
+	Corner.CornerRadius = UDim.new(0, 6)
+	Corner.Parent = Frame
+	local Accent = Instance.new("Frame")
+	Accent.Size = UDim2.new(1, 0, 0, 2)
+	Accent.Position = UDim2.new(0, 0, 1, -2)
+	Accent.BackgroundColor3 = Color3.fromRGB(0, 255, 106)
+	Accent.BorderSizePixel = 0
+	Accent.Parent = Frame
+
+	table.insert(guiLibrary.Collection, guiLibrary.Pallete.Changed.Event:Connect(function()
+		Accent.BackgroundColor3 = guiLibrary.Pallete.Main
+	end))
 	local Label = Instance.new('TextLabel')
 	Label.Parent = Frame
-	Label.Position = UDim2.fromOffset(8, 0)
-	Label.Size = UDim2.fromScale(1, 1)
+	Label.Position = UDim2.fromOffset(10, 0)
+	Label.Size = UDim2.new(1, -70, 1, 0)
 	Label.BackgroundTransparency = 1
 	Label.TextXAlignment = Enum.TextXAlignment.Left
 	Label.TextColor3 = Color3.fromRGB(255, 255, 255)
 	Label.TextSize = 18
 	Label.Text = Name
 	Label.Font = Enum.Font.BuilderSansMedium
+	local StateIndicator = Instance.new("TextLabel")
+	StateIndicator.Name = "Indicator"
+	StateIndicator.Text = "-"
+	StateIndicator.Size = UDim2.fromOffset(30, 40)
+	StateIndicator.Position = UDim2.new(1, -30, 0, 0)
+	StateIndicator.BackgroundTransparency = 1
+	StateIndicator.TextColor3 = Color3.fromRGB(200, 200, 200)
+	StateIndicator.TextSize = 22
+	StateIndicator.Font = Enum.Font.BuilderSans
+	StateIndicator.Parent = Frame
 	local Modules = Instance.new('Frame')
 	Modules.Parent = Frame
 	Modules.Position = UDim2.fromScale(0, 1)
 	Modules.Size = UDim2.fromScale(1, 0)
 	Modules.AutomaticSize = Enum.AutomaticSize.Y
 	Modules.BackgroundTransparency = 1
+	
 	local collapsed = false
 	Frame.InputBegan:Connect(function(input)
 		if input.UserInputType == Enum.UserInputType.MouseButton2 then
 			collapsed = not collapsed
 			local easingStyle = collapsed and Enum.EasingStyle.Quart or Enum.EasingStyle.Back
 			local duration = 0.3
+
+			StateIndicator.Text = collapsed and "+" or "-"
 
 			if collapsed then
 				Modules.AutomaticSize = Enum.AutomaticSize.None
@@ -440,6 +442,7 @@ function guiLibrary:createWindow(Name: string)
 			end
 		end
 	end)
+	
 	local ModulesSort = Instance.new('UIListLayout')
 	ModulesSort.Parent = Modules
 	ModulesSort.SortOrder = Enum.SortOrder.LayoutOrder
@@ -466,7 +469,7 @@ function guiLibrary:createWindow(Name: string)
 			ModuleFrame.Parent = Modules
 			ModuleFrame.Size = UDim2.new(1, 0, 0, 35)
 			ModuleFrame.BorderSizePixel = 0
-			ModuleFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+			ModuleFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
 			local ModuleLabel = Instance.new('TextButton')
 			ModuleLabel.Parent = ModuleFrame
 			ModuleLabel.Position = UDim2.fromOffset(8, 0)
@@ -597,7 +600,7 @@ function guiLibrary:createWindow(Name: string)
 				ToggleFrame.Parent = Dropdown
 				ToggleFrame.Size = UDim2.new(1, 0, 0, 30)
 				ToggleFrame.BorderSizePixel = 0
-				ToggleFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+				ToggleFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
 				local ToggleLabel = Instance.new('TextButton')
 				ToggleLabel.Parent = ToggleFrame
 				ToggleLabel.Position = UDim2.fromOffset(8, 0)
@@ -660,7 +663,7 @@ function guiLibrary:createWindow(Name: string)
 				SelectorFrame.Parent = Dropdown
 				SelectorFrame.Size = UDim2.new(1, 0, 0, 30)
 				SelectorFrame.BorderSizePixel = 0
-				SelectorFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+				SelectorFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
 				local SelectorLabel = Instance.new('TextButton')
 				SelectorLabel.Parent = SelectorFrame
 				SelectorLabel.Position = UDim2.fromOffset(8, 0)
@@ -744,7 +747,7 @@ function guiLibrary:createWindow(Name: string)
 				BoxFrame.Parent = Dropdown
 				BoxFrame.Size = UDim2.new(1, 0, 0, 35)
 				BoxFrame.BorderSizePixel = 0
-				BoxFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+				BoxFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
 
 				local BoxLabel = Instance.new('TextLabel')
 				BoxLabel.Parent = BoxFrame
@@ -820,7 +823,7 @@ function guiLibrary:createWindow(Name: string)
 				SliderFrame.Parent = Dropdown
 				SliderFrame.Size = UDim2.new(1, 0, 0, 42)
 				SliderFrame.BorderSizePixel = 0
-				SliderFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+				SliderFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
 
 				local SliderLabel = Instance.new('TextLabel')
 				SliderLabel.Parent = SliderFrame
@@ -1015,94 +1018,90 @@ guiLibrary:createWindow('Combat')
 guiLibrary:createWindow('Movement')
 guiLibrary:createWindow('Utility')
 guiLibrary:createWindow('Visuals')
-guiLibrary:createWindow('Extra')
+guiLibrary:createWindow('Exploit')
+guiLibrary:createWindow('Settings')
 
 local function getColorFixed(numb)
 	return math.round(numb * 255)
 end
 --185, 75, 255
-Interface = guiLibrary.Windows.Visuals:createModule({
-	['Name'] = 'Interface',
-	['Function'] = function(called)
-		if not called then
-			guiLibrary.Pallete.Main = Color3.fromRGB(66, 245, 108)
-			guiLibrary.Pallete.Changed:Fire()
-		else
-			if CustomColor.enabled then
-				task.delay(0.2, function()
-					guiLibrary.Pallete.Main = Color3.fromRGB(InterfaceColorR, InterfaceColorG.value, InterfaceColorB.value)
-					guiLibrary.Pallete.Changed:Fire()
-				end)
-			end
-		end
-	end,
-})
-CustomColor = Interface.toggles.new({
-	['Name'] = 'Custom Color',
-	['Function'] = function(called)
-		InterfaceColorR.inst.Visible = called
-		InterfaceColorG.inst.Visible = called
-		InterfaceColorB.inst.Visible = called
+local RainbowLoop
+local ColorMode = "Static"
 
-		if not called then
-			guiLibrary.Pallete.Main = Color3.fromRGB(66, 245, 108)
-			guiLibrary.Pallete.Changed:Fire()
-		else
-			task.delay(0.2, function()
-				guiLibrary.Pallete.Main = Color3.fromRGB(InterfaceColorR.value, InterfaceColorG.value, InterfaceColorB.value)
-				guiLibrary.Pallete.Changed:Fire()
-			end)
-		end
-	end,
+Interface = guiLibrary.Windows.Settings:createModule({
+    ['Name'] = 'Interface',
+    ['Function'] = function(called)
+        if not called then
+            if RainbowLoop then task.cancel(RainbowLoop) RainbowLoop = nil end
+            guiLibrary.Pallete.Main = Color3.fromRGB(66, 245, 108)
+            guiLibrary.Pallete.Changed:Fire()
+        end
+    end,
 })
+
+local modeSelector = Interface.selectors.new({
+    ["Name"] = "Color Mode",
+    ["Default"] = "Static",
+    ["Selections"] = {"Static", "Rainbow"},
+    ["Function"] = function(val)
+        ColorMode = val
+        
+        local isStatic = (val == "Static")
+        local isRainbow = (val == "Rainbow")
+
+        InterfaceColorR.inst.Visible = isStatic
+        InterfaceColorG.inst.Visible = isStatic
+        InterfaceColorB.inst.Visible = isStatic
+
+        if isRainbow then
+            if RainbowLoop then task.cancel(RainbowLoop) end
+            RainbowLoop = task.spawn(function()
+                while task.wait() do
+                    local hue = (tick() * 0.5 % 1)
+
+                    guiLibrary.Pallete.Main = Color3.fromHSV(hue, 0.7, 1)
+                    guiLibrary.Pallete.Changed:Fire()
+                end
+            end)
+        else
+            if RainbowLoop then task.cancel(RainbowLoop) RainbowLoop = nil end
+            guiLibrary.Pallete.Main = Color3.fromRGB(InterfaceColorR.value, InterfaceColorG.value, InterfaceColorB.value)
+            guiLibrary.Pallete.Changed:Fire()
+        end
+    end
+})
+
 InterfaceColorR = Interface.sliders.new({
-	['Name'] = 'R',
-	['Minimum'] = 0,
-	['Maximum'] = 255,
-	['Default'] = 185,
-	['Function'] = function(val)
-		if not Interface.enabled or not CustomColor.enabled then
-			return
-		end
-
-		guiLibrary.Pallete.Main = Color3.fromRGB(val, getColorFixed(guiLibrary.Pallete.Main.G), getColorFixed(guiLibrary.Pallete.Main.B))
-		guiLibrary.Pallete.Changed:Fire()
-	end,
+    ['Name'] = 'R', ['Minimum'] = 0, ['Maximum'] = 255, ['Default'] = 66,
+    ['Function'] = function(val)
+        if ColorMode == "Static" then
+            guiLibrary.Pallete.Main = Color3.fromRGB(val, InterfaceColorG.value, InterfaceColorB.value)
+            guiLibrary.Pallete.Changed:Fire()
+        end
+    end,
 })
+
 InterfaceColorG = Interface.sliders.new({
-	['Name'] = 'G',
-	['Minimum'] = 0,
-	['Maximum'] = 255,
-	['Default'] = 185,
-	['Function'] = function(val)
-		if not Interface.enabled or not CustomColor.enabled then
-			return
-		end
-
-		guiLibrary.Pallete.Main = Color3.fromRGB(getColorFixed(guiLibrary.Pallete.Main.R), val, getColorFixed(guiLibrary.Pallete.Main.B))
-		guiLibrary.Pallete.Changed:Fire()
-	end,
+    ['Name'] = 'G', ['Minimum'] = 0, ['Maximum'] = 255, ['Default'] = 245,
+    ['Function'] = function(val)
+        if ColorMode == "Static" then
+            guiLibrary.Pallete.Main = Color3.fromRGB(InterfaceColorR.value, val, InterfaceColorB.value)
+            guiLibrary.Pallete.Changed:Fire()
+        end
+    end,
 })
+
 InterfaceColorB = Interface.sliders.new({
-	['Name'] = 'B',
-	['Minimum'] = 0,
-	['Maximum'] = 255,
-	['Default'] = 185,
-	['Function'] = function(val)
-		if not Interface.enabled or not CustomColor.enabled then
-			return
-		end
-
-		guiLibrary.Pallete.Main = Color3.fromRGB(getColorFixed(guiLibrary.Pallete.Main.R), getColorFixed(guiLibrary.Pallete.Main.G), val)
-		guiLibrary.Pallete.Changed:Fire()
-	end,
+    ['Name'] = 'B', ['Minimum'] = 0, ['Maximum'] = 255, ['Default'] = 108,
+    ['Function'] = function(val)
+        if ColorMode == "Static" then
+            guiLibrary.Pallete.Main = Color3.fromRGB(InterfaceColorR.value, InterfaceColorG.value, val)
+            guiLibrary.Pallete.Changed:Fire()
+        end
+    end,
 })
 
-InterfaceColorR.inst.Visible = false
-InterfaceColorG.inst.Visible = false
-InterfaceColorB.inst.Visible = false
-
-Arraylist = guiLibrary.Windows.Visuals:createModule({
+Arraylist = guiLibrary.Windows.Settings:createModule({
 	['Name'] = 'Arraylist',
 	['Function'] = function(called)
 		arrayList.Visible = called
@@ -1148,9 +1147,10 @@ local modules = {
 }
 
 modules.Notifications:Notify("HAZE", "Welcome " .. LocalPlayer.Name .. ".", 5)
+modules.Notifications:Notify("Finished Loading", "Haze Loaded Successfully!", 5)
 
 local DiscordModule
-DiscordModule = guiLibrary.Windows.Extra:createModule({
+DiscordModule = guiLibrary.Windows.Settings:createModule({
 	["Name"] = "Discord",
 	["Function"] = function(state)
 		if not state then return end

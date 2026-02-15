@@ -354,7 +354,7 @@ local GayCapeVar = false
 
 local Capelist = {"Black", "White", "Red", "Yellow", "Green", "Blue", "Pink"}
 
-local GayCapeModule = guiLibrary.Windows.Extra:createModule({
+local GayCapeModule = guiLibrary.Windows.Visuals:createModule({
     ["Name"] = "GayCape",
     ["Description"] = "Im sorry for this, FE btw",
     ["Function"] = function(state)
@@ -383,7 +383,7 @@ local UniqueCapesData = {
     }
 }
 
-local UniqueCapeModule = guiLibrary.Windows.Extra:createModule({
+local UniqueCapeModule = guiLibrary.Windows.Visuals:createModule({
     ["Name"] = "UniqueCape",
     ["Function"] = function(state)
         if not state then
