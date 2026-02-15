@@ -185,7 +185,7 @@ local function runKA()
 
             if target then
                 for _, sword in ipairs(Swords) do
-                    remotes.SwordHitRemote:FireServer(target.Character, sword)
+                    remotes.SwordHitRemote:FireServer(sword, target.Character)
                 end
 
                 if AnimsVar then
