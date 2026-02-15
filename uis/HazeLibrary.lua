@@ -12,7 +12,7 @@ local lighting = game:GetService('Lighting')
 
 local localEntity = players.LocalPlayer
 
-if localEntity.PlayerGui:FindFirstChild('HazeScreen') then
+if game:GetService('CoreGui'):FindFirstChild('HazeScreen') then
 	localEntity.PlayerGui.HazeScreen:Destroy()
 end
 if lighting:FindFirstChild('BlurUI') then
@@ -21,7 +21,7 @@ end
 
 local screenGui = Instance.new('ScreenGui')
 screenGui.Name = 'HazeScreen'
-screenGui.Parent = cloneref(game:GetService('CoreGui'))
+screenGui.Parent = game:GetService('CoreGui')
 screenGui.ResetOnSpawn = false
 screenGui.DisplayOrder = 2147483647
 local clickGui = Instance.new('Frame')
