@@ -297,7 +297,7 @@ TargetSafeModule.toggles.new({
 --[[ JesusMode ]]
 local JesusModeVar = false
 local LastNotify = 0
-local WaterObject = workspace:WaitForChild("GameObjects"):WaitForChild("Map"):WaitForChild("Ice"):WaitForChild("Water"):WaitForChild("Model")
+local WaterObject = workspace:FindFirstChild("Water", true)
 
 local function waterpart()
     if WaterObject:IsA("BasePart") then return WaterObject end

@@ -5,6 +5,8 @@ local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
+local TeleportService = game:GetService("TeleportService")
+local HttpService = game:GetService("HttpService")
 
 --[[ Libraries ]]
 local LocalLibrary = "Haze/libraries"
@@ -13,7 +15,8 @@ local modules = {
     SprintController = loadfile(LocalLibrary .. "/bedfight/SprintController.lua")(),
     ScaffoldController = loadfile(LocalLibrary .. "/bedfight/ScaffoldController.lua")(),
     PartyController = loadfile(LocalLibrary .. "/bedfight/PartyController.lua")(),
-    EmotesController = loadfile(LocalLibrary .. "/bedfight/EmotesController.lua")()
+    EmotesController = loadfile(LocalLibrary .. "/bedfight/EmotesController.lua")(),
+    StaffList = loadfile(LocalLibrary .. "/bedfight/StaffList.lua")()
 }
 
 local remotes = {
@@ -569,6 +572,100 @@ local EmoteList = EmoteModule.selectors.new({
                         EmoteModule:toggle(true)
                     end
                 end)
+            end
+        end
+    end
+})
+
+--[[ StaffDetector ]]
+local connection
+local currentMethod = "Notify"
+local staffList = {}
+local ServerHopping = false
+
+local StaffDetectorModule = guiLibrary.Windows.Combat:createModule({
+    ["Name"] = "StaffDetector",
+    ["Function"] = function(state)
+        local function staffdetectHandle(playerName)
+            if currentMethod == "Notify" then
+                modules.Notifications:Notify("Staff Detected", playerName.." is in your server!", 10, Color3.fromRGB(255,0,0))
+            elseif currentMethod == "ServerHop" and not ServerHopping then
+                ServerHopping = true
+                modules.Notifications:Notify("Staff Detected", playerName.." detected! Changing server...", 5, Color3.fromRGB(255,165,0))
+                task.spawn(function()
+                    task.wait(1)
+                    local success,response=pcall(function() return game:HttpGet("https://games.roblox.com/v1/games/"..game.PlaceId.."/servers/Public?sortOrder=Asc&limit=100") end)
+                    if success then
+                        local data = HttpService:JSONDecode(response)
+                        for _,server in ipairs(data.data) do
+                            if server.playing < server.maxPlayers and server.id ~= game.JobId then
+                                TeleportService:TeleportToPlaceInstance(game.PlaceId,server.id,Players.LocalPlayer)
+                                return
+                            end
+                        end
+                        modules.Notifications:Notify("Staff Detected","No server found!",5,Color3.fromRGB(255,0,0))
+                    else
+                        modules.Notifications:Notify("Staff Detected","ServerHop failed, could not fetch servers",5,Color3.fromRGB(255,0,0))
+                    end
+                    ServerHopping=false
+                end)
+            end
+        end
+
+        local function checkPlayer(player)
+            if player and table.find(staffList,string.lower(player.Name)) then staffdetectHandle(player.Name) end
+        end
+
+        if state then
+            staffList = {}
+            ServerHopping = false
+            if type(modules)=="table" and type(modules.StaffList)=="table" then
+                for _,name in ipairs(modules.StaffList) do table.insert(staffList,string.lower(name)) end
+            else
+                modules.Notifications:Notify("Staff Detector","StaffList failed to load",5,Color3.fromRGB(255,0,0))
+                return
+            end
+            for _,player in ipairs(Players:GetPlayers()) do checkPlayer(player) end
+            connection = Players.PlayerAdded:Connect(checkPlayer)
+        else
+            if connection then connection:Disconnect() connection=nil end
+            staffList={}
+            ServerHopping=false
+        end
+    end
+})
+
+local StaffDetectMethod = StaffDetectorModule.selectors.new({
+    ["Name"]= "Method",
+    ["Default"]= "Notify",
+    ["Selections"]= {"Notify","ServerHop"},
+    ["Function"]= function(value)
+        currentMethod=value
+        for _,player in ipairs(Players:GetPlayers()) do
+            if table.find(staffList,string.lower(player.Name)) then
+                if currentMethod=="Notify" then
+                    modules.Notifications:Notify("Staff Detected",player.Name.." is in your server!",10,Color3.fromRGB(255,0,0))
+                elseif currentMethod=="ServerHop" and not ServerHopping then
+                    ServerHopping=true
+                    modules.Notifications:Notify("Staff Detected",player.Name.." detected! Changing server...",5,Color3.fromRGB(255,165,0))
+                    task.spawn(function()
+                        task.wait(1)
+                        local success,response=pcall(function() return game:HttpGet("https://games.roblox.com/v1/games/"..game.PlaceId.."/servers/Public?sortOrder=Asc&limit=100") end)
+                        if success then
+                            local data=HttpService:JSONDecode(response)
+                            for _,server in ipairs(data.data) do
+                                if server.playing<server.maxPlayers and server.id~=game.JobId then
+                                    TeleportService:TeleportToPlaceInstance(game.PlaceId,server.id,Players.LocalPlayer)
+                                    return
+                                end
+                            end
+                            modules.Notifications:Notify("Staff Detector","No server found!",5,Color3.fromRGB(255,0,0))
+                        else
+                            modules.Notifications:Notify("Staff Detector","ServerHop failed, could not fetch servers",5,Color3.fromRGB(255,0,0))
+                        end
+                        ServerHopping=false
+                    end)
+                end
             end
         end
     end
