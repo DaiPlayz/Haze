@@ -21,7 +21,7 @@ end
 
 local screenGui = Instance.new('ScreenGui')
 screenGui.Name = 'HazeScreen'
-screenGui.Parent = localEntity.PlayerGui
+screenGui.Parent = cloneref(game:GetService('CoreGui'))
 screenGui.ResetOnSpawn = false
 screenGui.DisplayOrder = 2147483647
 local clickGui = Instance.new('Frame')
