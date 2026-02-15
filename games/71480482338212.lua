@@ -79,6 +79,17 @@ local SpeedValueMod = SpeedModule.sliders.new({
     end
 })
 
+local function getRandomFolder()
+    for i = 1, 20 do
+        local Folder = workspace:GetChildren()[i]
+
+        if Folder and typeof(Folder) == 'Instance' and Folder:IsA('Folder') then
+            print('folder got ?')
+            return v
+        end
+    end
+end
+
 --[[ KillAura ]]
 local KAVar = false
 local HighVar = false
@@ -90,7 +101,7 @@ local LastAnimTime = 0
 local SwingSound = Instance.new("Sound")
 SwingSound.SoundId = "rbxassetid://104766549106531"
 SwingSound.Volume = 1
-SwingSound.Parent = workspace
+SwingSound.Parent = getRandomFolder() or workspace
 
 local SwingAnimation = Instance.new("Animation")
 SwingAnimation.AnimationId = "rbxassetid://123800159244236"
@@ -144,7 +155,7 @@ local function updhighlight(target)
         highlight.OutlineColor = Color3.fromRGB(0, 255, 0)
         highlight.FillTransparency = 0.5
         highlight.OutlineTransparency = 0
-        highlight.Parent = workspace
+        highlight.Parent = getRandomFolder() or workspace
         currentHighlight = highlight
     end
 end
