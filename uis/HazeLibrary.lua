@@ -9,29 +9,43 @@ local httpService = game:GetService('HttpService')
 local tweenService = game:GetService('TweenService')
 local userInputService = game:GetService('UserInputService')
 local lighting = game:GetService('Lighting')
-
 local localEntity = players.LocalPlayer
+local CollectionService = game:GetService("CollectionService")
+local CoreGui = game:GetService('CoreGui')
 
-if game:GetService('CoreGui'):FindFirstChild('HazeScreen') then
-	localEntity.PlayerGui.HazeScreen:Destroy()
+local function udcrypt()
+    local length = math.random(8, 16)
+    local array = {}
+    for i = 1, length do
+        array[i] = string.char(math.random(65, 90) + (math.random(0, 1) * 32))
+    end
+    return table.concat(array)
 end
-if lighting:FindFirstChild('BlurUI') then
-	lighting.BlurUI:Destroy()
+
+for _, oldGui in pairs(CollectionService:GetTagged("HazeUI")) do
+    oldGui:Destroy()
+end
+
+for _, oldBlur in pairs(CollectionService:GetTagged("HazeBlur")) do
+    oldBlur:Destroy()
 end
 
 local screenGui = Instance.new('ScreenGui')
-screenGui.Name = 'HazeScreen'
-screenGui.Parent = game:GetService('CoreGui')
+screenGui.Name = udcrypt()
+screenGui.Parent = CoreGui
 screenGui.ResetOnSpawn = false
 screenGui.DisplayOrder = 2147483647
+CollectionService:AddTag(screenGui, "HazeUI")
 local clickGui = Instance.new('Frame')
+clickGui.Name = udcrypt()
 clickGui.Parent = screenGui
 clickGui.Size = UDim2.fromScale(1, 1)
 clickGui.BackgroundTransparency = 1
 local blur = Instance.new('BlurEffect')
-blur.Name = tostring(math.random())
+blur.Name = udcrypt()
 blur.Size = 20
-blur.Parent = lighting
+blur.Parent = Lighting
+CollectionService:AddTag(blur, "HazeBlur")
 local arrayList = Instance.new('Frame')
 arrayList.Parent = screenGui
 arrayList.Position = UDim2.new(1, -10, 0, 60)
@@ -1039,6 +1053,36 @@ Interface = guiLibrary.Windows.Settings:createModule({
     end,
 })
 
+InterfaceColorR = Interface.sliders.new({
+    ['Name'] = 'R', ['Minimum'] = 0, ['Maximum'] = 255, ['Default'] = 66,
+    ['Function'] = function(val)
+        if ColorMode == "Static" then
+            guiLibrary.Pallete.Main = Color3.fromRGB(val, InterfaceColorG.value, InterfaceColorB.value)
+            guiLibrary.Pallete.Changed:Fire()
+        end
+    end,
+})
+
+InterfaceColorG = Interface.sliders.new({
+    ['Name'] = 'G', ['Minimum'] = 0, ['Maximum'] = 255, ['Default'] = 245,
+    ['Function'] = function(val)
+        if ColorMode == "Static" then
+            guiLibrary.Pallete.Main = Color3.fromRGB(InterfaceColorR.value, val, InterfaceColorB.value)
+            guiLibrary.Pallete.Changed:Fire()
+        end
+    end,
+})
+
+InterfaceColorB = Interface.sliders.new({
+    ['Name'] = 'B', ['Minimum'] = 0, ['Maximum'] = 255, ['Default'] = 108,
+    ['Function'] = function(val)
+        if ColorMode == "Static" then
+            guiLibrary.Pallete.Main = Color3.fromRGB(InterfaceColorR.value, InterfaceColorG.value, val)
+            guiLibrary.Pallete.Changed:Fire()
+        end
+    end,
+})
+
 local modeSelector = Interface.selectors.new({
     ["Name"] = "Color Mode",
     ["Default"] = "Static",
@@ -1069,36 +1113,6 @@ local modeSelector = Interface.selectors.new({
             guiLibrary.Pallete.Changed:Fire()
         end
     end
-})
-
-InterfaceColorR = Interface.sliders.new({
-    ['Name'] = 'R', ['Minimum'] = 0, ['Maximum'] = 255, ['Default'] = 66,
-    ['Function'] = function(val)
-        if ColorMode == "Static" then
-            guiLibrary.Pallete.Main = Color3.fromRGB(val, InterfaceColorG.value, InterfaceColorB.value)
-            guiLibrary.Pallete.Changed:Fire()
-        end
-    end,
-})
-
-InterfaceColorG = Interface.sliders.new({
-    ['Name'] = 'G', ['Minimum'] = 0, ['Maximum'] = 255, ['Default'] = 245,
-    ['Function'] = function(val)
-        if ColorMode == "Static" then
-            guiLibrary.Pallete.Main = Color3.fromRGB(InterfaceColorR.value, val, InterfaceColorB.value)
-            guiLibrary.Pallete.Changed:Fire()
-        end
-    end,
-})
-
-InterfaceColorB = Interface.sliders.new({
-    ['Name'] = 'B', ['Minimum'] = 0, ['Maximum'] = 255, ['Default'] = 108,
-    ['Function'] = function(val)
-        if ColorMode == "Static" then
-            guiLibrary.Pallete.Main = Color3.fromRGB(InterfaceColorR.value, InterfaceColorG.value, val)
-            guiLibrary.Pallete.Changed:Fire()
-        end
-    end,
 })
 
 Arraylist = guiLibrary.Windows.Settings:createModule({
