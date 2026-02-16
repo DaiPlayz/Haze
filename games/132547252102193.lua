@@ -219,23 +219,23 @@ TPAuraModule.sliders.new({
     end
 })
 
---[[ TargetSafe ]]
-local TargetSafeVar = false
+--[[ TargetStrafe ]]
+local TargetStrafeVar = false
 local TSRange = 20
 local SpinSpeed = 2
 local SpinAngle = 0
 local LookAtTarget = false
 
-local TargetSafeModule = guiLibrary.Windows.Combat:createModule({
-    ["Name"] = "TargetSafe",
+local TargetStrafeModule = guiLibrary.Windows.Combat:createModule({
+    ["Name"] = "TargetStrafe",
     ["Description"] = "Spins around the player",
     ["Function"] = function(state)
-        TargetSafeVar = state
+        TargetStrafeVar = state
         if state then
             task.spawn(function()
-                while TargetSafeVar do
+                while TargetStrafeVar do
                     local dt = task.wait()
-                    if not TargetSafeVar then break end
+                    if not TargetStrafeVar then break end
 
                     local myChar = LocalPlayer.Character
                     local myRoot = myChar and myChar:FindFirstChild("HumanoidRootPart")
@@ -266,7 +266,7 @@ local TargetSafeModule = guiLibrary.Windows.Combat:createModule({
     end
 })
 
-TargetSafeModule.sliders.new({
+TargetStrafeModule.sliders.new({
     ["Name"] = "Spin Speed",
     ["Minimum"] = 0.5,
     ["Maximum"] = 10,
@@ -276,7 +276,7 @@ TargetSafeModule.sliders.new({
     end
 })
 
-TargetSafeModule.sliders.new({
+TargetStrafeModule.sliders.new({
     ["Name"] = "Range",
     ["Minimum"] = 5,
     ["Maximum"] = 50,
@@ -286,7 +286,7 @@ TargetSafeModule.sliders.new({
     end
 })
 
-TargetSafeModule.toggles.new({
+TargetStrafeModule.toggles.new({
     ["Name"] = "Target Face",
     ["Default"] = false,
     ["Function"] = function(state)
@@ -338,9 +338,9 @@ RunService.Heartbeat:Connect(function()
                 TPAuraModule:toggle(false)
             end
             
-            if TargetSafeVar then
-                TargetSafeVar = false
-                TargetSafeModule:toggle(false)
+            if TargetStrafeVar then
+                TargetStrafeVar = false
+                TargetStrafeModule:toggle(false)
             end
             root.Velocity = Vector3.zero
             root.CFrame = CFrame.new(root.Position.X, p.Position.Y + 5, root.Position.Z)
