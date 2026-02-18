@@ -2,7 +2,7 @@ local HttpService = game:GetService("HttpService")
 
 local CONFIG = {
     ROOT = "Haze",
-    REPO_URL = "https://raw.githubusercontent.com/7Smoker/Haze/main/",
+    REPO_URL = "https://raw.githubusercontent.com/7Smoker/Haze/dev/",
     FILES = "https://raw.githubusercontent.com/7Smoker/Haze/main/assets/Default.json"
 }
 
