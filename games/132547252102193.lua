@@ -268,9 +268,9 @@ local TargetStrafeModule = guiLibrary.Windows.Combat:createModule({
 
 TargetStrafeModule.sliders.new({
     ["Name"] = "Spin Speed",
-    ["Minimum"] = 0.5,
-    ["Maximum"] = 10,
-    ["Default"] = 2,
+    ["Minimum"] = 5,
+    ["Maximum"] = 50,
+    ["Default"] = 25,
     ["Function"] = function(value)
         SpinSpeed = value
     end
