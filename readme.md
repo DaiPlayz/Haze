@@ -25,9 +25,9 @@
         <img src="https://github.com/Springs67.png" width="90" style="border-radius:50%;"/>
       </td>
       <td style="padding-left: 10px; text-align:center;">
-        <strong>Springs67</strong><br>
+        <strong>spring67</strong><br>
         <em>Contributor</em><br>
-        <span style="opacity:0.8;">UI & Logic</span>
+        <span style="opacity:0.8;">I do whatever</span>
       </td>
     </tr>
     <tr>
