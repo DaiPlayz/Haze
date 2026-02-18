@@ -163,6 +163,8 @@ local function updhighlight(target)
     end
 end
 
+-- we are so detected again XD
+
 local function playanims()
     local char = LocalPlayer.Character
     if not char then return end
@@ -284,10 +286,12 @@ end
 
 local function breakbed(pick, hitbox)
     if not pick or not hitbox then return end
+
     local model = hitbox.Parent
     local pos = hitbox.Position
     local origin = pos + Vector3.new(0, 3, 0)
     local direction = (pos - origin).Unit
+
     remotes.MineBlockRemote:FireServer(
         pick.Name,
         model,
@@ -583,54 +587,64 @@ local currentMethod = "Notify"
 local staffList = {}
 local ServerHopping = false
 
+local function staffdetectHandle(playerName)
+    if currentMethod == "Notify" then
+        modules.Notifications:Notify("Staff Detected", playerName.." is in your server!", 10, Color3.fromRGB(255,0,0))
+    elseif currentMethod == "ServerHop" and not ServerHopping then
+        ServerHopping = true
+        modules.Notifications:Notify("Staff Detected", playerName.." detected! Changing server...", 5, Color3.fromRGB(255,165,0))
+
+        task.spawn(function()
+            task.wait(1)
+            local success, response = pcall(function() return game:HttpGet("https://games.roblox.com/v1/games/"..game.PlaceId.."/servers/Public?sortOrder=Asc&limit=100") end)
+
+            if success then
+                local data = HttpService:JSONDecode(response)
+                
+                for _,server in ipairs(data.data) do
+                    if server.playing < server.maxPlayers and server.id ~= game.JobId then
+                        TeleportService:TeleportToPlaceInstance(game.PlaceId,server.id,Players.LocalPlayer)
+                        return
+                    end
+                end
+                
+                modules.Notifications:Notify("Staff Detected","No server found!",5,Color3.fromRGB(255,0,0))
+            else
+                modules.Notifications:Notify("Staff Detected","ServerHop failed, could not fetch servers",5,Color3.fromRGB(255,0,0))
+            end
+
+            ServerHopping = false    
+        end)
+    end
+end
+
+local function checkPlayer(player)
+    if player and table.find(staffList,string.lower(player.Name)) then staffdetectHandle(player.Name) end
+end
+
 local StaffDetectorModule = guiLibrary.Windows.Combat:createModule({
     ["Name"] = "StaffDetector",
     ["Function"] = function(state)
-        local function staffdetectHandle(playerName)
-            if currentMethod == "Notify" then
-                modules.Notifications:Notify("Staff Detected", playerName.." is in your server!", 10, Color3.fromRGB(255,0,0))
-            elseif currentMethod == "ServerHop" and not ServerHopping then
-                ServerHopping = true
-                modules.Notifications:Notify("Staff Detected", playerName.." detected! Changing server...", 5, Color3.fromRGB(255,165,0))
-                task.spawn(function()
-                    task.wait(1)
-                    local success,response=pcall(function() return game:HttpGet("https://games.roblox.com/v1/games/"..game.PlaceId.."/servers/Public?sortOrder=Asc&limit=100") end)
-                    if success then
-                        local data = HttpService:JSONDecode(response)
-                        for _,server in ipairs(data.data) do
-                            if server.playing < server.maxPlayers and server.id ~= game.JobId then
-                                TeleportService:TeleportToPlaceInstance(game.PlaceId,server.id,Players.LocalPlayer)
-                                return
-                            end
-                        end
-                        modules.Notifications:Notify("Staff Detected","No server found!",5,Color3.fromRGB(255,0,0))
-                    else
-                        modules.Notifications:Notify("Staff Detected","ServerHop failed, could not fetch servers",5,Color3.fromRGB(255,0,0))
-                    end
-                    ServerHopping=false
-                end)
-            end
-        end
-
-        local function checkPlayer(player)
-            if player and table.find(staffList,string.lower(player.Name)) then staffdetectHandle(player.Name) end
-        end
-
         if state then
             staffList = {}
             ServerHopping = false
+
             if type(modules)=="table" and type(modules.StaffList)=="table" then
                 for _,name in ipairs(modules.StaffList) do table.insert(staffList,string.lower(name)) end
             else
                 modules.Notifications:Notify("Staff Detector","StaffList failed to load",5,Color3.fromRGB(255,0,0))
                 return
             end
+
             for _,player in ipairs(Players:GetPlayers()) do checkPlayer(player) end
             connection = Players.PlayerAdded:Connect(checkPlayer)
         else
-            if connection then connection:Disconnect() connection=nil end
-            staffList={}
-            ServerHopping=false
+            if connection then
+                connection:Disconnect()
+                connection = nil
+            end
+
+            -- why did it clean up the table again if it was already gonna get cleaned up on toggle??? XDD
         end
     end
 })
@@ -640,30 +654,36 @@ local StaffDetectMethod = StaffDetectorModule.selectors.new({
     ["Default"]= "Notify",
     ["Selections"]= {"Notify","ServerHop"},
     ["Function"]= function(value)
-        currentMethod=value
-        for _,player in ipairs(Players:GetPlayers()) do
+        currentMethod = value
+
+        for _,player in Players:GetPlayers() do
             if table.find(staffList,string.lower(player.Name)) then
-                if currentMethod=="Notify" then
+                if currentMethod == "Notify" then
                     modules.Notifications:Notify("Staff Detected",player.Name.." is in your server!",10,Color3.fromRGB(255,0,0))
                 elseif currentMethod=="ServerHop" and not ServerHopping then
-                    ServerHopping=true
+                    ServerHopping = true
                     modules.Notifications:Notify("Staff Detected",player.Name.." detected! Changing server...",5,Color3.fromRGB(255,165,0))
+
                     task.spawn(function()
                         task.wait(1)
-                        local success,response=pcall(function() return game:HttpGet("https://games.roblox.com/v1/games/"..game.PlaceId.."/servers/Public?sortOrder=Asc&limit=100") end)
+                        local success, response = pcall(function() return game:HttpGet("https://games.roblox.com/v1/games/"..game.PlaceId.."/servers/Public?sortOrder=Asc&limit=100") end)
+
                         if success then
-                            local data=HttpService:JSONDecode(response)
-                            for _,server in ipairs(data.data) do
-                                if server.playing<server.maxPlayers and server.id~=game.JobId then
+                            local data = HttpService:JSONDecode(response)
+
+                            for _, server in ipairs(data.data) do
+                                if server.playing < server.maxPlayers and server.id ~= game.JobId then
                                     TeleportService:TeleportToPlaceInstance(game.PlaceId,server.id,Players.LocalPlayer)
                                     return
                                 end
                             end
+
                             modules.Notifications:Notify("Staff Detector","No server found!",5,Color3.fromRGB(255,0,0))
                         else
                             modules.Notifications:Notify("Staff Detector","ServerHop failed, could not fetch servers",5,Color3.fromRGB(255,0,0))
                         end
-                        ServerHopping=false
+
+                        ServerHopping = false
                     end)
                 end
             end
