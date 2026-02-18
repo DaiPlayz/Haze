@@ -44,7 +44,7 @@ do
     end
     for i,v in uncfunctions do
         if not getgenv()[v] then
-            Notifications:Notify("Cooked", `Executor missing {i}`, 15, Color3.fromRGB(191,92,105))
+            Notifications:Notify("Cooked", `Executor missing {v}`, 15, Color3.fromRGB(191,92,105))
         end
     end
     --[[
