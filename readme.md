@@ -20,6 +20,26 @@
         <span style="opacity:0.8;">Developer when im bored.</span>
       </td>
     </tr>
+    <tr>
+      <td width="110">
+        <img src="https://github.com/Springs67.png" width="90" style="border-radius:50%;"/>
+      </td>
+      <td style="padding-left: 10px; text-align:center;">
+        <strong>Springs67</strong><br>
+        <em>Contributor</em><br>
+        <span style="opacity:0.8;">UI & Logic</span>
+      </td>
+    </tr>
+    <tr>
+      <td width="110">
+        <img src="https://github.com/tinnlol.png" width="90" style="border-radius:50%;"/>
+      </td>
+      <td style="padding-left: 10px; text-align:center;">
+        <strong>tinnlol</strong><br>
+        <em>Contributor</em><br>
+        <span style="opacity:0.8;">Script Optimization</span>
+      </td>
+    </tr>
   </table>
 
   <hr>
