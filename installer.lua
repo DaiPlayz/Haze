@@ -4,7 +4,6 @@ local CONFIG = {
     ROOT = "Haze",
     REPO_URL = "https://raw.githubusercontent.com/7Smoker/Haze/dev/",
     FILES = "https://raw.githubusercontent.com/7Smoker/Haze/dev/assets/Default.json"
-    FILES = "https://raw.githubusercontent.com/7Smoker/Haze/dev/assets/Default.json"
 }
 
 local function httpGet(url)
