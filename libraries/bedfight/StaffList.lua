@@ -1,1 +1,1 @@
-return {"minitoonfreind","GameMaster4268","HeyItsDaiPlayz","ohhiimnoobinarsenal2","HeyGangItsBob","Ragebaitedimbanned", "ReaIPoyo", "lIIIIlIIlIllIllll", "SimplyAlky", "7ax5", "Tryradv2", "thexyrae", "ReidHaloRBX", "UnicornHorn4264", "AnOmaly_Art", "Wibinoob"}
+return {"minitoonfreind","GameMaster4268","HeyItsDaiPlayz","ohhiimnoobinarsenal2", "Ragebaitedimbanned", "ReaIPoyo", "lIIIIlIIlIllIllll", "SimplyAlky", "7ax5", "Tryradv2", "thexyrae", "ReidHaloRBX", "AnOmaly_Art", "Wibinoob"}
