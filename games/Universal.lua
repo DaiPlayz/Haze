@@ -9,6 +9,7 @@ local RunService = game:GetService("RunService")
 local SpeedVar = false
 local SpeedValue = 16
 
+--[[
 local gmt = getrawmetatable(game)
 setreadonly(gmt, false)
 local oldindex = gmt.__index
@@ -18,7 +19,7 @@ gmt.__index = newcclosure(function(self, b)
     if b == "WalkSpeed" then return 16 end
     return oldindex(self, b)
 end)
-setreadonly(gmt, true)
+setreadonly(gmt, true)]]
 
 RunService.Heartbeat:Connect(function()
     if SpeedVar then
