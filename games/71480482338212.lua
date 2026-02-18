@@ -87,7 +87,6 @@ local function getRandomFolder()
         local Folder = workspace:GetChildren()[i]
 
         if Folder and typeof(Folder) == 'Instance' and Folder:IsA('Folder') then
-            print('folder got ?')
             return v
         end
     end
