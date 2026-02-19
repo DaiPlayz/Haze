@@ -273,7 +273,7 @@ function addToArray(Name: string, ExtraText)
 	ModuleText.TextColor3 = Color3.fromRGB(255, 255, 255)
 	ModuleText.TextSize = 17
 	ModuleText.Font = Enum.Font.BuilderSans
-	ModuleText.TextXAlignment = Enum.TextXAlignment.Right
+	ModuleText.TextXAlignment = Enum.TextXAlignment.Center
 	ModuleText.RichText = true
 
 	local aider = guiLibrary.Pallete.Changed.Event:Connect(function()
