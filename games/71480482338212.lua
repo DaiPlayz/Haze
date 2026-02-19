@@ -791,3 +791,30 @@ local FastPickUpModule = guiLibrary.Windows.Utility:createModule({
         end
     end
 })
+
+--[[ AntiVoid ]]
+local AntiVoidModule = guiLibrary.Windows.Movement:createModule({
+    ["Name"] = "AntiVoid",
+    ["Description"] = "Beta may not work",
+    ["Function"] = function(state)
+        if state then
+            RunService:BindToRenderStep('AntiVoid', 1, function()
+                local character = LocalPlayer.Character
+                if not character or not character:FindFirstChild("Humanoid") or character.Humanoid.Health <= 0 then
+                    return
+                end
+
+                local rootPart = character:FindFirstChild("HumanoidRootPart") or character.PrimaryPart
+                if not rootPart then
+                    return
+                end
+
+                if rootPart.CFrame.Y < 0 then
+                    rootPart.AssemblyLinearVelocity = Vector3.new(rootPart.AssemblyLinearVelocity.X, 150, rootPart.AssemblyLinearVelocity.Z)
+                end
+            end)
+        else
+            RunService:UnbindFromRenderStep('AntiVoid')
+        end
+    end
+})
