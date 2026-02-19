@@ -516,8 +516,8 @@ ScaffoldTower = ScaffoldModule.toggles.new({
                     return
                 end
 
-                if hasWool() and UserInputService:IsKeyDown(Enum.KeyCode.Space) then
-                    
+                if hasWool() and UserInputService:IsKeyDown(Enum.KeyCode.Space) and scaffTower then
+                    LocalPlayer.Character.PrimaryPart.AssemblyLinearVelocity = Vector3.new(LocalPlayer.Character.PrimaryPart.AssemblyLinearVelocity.X, scaffTowerSpeed, LocalPlayer.Character.PrimaryPart.AssemblyLinearVelocity.Z)
                 end
             end)
         end
