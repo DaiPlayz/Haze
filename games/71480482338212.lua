@@ -818,3 +818,122 @@ local AntiVoidModule = guiLibrary.Windows.Movement:createModule({
         end
     end
 })
+
+--[[ LongJump ]]
+local LongJumpMethodVal = "Fast"
+local LongJumpModule 
+local speedSync = false 
+local sprintSync = false
+
+LongJumpModule = guiLibrary.Windows.Movement:createModule({
+    ["Name"] = "LongJump",
+    ["Description"] = "Beta"
+    ["Function"] = function(state)
+        if state then
+            if SpeedModule.enabled then
+                speedSync = true
+                SpeedModule:toggle(false)
+            else
+                speedSync = false
+            end
+
+            if SprintModule.enabled then
+                sprintSync = true
+                SprintModule:toggle(false)
+            else
+                sprintSync = false
+            end
+
+            local startY = 26
+            local startTick = tick()
+            local character = LocalPlayer.Character
+            local root = character and character:FindFirstChild("HumanoidRootPart")
+            
+            if not root then 
+                task.spawn(function()
+                    if LongJumpModule.enabled then
+                        LongJumpModule:toggle(false)
+                    end
+                end)
+                return 
+            end
+            
+            local startDist = root.Position
+            
+            RunService:BindToRenderStep("LongJumpBinding", 1, function(deltaTime)
+                local char = LocalPlayer.Character
+                local rootPart = char and char:FindFirstChild("HumanoidRootPart")
+                local hum = char and char:FindFirstChildOfClass("Humanoid")
+
+                if not rootPart or not hum then 
+                    if LongJumpModule.enabled then
+                        LongJumpModule:toggle(false)
+                    end
+                    return 
+                end
+
+                shared.overRiding = true
+                local speedval = 20
+                startY = startY - (42 * deltaTime) 
+
+                local maxTime = (LongJumpMethodVal == "Fast" and 0.5) or 0.375
+
+                if (tick() - startTick) > maxTime or (LocalPlayer:DistanceFromCharacter(startDist)) >= 130 then
+                    task.defer(function()
+                        if LongJumpModule.enabled then
+                            LongJumpModule:toggle(false)
+                        end
+                    end)
+                    return
+                end
+
+                if LongJumpMethodVal == "Fast" then
+                    speedval = 400
+                elseif LongJumpMethodVal == "Safe" then
+                    speedval = 100
+                end
+
+                rootPart.AssemblyLinearVelocity = Vector3.new(
+                    hum.MoveDirection.X * speedval, 
+                    startY, 
+                    hum.MoveDirection.Z * speedval
+                )
+            end)
+        else
+            RunService:UnbindFromRenderStep("LongJumpBinding")
+            shared.overRiding = false
+            
+            local root = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+            if root then
+                root.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
+            end
+
+            if speedSync then
+                task.delay(0.1, function()
+                    if not SpeedModule.enabled then
+                        SpeedModule:toggle(true)
+                    end
+                    speedSync = false
+                end)
+            end
+
+            if sprintSync then
+                task.delay(0.1, function()
+                    if not SprintModule.enabled then
+                        SprintModule:toggle(true)
+                    end
+                    sprintSync = false
+                end)
+            end
+        end
+    end
+})
+
+local LongJumpMethod = LongJumpModule.selectors.new({
+    ["Name"] = "Method",
+    ["Default"] = "Fast",
+    ["Selections"] = {"Fast", "Safe"},
+    ["Function"] = function(value)
+        LongJumpMethodVal = value
+    end
+})
