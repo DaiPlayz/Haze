@@ -37,42 +37,33 @@ loadstring(game:HttpGet("https://raw.githubusercontent.com/7Smoker/Haze/refs/hea
 Development Team & Contributors
 </span>
 
-<table border="0" cellspacing="0" cellpadding="5">
+<table border="1" cellspacing="0" cellpadding="10" style="border-collapse: collapse; border-color: #30363d; color: white;">
 
 <tr>
-  <td>
+  <td align="center">
     <img src="https://github.com/7Smoker.png" width="50" style="border-radius:50%;" />
   </td>
-  <td align="left">
-    <b>ScriptIsFocus</b> Lead Dev
-  </td>
-  <td align="left">
-    Developer when im bored.
-  </td>
+  <td align="left"><b>ScriptIsFocus</b></td>
+  <td align="left">Lead Dev</td>
+  <td align="left">Developer when im bored.</td>
 </tr>
 
 <tr>
-  <td>
+  <td align="center">
     <img src="https://github.com/Springs67.png" width="50" style="border-radius:50%;" />
   </td>
-  <td align="left">
-    <b>spring67</b> Contributor
-  </td>
-  <td align="left">
-    I do whatever.
-  </td>
+  <td align="left"><b>spring67</b></td>
+  <td align="left">Contributor</td>
+  <td align="left">I do whatever.</td>
 </tr>
 
 <tr>
-  <td>
+  <td align="center">
     <img src="https://github.com/tinnlol.png" width="50" style="border-radius:50%;" />
   </td>
-  <td align="left">
-    <b>tinnlol</b> Contributor
-  </td>
-  <td align="left">
-    Script Optimization.
-  </td>
+  <td align="left"><b>tinnlol</b></td>
+  <td align="left">Contributor</td>
+  <td align="left">Script Optimization.</td>
 </tr>
 
 </table>
