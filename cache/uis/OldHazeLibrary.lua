@@ -80,10 +80,10 @@ local Library do
         },
 
         Images = {
-            ["Saturation"] = {"Saturation.png", "https://raw.githubusercontent.com/7Smoker/Haze/refs/heads/dev/assets/lib/saturation.png"},
-            ["Value"] = {"Value.png", "https://raw.githubusercontent.com/7Smoker/Haze/refs/heads/dev/assets/lib/value.png"},
-            ["Hue"] = {"Hue.png", "https://raw.githubusercontent.com/7Smoker/Haze/refs/heads/dev/assets/lib/horizontalhue.png"},
-            ["Checkers"] = {"Checkers.png", "https://raw.githubusercontent.com/7Smoker/Haze/refs/heads/dev/assets/lib/checkers.png"},
+            ["Saturation"] = {"Saturation.png", "https://raw.githubusercontent.com/7Smoker/Haze/refs/heads/main/assets/lib/saturation.png"},
+            ["Value"] = {"Value.png", "https://raw.githubusercontent.com/7Smoker/Haze/refs/heads/main/assets/lib/value.png"},
+            ["Hue"] = {"Hue.png", "https://raw.githubusercontent.com/7Smoker/Haze/refs/heads/main/assets/lib/horizontalhue.png"},
+            ["Checkers"] = {"Checkers.png", "https://raw.githubusercontent.com/7Smoker/Haze/refs/heads/main/assets/lib/checkers.png"},
         },
 
         Pages = { },
@@ -608,7 +608,7 @@ local Library do
         end
 
         CustomFont:New("Windows-XP-Tahoma", 200, "Regular", {
-            Url = "https://github.com/7Smoker/Haze/raw/refs/heads/dev/assets/lib/windows-xp-tahoma.ttf"
+            Url = "https://github.com/7Smoker/Haze/raw/refs/heads/main/assets/lib/windows-xp-tahoma.ttf"
         })
 
         Library.Font = CustomFont:Get("Windows-XP-Tahoma")

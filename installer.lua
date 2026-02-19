@@ -2,8 +2,8 @@ local HttpService = game:GetService("HttpService")
 
 local CONFIG = {
     ROOT = "Haze",
-    REPO_URL = "https://raw.githubusercontent.com/7Smoker/Haze/dev/",
-    FILES = "https://raw.githubusercontent.com/7Smoker/Haze/dev/assets/Default.json"
+    REPO_URL = "https://raw.githubusercontent.com/7Smoker/Haze/main/",
+    FILES = "https://raw.githubusercontent.com/7Smoker/Haze/main/assets/Default.json"
 }
 
 local function httpGet(url)
@@ -26,7 +26,7 @@ local function write(path, content)
 end
 
 local Notifications = loadstring(
-    game:HttpGet("https://raw.githubusercontent.com/7Smoker/Haze/dev/libraries/Notifications.lua")
+    game:HttpGet("https://raw.githubusercontent.com/7Smoker/Haze/main/libraries/Notifications.lua")
 )()
 
 local function flattenFiles(tbl, prefix)
