@@ -57,7 +57,7 @@ RunService.Heartbeat:Connect(function()
         local Humanoid = Character and Character:FindFirstChildOfClass("Humanoid")
         if Humanoid then
             Humanoid.WalkSpeed = SpeedValue
-            Character.PrimaryPart.AssemblyLinearVelocity = Vector3.new(Humanoid.MoveDirection.X * Humanoid.WalkSpeed, Character.PrimaryPart.Velocity.Y, Humanoid.MoveDirection.Z * Humanoid.WalkSpeed)
+            Character.PrimaryPart.AssemblyLinearVelocity = Vector3.new(Humanoid.MoveDirection.X * SpeedValue, Character.PrimaryPart.Velocity.Y, Humanoid.MoveDirection.Z * SpeedValue)
         end
     end
 end)
