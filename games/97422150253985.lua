@@ -13,21 +13,27 @@ local modules = {
     SwordController = loadfile(LocalLibrary .. "/skybridge/SwordController.lua")(),
     BowController = loadfile(LocalLibrary .. "/skybridge/BowController.lua")()
 }
+local humanoidvalues = {
+    ['JumpPower'] = 50,
+    ['WalkSpeed'] = 16
+}
 
 --[[ Speed ]]
 local SpeedVar = false
 local SpeedValue = 16
 
-local gmt = getrawmetatable(game)
-setreadonly(gmt, false)
-local oldindex = gmt.__index
+local oldindex;oldindex = hookmetamethod(game,"__index",newcclosure(function(self,key)
+    if self:IsA("Humanoid") and humanoidvalues[key] then return humanoidvalues[key] end
+    return oldindex(self,key)
+end))
+local oldnewindex;oldnewindex = hookmetamethod(game,"__newindex",newcclosure(function(self,key,value)
+    if not checkcaller() and self:IsA("Humanoid") and humanoidvalues[key] then
+        humanoidvalues[key] = value
+        return
+    end
+    return oldnewindex(self,key,value)
+end))
 
-gmt.__index = newcclosure(function(self, b)
-    if b == "JumpPower" then return 50 end
-    if b == "WalkSpeed" then return 16 end
-    return oldindex(self, b)
-end)
-setreadonly(gmt, true)
 
 RunService.Heartbeat:Connect(function()
     if SpeedVar then
@@ -96,7 +102,7 @@ local AutoWinModule = guiLibrary.Windows.Combat:createModule({
 
                         tpIndex = tpIndex % #Teams + 1
                     end
-                    wait(.5)
+                    task.wait(.5)
                 end
             end)
         end

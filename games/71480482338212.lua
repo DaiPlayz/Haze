@@ -29,20 +29,26 @@ local remotes = {
 
 local Swords = {"Emerald Sword", "Diamond Sword", "Iron Sword", "Stone Sword", "Wooden Sword"}
 
+local humanoidvalues = {
+    ['JumpPower'] = 50,
+    ['WalkSpeed'] = 16
+}
+
 --[[ Speed ]]
 local SpeedVar = false
 local SpeedValue = 16
 
-local gmt = getrawmetatable(game)
-setreadonly(gmt, false)
-local oldindex = gmt.__index
-
-gmt.__index = newcclosure(function(self, b)
-    if b == "JumpPower" then return 50 end
-    if b == "WalkSpeed" then return 16 end
-    return oldindex(self, b)
-end)
-setreadonly(gmt, true)
+local oldindex;oldindex = hookmetamethod(game,"__index",newcclosure(function(self,key)
+    if self:IsA("Humanoid") and humanoidvalues[key] then return humanoidvalues[key] end
+    return oldindex(self,key)
+end))
+local oldnewindex;oldnewindex = hookmetamethod(game,"__newindex",newcclosure(function(self,key,value)
+    if not checkcaller() and self:IsA("Humanoid") and humanoidvalues[key] then
+        humanoidvalues[key] = value
+        return
+    end
+    return oldnewindex(self,key,value)
+end))
 
 RunService.Heartbeat:Connect(function()
     if SpeedVar then
@@ -436,7 +442,7 @@ local ChestStealerModule = guiLibrary.Windows.Utility:createModule({
     ["Function"] = function(state)
         CSVar = state
         if state then
-            spawn(function()
+            task.spawn(function()
                 while CSVar do
                     for _, color in ipairs(TeamColors) do
                         for num = 1, 20 do
@@ -499,7 +505,7 @@ local InviteModule = guiLibrary.Windows.Utility:createModule({
         task.spawn(function()
             while InviteSpam do
                 modules.PartyController:InviteAll()
-                wait(.1)
+                task.wait(.1)
             end
         end)
     end
@@ -516,7 +522,7 @@ local KickModule = guiLibrary.Windows.Utility:createModule({
         task.spawn(function()
             while KickExpVar do
                 modules.PartyController:KickAll()
-                wait(.1)
+                task.wait(.1)
             end
         end)
     end

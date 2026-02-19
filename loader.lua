@@ -1,5 +1,6 @@
 local Players = game:GetService("Players")
 local MarketplaceService = game:GetService("MarketplaceService")
+local uncfunctions = {"identifyexecutor","hookmetamethod","checkcaller"}
 
 local ROOT = "Haze"
 local GAMES = ROOT .. "/games"
@@ -41,9 +42,10 @@ do
             return
         end
     end
-    if not getrawmetatable or not pcall(getrawmetatable, game) then
-        Notifications:Notify("Cooked", "Executor missing getrawmetatable", 15, Color3.fromRGB(191, 92, 105))
-        return
+    for i,v in uncfunctions do
+        if not getgenv()[v] then
+            Notifications:Notify("Cooked", `Executor missing {v}`, 15, Color3.fromRGB(191,92,105))
+        end
     end
 end
 

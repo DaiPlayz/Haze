@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="https://raw.githubusercontent.com/7Smoker/Haze/refs/heads/main/assets/lib/signlogo.png" width="250"/>
+  <img src="https://raw.githubusercontent.com/7Smoker/Haze/refs/heads/dev/assets/lib/signlogo.png" width="250"/>
 
   <p>Haze Script</p>
 
@@ -48,7 +48,8 @@
 
   <p>Haze <strong>requires advanced exploit functions</strong>, such as:</p>
   <div align="center">
-    <p>• <code>getrawmetatable</code></p>
+    <p>• <code>hookmetamethod</code></p>
+     <p>• <code>checkcaller</code></p>
     <p>• other low-level environment access</p>
   </div>
 
@@ -62,7 +63,7 @@
   <p>If your executor lacks required functions Haze will not run correctly.</p>
 
   <h3>Loadstring</h3>
-  <pre><code>loadstring(game:HttpGet("https://raw.githubusercontent.com/7Smoker/Haze/refs/heads/main/installer.lua"))()</code></pre>
+  <pre><code>loadstring(game:HttpGet("https://raw.githubusercontent.com/7Smoker/Haze/refs/heads/dev/installer.lua"))()</code></pre>
 
   <h3>How to Use</h3>
   <div align="center">
