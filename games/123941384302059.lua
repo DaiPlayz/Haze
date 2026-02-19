@@ -10,15 +10,25 @@ local LocalLibrary = "Haze/libraries"
 local modules = {
     PartyController = loadfile(LocalLibrary .. "/skybridge/PartyController.lua")()
 }
+local humanoidvalues = {
+    ['JumpPower'] = 50,
+    ['WalkSpeed'] = 16
+}
 
 --[[ Speed ]]
 local SpeedVar = false
 local SpeedValue = 16
 
-local oldindex;oldindex = hookfunction(getrawmetatable(game).__index,newcclosure(function(self, b)
-    if b == "JumpPower" then return 50 end
-    if b == "WalkSpeed" then return 16 end
-    return oldindex(self, b)
+local oldindex;oldindex = hookmetamethod(game,"__index",newcclosure(function(self,key)
+    if self:IsA("Humanoid") and humanoidvalues[key] then return humanoidvalues[key] end
+    return oldindex(self,key)
+end))
+local oldnewindex;oldnewindex = hookmetamethod(game,"__newindex",newcclosure(function(self,key,value)
+    if not checkcaller() and self:IsA("Humanoid") and humanoidvalues[key] then
+        humanoidvalues[key] = value
+        return
+    end
+    return oldnewindex(self,key,value)
 end))
 
 RunService.Heartbeat:Connect(function()
@@ -85,7 +95,7 @@ local KicksModule = guiLibrary.Windows.Utility:createModule({
         task.spawn(function()
             while KickSpamVar do
                 modules.PartyController:KickAll()
-                wait(.1)
+                task.wait(.1)
             end
         end)
     end

@@ -611,10 +611,10 @@ PartySec:Toggle({
     ["Tooltip"] = "invites everyone in the server in your party",
     ["Default"] = false,
     ["Callback"] = function(state)
-        spawn(function()
+        task.spawn(function()
             while state do
                 modules.PartyController:InviteAll()
-                wait(0.01)
+                task.wait(0.01)
             end
         end)
     end
@@ -626,10 +626,10 @@ PartySec:Toggle({
     ["Tooltip"] = "kicks everyone from your party",
     ["Default"] = false,
     ["Callback"] = function(state)
-        spawn(function()
+        task.spawn(function()
             while state do
                 modules.PartyController:KickAll()
-                wait(0.01)
+                task.wait(0.01)
             end
         end)
     end

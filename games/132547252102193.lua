@@ -26,11 +26,21 @@ local AnimationData = require(ReplicatedStorage:WaitForChild("GameInfo"):WaitFor
 local SpeedVar = false
 local SpeedValue = 16
 local SpeedMode = "WalkSpeed"
+local humanoidvalues = {
+    ['JumpPower'] = 50,
+    ['WalkSpeed'] = 16
+}
 
-local oldindex;oldindex = hookfunction(getrawmetatable(game).__index,newcclosure(function(self, b)
-    if b == "JumpPower" then return 50 end
-    if b == "WalkSpeed" then return 16 end
-    return oldindex(self, b)
+local oldindex;oldindex = hookmetamethod(game,"__index",newcclosure(function(self,key)
+    if self:IsA("Humanoid") and humanoidvalues[key] then return humanoidvalues[key] end
+    return oldindex(self,key)
+end))
+local oldnewindex;oldnewindex = hookmetamethod(game,"__newindex",newcclosure(function(self,key,value)
+    if not checkcaller() and self:IsA("Humanoid") and humanoidvalues[key] then
+        humanoidvalues[key] = value
+        return
+    end
+    return oldnewindex(self,key,value)
 end))
 
 RunService.Heartbeat:Connect(function()
@@ -262,9 +272,9 @@ local TargetStrafeModule = guiLibrary.Windows.Combat:createModule({
 
 TargetStrafeModule.sliders.new({
     ["Name"] = "Spin Speed",
-    ["Minimum"] = 0.5,
-    ["Maximum"] = 10,
-    ["Default"] = 2,
+    ["Minimum"] = 5,
+    ["Maximum"] = 50,
+    ["Default"] = 25,
     ["Function"] = function(value)
         SpinSpeed = value
     end

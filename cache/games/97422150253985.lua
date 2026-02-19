@@ -624,7 +624,7 @@ AutoWinSec:Toggle({
             end
 
             local tpIndex = 1
-            spawn(function()
+            task.spawn(function()
                 while AutoWinVar do
                     local character = LocalPlayer.Character
                     if character and character:FindFirstChild("HumanoidRootPart") then
@@ -638,7 +638,7 @@ AutoWinSec:Toggle({
 
                         tpIndex = tpIndex % #Teams + 1
                     end
-                    wait(.5)
+                    task.wait(.5)
                 end
             end)
         end

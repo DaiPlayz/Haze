@@ -29,14 +29,25 @@ local remotes = {
 
 local Swords = {"Emerald Sword", "Diamond Sword", "Iron Sword", "Stone Sword", "Wooden Sword"}
 
+local humanoidvalues = {
+    ['JumpPower'] = 50,
+    ['WalkSpeed'] = 16
+}
+
 --[[ Speed ]]
 local SpeedVar = false
 local SpeedValue = 16
 
-local oldindex;oldindex = hookfunction(getrawmetatable(game).__index,newcclosure(function(self, b)
-    if b == "JumpPower" then return 50 end
-    if b == "WalkSpeed" then return 16 end
-    return oldindex(self, b)
+local oldindex;oldindex = hookmetamethod(game,"__index",newcclosure(function(self,key)
+    if self:IsA("Humanoid") and humanoidvalues[key] then return humanoidvalues[key] end
+    return oldindex(self,key)
+end))
+local oldnewindex;oldnewindex = hookmetamethod(game,"__newindex",newcclosure(function(self,key,value)
+    if not checkcaller() and self:IsA("Humanoid") and humanoidvalues[key] then
+        humanoidvalues[key] = value
+        return
+    end
+    return oldnewindex(self,key,value)
 end))
 
 RunService.Heartbeat:Connect(function()
@@ -82,10 +93,10 @@ local function getRandomFolder()
         local Folder = workspace:GetChildren()[i]
 
         if Folder and typeof(Folder) == 'Instance' and Folder:IsA('Folder') then
-            print('folder got ?')
             return v
         end
     end
+    return Instance.new('Folder', workspace)
 end
 
 --[[ KillAura ]]
@@ -99,7 +110,7 @@ local LastAnimTime = 0
 local SwingSound = Instance.new("Sound")
 SwingSound.SoundId = "rbxassetid://104766549106531"
 SwingSound.Volume = 1
-SwingSound.Parent = getRandomFolder() or workspace
+SwingSound.Parent = getRandomFolder()
 
 local SwingAnimation = Instance.new("Animation")
 SwingAnimation.AnimationId = "rbxassetid://123800159244236"
@@ -153,7 +164,7 @@ local function updhighlight(target)
         highlight.OutlineColor = Color3.fromRGB(0, 255, 0)
         highlight.FillTransparency = 0.5
         highlight.OutlineTransparency = 0
-        highlight.Parent = getRandomFolder() or workspace
+        highlight.Parent = getRandomFolder()
         currentHighlight = highlight
     end
 end
@@ -430,7 +441,7 @@ local ChestStealerModule = guiLibrary.Windows.Utility:createModule({
     ["Function"] = function(state)
         CSVar = state
         if state then
-            spawn(function()
+            task.spawn(function()
                 while CSVar do
                     for _, color in ipairs(TeamColors) do
                         for num = 1, 20 do
@@ -493,7 +504,7 @@ local InviteModule = guiLibrary.Windows.Utility:createModule({
         task.spawn(function()
             while InviteSpam do
                 modules.PartyController:InviteAll()
-                wait(.1)
+                task.wait(.1)
             end
         end)
     end
@@ -510,7 +521,7 @@ local KickModule = guiLibrary.Windows.Utility:createModule({
         task.spawn(function()
             while KickExpVar do
                 modules.PartyController:KickAll()
-                wait(.1)
+                task.wait(.1)
             end
         end)
     end

@@ -542,7 +542,7 @@ local FECape = FECapeSec:Toggle({
         while FECapeVar do
             for _, color in ipairs(SelectedColors) do
                remotes.EquipCape:FireServer(color)
-                wait(.1)
+                task.wait(.1)
                 if not FECapeVar then break end
             end
         end
@@ -732,7 +732,7 @@ local CSTog = ChestStealSec:Toggle({
     ["Callback"] = function(state)
         CSVar = state
         if state then
-            spawn(function()
+            task.spawn(function()
                 while CSVar do
                     for _, color in ipairs(TeamColors) do
                         for num = 1, 20 do
@@ -901,10 +901,10 @@ PartySec:Toggle({
     ["Tooltip"] = "Invites everyone in your party",
     ["Default"] = false,
     ["Callback"] = function(state)
-        spawn(function()
+        task.spawn(function()
             while state do
                 modules.PartyController:InviteAll()
-                wait(0.1)
+                task.wait(0.1)
             end
         end)
     end
@@ -916,10 +916,10 @@ PartySec:Toggle({
     ["Tooltip"] = "Spam Kick everyone for party, everyone in server will get spam kicked even if not in party",
     ["Default"] = false,
     ["Callback"] = function(state)
-        spawn(function()
+        task.spawn(function()
             while state do
                 modules.PartyController:KickAll()
-                wait(0.1)
+                task.wait(0.1)
             end
         end)
     end
