@@ -302,7 +302,7 @@ function addToArray(Name: string, ExtraText)
 		return a.Size.X.Offset > b.Size.X.Offset
 	end)
 
-	for i, v in ipairs(aids) do v.LayoutOrder = i end
+	for i, v in aids do v.LayoutOrder = i end
 end
 
 local function removeFromArray(Name: string)
