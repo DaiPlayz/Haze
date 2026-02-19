@@ -737,3 +737,14 @@ local StaffDetectMethod = StaffDetectorModule.selectors.new({
         end
     end
 })
+
+--[[ Disabler ]]
+local DisablerModule = guiLibrary.Windows.Combat:createModule({
+    ["Name"] = "Disabler",
+    ["Description"] = "mrfridgebeater found this"
+    ["Function"] = function(state)
+        if state then
+            ReplicatedStorage.Remotes.AdminRemotes.RemoteEvent:Destroy()
+        end
+    end
+})
