@@ -744,10 +744,50 @@ local StaffDetectMethod = StaffDetectorModule.selectors.new({
 --[[ Disabler ]]
 local DisablerModule = guiLibrary.Windows.Exploit:createModule({
     ["Name"] = "Disabler",
-    ["Description"] = "mrfridgebeater found this"
+    ["Description"] = "mrfridgebeater found this",
     ["Function"] = function(state)
         if state then
             ReplicatedStorage.Remotes.AdminRemotes.RemoteEvent:Destroy()
+        end
+    end
+})
+
+--[[ FastPickUp ]]
+local FastPickUpVar = false
+local FastPickUpModule = guiLibrary.Windows.Utility:createModule({
+    ["Name"] = "FastPickUp",
+    ["Function"] = function(state)
+        FastPickUpVar = state
+        if FastPickUpVar then
+            task.spawn(function()
+                while FastPickUpVar do 
+                    task.wait()
+                    local character = LocalPlayer.Character
+                    if not character or not character:FindFirstChild("Humanoid") or character.Humanoid.Health <= 0 then
+                        continue
+                    end
+
+                    local rootPart = character:FindFirstChild("HumanoidRootPart")
+                    if not rootPart then 
+                        continue 
+                    end
+
+                    local container = workspace:FindFirstChild('DroppedItemsContainer')
+                    if container then
+                        for _, item in ipairs(container:GetChildren()) do
+                            local itemPart = item.PrimaryPart or item:FindFirstChildWhichIsA("BasePart")
+                            
+                            if itemPart then
+                                local dist = (rootPart.Position - itemPart.Position).Magnitude
+
+                                if dist <= 10 then
+                                    itemPart.CFrame = rootPart.CFrame - Vector3.new(0, 4, 0)
+                                end
+                            end
+                        end
+                    end
+                end
+            end)
         end
     end
 })
