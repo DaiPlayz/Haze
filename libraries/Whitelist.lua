@@ -4,7 +4,7 @@ local RunService = game:GetService("RunService")
 local LocalPlayer = Players.LocalPlayer
 
 local LicensePath = "Haze/assets/data/License.json"
-local WhitelistURL = "https://raw.githubusercontent.com/7Smoker/whitelisted/refs/heads/dev/private.json"
+local WhitelistURL = "https://raw.githubusercontent.com/7Smoker/whitelisted/refs/heads/main/private.json"
 
 local SALT = "HazeWhitelistCrypted"
 local whitelistData = nil
