@@ -742,7 +742,7 @@ local StaffDetectMethod = StaffDetectorModule.selectors.new({
 })
 
 --[[ Disabler ]]
-local DisablerModule = guiLibrary.Windows.Combat:createModule({
+local DisablerModule = guiLibrary.Windows.Exploit:createModule({
     ["Name"] = "Disabler",
     ["Description"] = "mrfridgebeater found this"
     ["Function"] = function(state)
