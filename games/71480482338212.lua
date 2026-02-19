@@ -798,19 +798,19 @@ local AntiVoidModule = guiLibrary.Windows.Movement:createModule({
     ["Description"] = "Beta may not work",
     ["Function"] = function(state)
         if state then
-            RunService:BindToRenderStep('AntiVoid', 1, function()
+            RunService:BindToRenderStep('AntiVoid', 999, function()
                 local character = LocalPlayer.Character
                 if not character or not character:FindFirstChild("Humanoid") or character.Humanoid.Health <= 0 then
                     return
                 end
 
-                local rootPart = character:FindFirstChild("HumanoidRootPart") or character.PrimaryPart
+                local rootPart = character.PrimaryPart or character:FindFirstChild("HumanoidRootPart")
                 if not rootPart then
                     return
                 end
 
                 if rootPart.CFrame.Y < 0 then
-                    rootPart.AssemblyLinearVelocity = Vector3.new(rootPart.AssemblyLinearVelocity.X, 150, rootPart.AssemblyLinearVelocity.Z)
+                    rootPart.Velocity = Vector3.new(0, 150, 0)
                 end
             end)
         else
