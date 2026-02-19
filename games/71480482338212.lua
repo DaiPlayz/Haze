@@ -827,7 +827,7 @@ local sprintSync = false
 
 LongJumpModule = guiLibrary.Windows.Movement:createModule({
     ["Name"] = "LongJump",
-    ["Description"] = "Beta"
+    ["Description"] = "Beta",
     ["Function"] = function(state)
         if state then
             if SpeedModule.enabled then
