@@ -7,6 +7,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local TeleportService = game:GetService("TeleportService")
 local HttpService = game:GetService("HttpService")
+local UserInputService = game:GetService("UserInputService")
 
 --[[ Libraries ]]
 local LocalLibrary = "Haze/libraries"
@@ -56,6 +57,7 @@ RunService.Heartbeat:Connect(function()
         local Humanoid = Character and Character:FindFirstChildOfClass("Humanoid")
         if Humanoid then
             Humanoid.WalkSpeed = SpeedValue
+            Character.PrimaryPart.AssemblyLinearVelocity = Vector3.new(Humanoid.MoveDirection.X * SpeedValue, Character.PrimaryPart.Velocity.Y, Humanoid.MoveDirection.Z * SpeedValue)
         end
     end
 end)
@@ -93,7 +95,7 @@ local function getRandomFolder()
         local Folder = workspace:GetChildren()[i]
 
         if Folder and typeof(Folder) == 'Instance' and Folder:IsA('Folder') then
-            return v
+            return Folder
         end
     end
 
@@ -302,9 +304,9 @@ local function breakbed(pick, hitbox)
     remotes.MineBlockRemote:FireServer(
         pick.Name,
         model,
-        vector.create(pos.X, pos.Y, pos.Z),
-        vector.create(origin.X, origin.Y, origin.Z),
-        vector.create(direction.X, direction.Y, direction.Z)
+        Vector3.new(pos.X, pos.Y, pos.Z),
+        Vector3.new(origin.X, origin.Y, origin.Z),
+        Vector3.new(direction.X, direction.Y, direction.Z)
     )
 end
 
@@ -486,11 +488,49 @@ local SprintModule = guiLibrary.Windows.Movement:createModule({
     end
 })
 
+local function hasWool()
+    for i, v in LocalPlayer.Backpack:GetChildren() do
+        if v.Name:lower():find('wool') then
+            return true
+        end
+    end
+
+    return false
+end
+
 --[[ Scaffold ]]
+local scaffTower, scaffTowerSpeed = false, 50
 local ScaffoldModule = guiLibrary.Windows.Utility:createModule({
     ["Name"] = "Scaffold",
     ["Function"] = function(state)
         modules.ScaffoldController:SetState(state)
+    end
+})
+ScaffoldTower = ScaffoldModule.toggles.new({
+    ['Name'] = 'Tower',
+    ['Function'] = function(state)
+        scaffTower = state
+
+        if state then
+            RunService:BindToRenderStep('ScaffoldTowerStuff', 999, function()
+                if not modules.Entity.isAlive(LocalPlayer.Character) then
+                    return
+                end
+
+                if hasWool() and UserInputService:IsKeyDown(Enum.KeyCode.Space) and scaffTower then
+                    LocalPlayer.Character.PrimaryPart.AssemblyLinearVelocity = Vector3.new(LocalPlayer.Character.PrimaryPart.AssemblyLinearVelocity.X, scaffTowerSpeed, LocalPlayer.Character.PrimaryPart.AssemblyLinearVelocity.Z)
+                end
+            end)
+        end
+    end
+})
+ScaffoldTowerSpeed = ScaffoldModule.sliders.new({
+    ["Name"] = "Tower Speed",
+    ["Minimum"] = 1,
+    ["Maximum"] = 50,
+    ["Default"] = 50,
+    ["Function"] = function(value)
+        scaffTowerSpeed = value
     end
 })
 
