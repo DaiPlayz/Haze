@@ -96,6 +96,7 @@ local function getRandomFolder()
             return v
         end
     end
+
     return Instance.new('Folder', workspace)
 end
 
