@@ -83,7 +83,7 @@ local SpeedModule = guiLibrary.Windows.Movement:createModule({
 local SpeedValueMod = SpeedModule.sliders.new({
     ["Name"] = "Speed Value",
     ["Minimum"] = 16,
-    ["Maximum"] = 31,
+    ["Maximum"] = 28,
     ["Default"] = 28,
     ["Function"] = function(value)
         SpeedValue = value
@@ -499,7 +499,7 @@ local function hasWool()
 end
 
 --[[ Scaffold ]]
-local scaffTower, scaffTowerSpeed = false, 50
+local scaffTowerSpeed = 50
 local ScaffoldModule = guiLibrary.Windows.Utility:createModule({
     ["Name"] = "Scaffold",
     ["Function"] = function(state)
@@ -509,18 +509,18 @@ local ScaffoldModule = guiLibrary.Windows.Utility:createModule({
 ScaffoldTower = ScaffoldModule.toggles.new({
     ['Name'] = 'Tower',
     ['Function'] = function(state)
-        scaffTower = state
-
         if state then
             RunService:BindToRenderStep('ScaffoldTowerStuff', 999, function()
                 if not modules.Entity.isAlive(LocalPlayer.Character) then
                     return
                 end
 
-                if hasWool() and UserInputService:IsKeyDown(Enum.KeyCode.Space) and scaffTower then
+                if hasWool() and UserInputService:IsKeyDown(Enum.KeyCode.Space) and ScaffoldModule.enabled then
                     LocalPlayer.Character.PrimaryPart.AssemblyLinearVelocity = Vector3.new(LocalPlayer.Character.PrimaryPart.AssemblyLinearVelocity.X, scaffTowerSpeed, LocalPlayer.Character.PrimaryPart.AssemblyLinearVelocity.Z)
                 end
             end)
+        else
+            RunService:UnbindFromRenderStep('ScaffoldTowerStuff')
         end
     end
 })
