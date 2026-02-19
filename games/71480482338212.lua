@@ -57,7 +57,7 @@ RunService.Heartbeat:Connect(function()
         local Humanoid = Character and Character:FindFirstChildOfClass("Humanoid")
         if Humanoid then
             Humanoid.WalkSpeed = SpeedValue
-            Character.PrimaryPart.AssemblyLinearVelocity = Vector3.new(Humanoid.MoveDirection.X * SpeedValue, Character.PrimaryPart.Velocity.Y, Humanoid.MoveDirection.Z * SpeedValue)
+            Character.PrimaryPart.AssemblyLinearVelocity = Vector3.new(Humanoid.MoveDirection.X * SpeedValue, Character.PrimaryPart.AssemblyLinearVelocity.Y, Humanoid.MoveDirection.Z * SpeedValue)
         end
     end
 end)
@@ -490,7 +490,7 @@ local SprintModule = guiLibrary.Windows.Movement:createModule({
 
 local function hasWool()
     for i, v in LocalPlayer.Backpack:GetChildren() do
-        if v.Name:lower():find('wool') then
+        if v.Name:lower():find('wool') or v.Name:lower():find('fake') then
             return true
         end
     end
@@ -515,7 +515,10 @@ ScaffoldTower = ScaffoldModule.toggles.new({
                     return
                 end
 
+
+
                 if hasWool() and UserInputService:IsKeyDown(Enum.KeyCode.Space) and ScaffoldModule.enabled then
+                    print('go')
                     LocalPlayer.Character.PrimaryPart.AssemblyLinearVelocity = Vector3.new(LocalPlayer.Character.PrimaryPart.AssemblyLinearVelocity.X, scaffTowerSpeed, LocalPlayer.Character.PrimaryPart.AssemblyLinearVelocity.Z)
                 end
             end)
