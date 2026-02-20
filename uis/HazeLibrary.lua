@@ -10,7 +10,7 @@ local tweenService = game:GetService('TweenService')
 local userInputService = game:GetService('UserInputService')
 local lighting = game:GetService('Lighting')
 local collectionService = game:GetService("CollectionService")
-local coreGui = game:GetService('CoreGui')
+local coreGui = game:GetService('CoreGui') -- yo tin can, change it to PlayerGui! 
 
 local function udcrypt()
     local length = math.random(10, 20)
