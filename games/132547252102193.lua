@@ -5,6 +5,7 @@ local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
 
 --[[ Libraries ]]
 local LocalLibrary = "Haze/libraries"
@@ -84,7 +85,7 @@ local SpeedValueMod = SpeedModule.sliders.new({
 --[[ KillAura ]]
 local KillAuraVar = false
 local FaceTargetVar = false
-local KARange = 20
+local KARange = 18
 local currentTargetPart = nil
 local character = Players.LocalPlayer.Character or Players.LocalPlayer.CharacterAdded:Wait()
 local rootPart = character:WaitForChild("HumanoidRootPart")
@@ -107,8 +108,8 @@ KillAuraModule.toggles.new({
 KillAuraModule.sliders.new({
     ["Name"] = "Range",
     ["Minimum"] = 5,
-    ["Maximum"] = 50,
-    ["Default"] = 20,
+    ["Maximum"] = 18,
+    ["Default"] = 18,
     ["Function"] = function(value)
         KARange = value
     end
@@ -149,27 +150,32 @@ end)
 --[[ TPAura ]]
 local TPAuraVar = false
 local TPAHeight = 5
-local TPARange = 20
+local TPARange = 18
+local tweeninfo = TweenInfo.new(0.15, Enum.EasingStyle.Linear, Enum.EasingDirection.Out)
 
 local TPAuraModule = guiLibrary.Windows.Movement:createModule({
     ["Name"] = "TPAura",
+    ["Description"] = "beta"
     ["Function"] = function(state)
         TPAuraVar = state
         if state then
             task.spawn(function()
                 while TPAuraVar do
-                    task.wait()
-                    if not TPAuraVar then break end
+                    task.wait(0.1)
                     
                     local myChar = LocalPlayer.Character
                     local myRoot = myChar and myChar:FindFirstChild("HumanoidRootPart")
-                    if myRoot then
-                        local targetPlayer = modules.Entity.nearPlayer(TPARange)
-                        if targetPlayer and targetPlayer.Character and modules.Entity.isAlive(targetPlayer.Character) then
-                            local targetRoot = targetPlayer.Character:FindFirstChild("HumanoidRootPart")
-                            if targetRoot then
-                                myRoot.CFrame = CFrame.new(targetRoot.Position + Vector3.new(0, TPAHeight, 0))
-                            end
+                    
+                    if not myRoot then continue end
+
+                    local targetPlayer = modules.Entity.nearPlayer(TPARange)
+
+                    if targetPlayer and targetPlayer.Character and modules.Entity.isAlive(targetPlayer.Character) then
+                        local targetRoot = targetPlayer.Character:FindFirstChild("HumanoidRootPart")
+                        
+                        if targetRoot then
+                            local targetPos = targetRoot.Position + Vector3.new(0, TPAHeight, 0)
+                            TweenService:Create(myRoot, tweeninfo, {CFrame = CFrame.new(targetPos)}):Play()
                         end
                     end
                 end
@@ -178,29 +184,9 @@ local TPAuraModule = guiLibrary.Windows.Movement:createModule({
     end
 })
 
-TPAuraModule.sliders.new({
-    ["Name"] = "Height",
-    ["Minimum"] = 1,
-    ["Maximum"] = 20,
-    ["Default"] = 5,
-    ["Function"] = function(value)
-        TPAHeight = value
-    end
-})
-
-TPAuraModule.sliders.new({
-    ["Name"] = "Range",
-    ["Minimum"] = 5,
-    ["Maximum"] = 50,
-    ["Default"] = 20,
-    ["Function"] = function(value)
-        TPARange = value
-    end
-})
-
 --[[ TargetStrafe ]]
 local TargetStrafeVar = false
-local TSRange = 20
+local TSRange = 18
 local SpinSpeed = 2
 local SpinAngle = 0
 local LookAtTarget = false
@@ -248,8 +234,8 @@ local TargetStrafeModule = guiLibrary.Windows.Combat:createModule({
 TargetStrafeModule.sliders.new({
     ["Name"] = "Spin Speed",
     ["Minimum"] = 5,
-    ["Maximum"] = 50,
-    ["Default"] = 25,
+    ["Maximum"] = 10,
+    ["Default"] = 10,
     ["Function"] = function(value)
         SpinSpeed = value
     end
@@ -258,8 +244,8 @@ TargetStrafeModule.sliders.new({
 TargetStrafeModule.sliders.new({
     ["Name"] = "Range",
     ["Minimum"] = 5,
-    ["Maximum"] = 50,
-    ["Default"] = 20,
+    ["Maximum"] = 18,
+    ["Default"] = 18,
     ["Function"] = function(value)
         TSRange = value
     end
