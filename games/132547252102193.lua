@@ -22,14 +22,14 @@ local remotes = {
 --[[ Modules ]]
 local AnimationData = require(ReplicatedStorage:WaitForChild("GameInfo"):WaitForChild("Ids"):WaitForChild("Animations"))
 
---[[ Speed ]]  
-local SpeedVar = false
-local SpeedValue = 16
-local SpeedMode = "WalkSpeed"
 local humanoidvalues = {
     ['JumpPower'] = 50,
     ['WalkSpeed'] = 16
 }
+
+--[[ Speed ]]
+local SpeedVar = false
+local SpeedValue = 16
 
 local oldindex;oldindex = hookmetamethod(game,"__index",newcclosure(function(self,key)
     if self:IsA("Humanoid") and humanoidvalues[key] then return humanoidvalues[key] end
@@ -44,24 +44,12 @@ local oldnewindex;oldnewindex = hookmetamethod(game,"__newindex",newcclosure(fun
 end))
 
 RunService.Heartbeat:Connect(function()
-    if not SpeedVar then return end
-
-    local Character = LocalPlayer.Character
-    if not Character then return end
-
-    local Humanoid = Character:FindFirstChildOfClass("Humanoid")
-    local RootPart = Character:FindFirstChild("HumanoidRootPart")
-    if not Humanoid or not RootPart then return end
-
-    if SpeedMode == "WalkSpeed" then
-        Humanoid.WalkSpeed = SpeedValue
-
-    elseif SpeedMode == "Velocity" then
-        RootPart.Velocity = Vector3.new(
-            Humanoid.MoveDirection.X * SpeedValue,
-            RootPart.Velocity.Y,
-            Humanoid.MoveDirection.Z * SpeedValue
-        )
+    if SpeedVar then
+        local Character = LocalPlayer.Character
+        local Humanoid = Character and Character:FindFirstChildOfClass("Humanoid")
+        if Humanoid then
+            Humanoid.WalkSpeed = SpeedValue
+        end
     end
 end)
 
@@ -70,39 +58,26 @@ local SpeedModule = guiLibrary.Windows.Movement:createModule({
     ["Description"] = "Makes you walk faster",
     ["Function"] = function(state)
         SpeedVar = state
-
-        local Character = LocalPlayer.Character
-        if not Character then return end
-
-        local Humanoid = Character:FindFirstChildOfClass("Humanoid")
-        local RootPart = Character:FindFirstChild("HumanoidRootPart")
-
         if not state then
-            if Humanoid then Humanoid.WalkSpeed = 16 end
-            if RootPart then RootPart.Velocity = Vector3.zero end
+            local Character = LocalPlayer.Character
+            local Humanoid = Character and Character:FindFirstChildOfClass("Humanoid")
+            if Humanoid then
+                Humanoid.WalkSpeed = 16
+            end
         end
     end,
     ["ExtraText"] = function()
-        return tostring(SpeedMode)
+        return tostring(SpeedValue)
     end
 })
 
-SpeedModule.sliders.new({
+local SpeedValueMod = SpeedModule.sliders.new({
     ["Name"] = "Speed Value",
     ["Minimum"] = 16,
-    ["Maximum"] = 100,
+    ["Maximum"] = 29,
     ["Default"] = 16,
     ["Function"] = function(value)
         SpeedValue = value
-    end
-})
-
-SpeedModule.selectors.new({
-    ["Name"] = "Mode",
-    ["Default"] = "WalkSpeed",
-    ["Selections"] = {"WalkSpeed", "Velocity"},
-    ["Function"] = function(value)
-        SpeedMode = value
     end
 })
 
