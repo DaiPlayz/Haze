@@ -382,3 +382,49 @@ local ClanInviterModule = guiLibrary.Windows.Utility:createModule({
         end
     end
 })
+
+--[[ InstaKill ]]
+local killConnect
+
+local function getTarget()
+    local target = nil
+    local lastDist = 20
+    
+    local char = LocalPlayer.Character
+    local root = char and char:FindFirstChild("HumanoidRootPart")
+    
+    if not root then return nil end
+
+    for _, v in pairs(Players:GetPlayers()) do
+        if v ~= LocalPlayer and v.Character and v.Character:FindFirstChild("HumanoidRootPart") then
+            local pRoot = v.Character.HumanoidRootPart
+            local dist = (pRoot.Position - root.Position).Magnitude
+            
+            if dist < lastDist then
+                lastDist = dist
+                target = v.Character
+            end
+        end
+    end
+    return target
+end
+
+local InstaKillModule = guiLibrary.Windows.Exploit:createModule({
+    ["Name"] = "InstaKill",
+    ["Description"] = "instakill exploit from haze private leaked",
+    ["Function"] = function(callback)
+        if callback then
+            killConnect = RunService.Heartbeat:Connect(function()
+                local enemy = getTarget()
+                if enemy then
+                    remotes.ApplyDamage:InvokeServer(enemy)
+                end
+            end)
+        else
+            if killConnect then
+                killConnect:Disconnect()
+                killConnect = nil
+            end
+        end
+    end
+})
