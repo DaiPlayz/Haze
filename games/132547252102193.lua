@@ -155,7 +155,7 @@ local tweeninfo = TweenInfo.new(0.15, Enum.EasingStyle.Linear, Enum.EasingDirect
 
 local TPAuraModule = guiLibrary.Windows.Movement:createModule({
     ["Name"] = "TPAura",
-    ["Description"] = "beta"
+    ["Description"] = "beta",
     ["Function"] = function(state)
         TPAuraVar = state
         if state then
