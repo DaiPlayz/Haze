@@ -9,43 +9,40 @@ local httpService = game:GetService('HttpService')
 local tweenService = game:GetService('TweenService')
 local userInputService = game:GetService('UserInputService')
 local lighting = game:GetService('Lighting')
-local localEntity = players.LocalPlayer
-local CollectionService = game:GetService("CollectionService")
-local CoreGui = game:GetService('CoreGui')
+local collectionService = game:GetService("CollectionService")
+local coreGui = game:GetService('CoreGui')
 
 local function udcrypt()
-    local length = math.random(8, 16)
+    local length = math.random(10, 20)
     local array = {}
     for i = 1, length do
-        array[i] = string.char(math.random(65, 90) + (math.random(0, 1) * 32))
+        array[i] = string.char(math.random(97, 122))
     end
     return table.concat(array)
 end
 
-for _, oldGui in pairs(CollectionService:GetTagged("HazeUI")) do
-    oldGui:Destroy()
+local function createUd(class, properties)
+    local inst = Instance.new(class)
+    inst.Name = udcrypt()
+    for prop, val in pairs(properties) do
+        inst[prop] = val
+    end
+    return inst
 end
 
-for _, oldBlur in pairs(CollectionService:GetTagged("HazeBlur")) do
-    oldBlur:Destroy()
+local function clean(tag)
+    for _, obj in ipairs(collectionService:GetTagged(tag)) do
+        obj:Destroy()
+    end
 end
+clean("HazeUI")
+clean("HazeBlur")
 
-local screenGui = Instance.new('ScreenGui')
-screenGui.Name = udcrypt()
-screenGui.Parent = CoreGui
-screenGui.ResetOnSpawn = false
-screenGui.DisplayOrder = 2147483647
-CollectionService:AddTag(screenGui, "HazeUI")
-local clickGui = Instance.new('Frame')
-clickGui.Name = udcrypt()
-clickGui.Parent = screenGui
-clickGui.Size = UDim2.fromScale(1, 1)
-clickGui.BackgroundTransparency = 1
-local blur = Instance.new('BlurEffect')
-blur.Name = udcrypt()
-blur.Size = 20
-blur.Parent = Lighting
-CollectionService:AddTag(blur, "HazeBlur")
+local screenGui = createUd("ScreenGui", {Parent = coreGui, ResetOnSpawn = false, DisplayOrder = 2147483647})
+collectionService:AddTag(screenGui, "HazeUI")
+local clickGui = createUd("Frame", {Parent = screenGui, Size = UDim2.fromScale(1, 1), BackgroundTransparency = 1})
+local blur = createUd("BlurEffect", {Parent = lighting, Size = 20})
+collectionService:AddTag(blur, "HazeBlur")
 local arrayList = Instance.new('Frame')
 arrayList.Parent = screenGui
 arrayList.Position = UDim2.new(1, -10, 0, 60)
